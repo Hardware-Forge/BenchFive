@@ -1,0 +1,3 @@
+[submodule "benchmarks/CPU/coremark"]
+	path = benchmarks/CPU/coremark
+	url = https://github.com/eembc/coremark.git
