@@ -4,3 +4,6 @@
 [submodule "benchmarks/CPU/linpack"]
 	path = benchmarks/CPU/linpack
 	url = https://github.com/ereyes01/linpack.git
+[submodule "benchmarks/syslevel/rt-tests"]
+	path = benchmarks/syslevel/rt-tests
+	url = https://github.com/vianpl/rt-tests.git
