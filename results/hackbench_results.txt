@@ -1,3 +1,0 @@
-Running in process mode with 10 groups using 40 file descriptors each (== 400 tasks)
-Each sender will pass 100 messages of 100 bytes
-Time: 0.210

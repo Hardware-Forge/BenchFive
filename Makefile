@@ -5,6 +5,7 @@
 
 #directory di output
 RESULTS_DIR := results
+BIN_DIR := bin
 
 
 all: coremark
@@ -17,37 +18,41 @@ clean:
 	$(MAKE) -C benchmarks/CPU/coremark clean
 	$(MAKE) -C benchmarks/syslevel/rt-tests clean
 	$(MAKE) -C benchmarks/IO/fio clean
+	rm -rf $(RESULTS_DIR)/*
+	rm -rf $(BIN_DIR)/*
 
 # Esecuzione di CoreMark e raccolta risultati in results
 getresultscoremark: | $(RESULTS_DIR)
 	@benchmarks/CPU/coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
 	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
 
-rt-tests: $(RESULTS_DIR) #mi assicuro esista la cartella prima di eseguire il make
+rt-tests: $(BIN_DIR) #mi assicuro esista la cartella prima di eseguire il make
 	$(MAKE) -C benchmarks/syslevel/rt-tests all
-	find benchmarks/syslevel/rt-tests -maxdepth 1 -type f -executable -exec cp {} $(RESULTS_DIR)/ \; 
+	find benchmarks/syslevel/rt-tests -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \; 
 # trovo tutti i file eseguibili e li copio nella cartella bin 
 #Esecuzione di hackbench
 run_hackbench: | $(RESULTS_DIR)
 	@benchmarks/syslevel/rt-tests/hackbench > $(RESULTS_DIR)/hackbench_results.txt
 #Esecuzione di hwlatdetect
 run_hwlatdetect:
-	@benchmarks/syslevel/rt-tests/hwlatdetect
+	@benchmarks/syslevel/rt-tests/hwlatdetect > $(RESULTS_DIR)/hwlatdetect_results.txt
 #Esecuzione di deadline_test
 run_deadline_test:
-	@benchmarks/syslevel/rt-tests/deadline_test
+	@benchmarks/syslevel/rt-tests/deadline_test > $(RESULTS_DIR)/deadline_test_results.txt
 #Esecuzione di cyclictest
 run_cyclictest:
-	@benchmarks/syslevel/rt-tests/cyclictest
+	@benchmarks/syslevel/rt-tests/cyclictest 
 #Esecuzione di get_cyclictest_snapshot
 run_get_cyclictest_snapshot:
-	@benchmarks/syslevel/rt-tests/get_cyclictest_snapshot
+	@benchmarks/syslevel/rt-tests/get_cyclictest_snapshot > $(RESULTS_DIR)/cyclictest_results.txt
 # Esecuzione cyclictest e raccolta risultati,non funziona bene
 getresultscyclictest:
 	$(MAKE) run_cyclictest & 
 	@sleep 1
-	$(MAKE) get_cyclictest_snapshot
+	$(MAKE) get_cyclictest_snapshot > $(RESULTS_DIR)/cyclictest_results.txt
 	@sleep 1
+	pkill -f cyclictest
+	@echo "Risultati di Cyclictest salvati in $(RESULTS_DIR)/cyclictest_results.txt"
 
 fio:
 	@benchmarks/IO/fio/configure
