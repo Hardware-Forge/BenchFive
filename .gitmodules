@@ -13,3 +13,6 @@
 [submodule "benchmarks/CPU/testfloat"]
 	path = benchmarks/CPU/testfloat
 	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
+[submodule "benchmarks/STREAM"]
+	path = benchmarks/STREAM
+	url = https://github.com/jeffhammond/STREAM.git
