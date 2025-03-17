@@ -52,23 +52,21 @@ run_deadline_test:
 	@benchmarks/syslevel/rt-tests/deadline_test > $(RESULTS_DIR)/deadline_test_results.txt
 #Esecuzione di cyclictest
 run_cyclictest:
-	@benchmarks/syslevel/rt-tests/cyclictest 
+	@benchmarks/syslevel/rt-tests/cyclictest -a -t -N -p99
 #Esecuzione di get_cyclictest_snapshot
 run_get_cyclictest_snapshot:
 	@benchmarks/syslevel/rt-tests/get_cyclictest_snapshot > $(RESULTS_DIR)/cyclictest_results.txt
 # Esecuzione cyclictest e raccolta risultati,non funziona bene
 getresultscyclictest:
-	$(MAKE) run_cyclictest & 
-	@sleep 1
-	$(MAKE) get_cyclictest_snapshot > $(RESULTS_DIR)/cyclictest_results.txt
-	@sleep 1
-	pkill -f cyclictest
+	tmux new-session -d -s cyclictest_session 'benchmarks/syslevel/rt-tests/cyclictest -a -t -N -p99'
+	sleep 3
+	@benchmarks/syslevel/rt-tests/get_cyclictest_snapshot > $(RESULTS_DIR)/cyclictest_results.txt
+	sleep 3
+	tmux kill-session -t cyclictest_session
 	@echo "Risultati di Cyclictest salvati in $(RESULTS_DIR)/cyclictest_results.txt"
 
 fio:
-	@benchmarks/IO/fio/configure
-	$(MAKE) -C benchmarks/IO/fio all
-	$(MAKE) -C benchmarks/IO/fio install
+	(cd benchmarks/IO/fio && ./configure && $(MAKE) -C benchmarks/IO/fio all && $(MAKE) -C benchmarks/IO/fio install)
 	$(MAKE) create_fio_file
 
 create_fio_file:
@@ -82,3 +80,27 @@ create_fio_file:
 
 fio_run:
 	@fio benchmarks/IO/fio/config.fio
+
+#configuro e installo sockperf, le parentesi sono necessarie per eseguire i comandi nella stessa shell
+sockperf:
+	(cd benchmarks/IO/sockperf && ./autogen.sh && ./configure && $(MAKE) && $(MAKE) install)
+#avvio un test di sockperf
+sockperf_run_pingpong:
+	tmux new-session -d -s sockperf_server 'sockperf server -p 9000'
+#attendo che il server sia pronto
+	sleep 2
+	sockperf ping-pong -i 127.0.0.1 -p 9000 -t 10 > $(RESULTS_DIR)/sockperf_pingpong_results.txt
+	tmux kill-session -t sockperf_server
+
+sockperf_run_throughput:
+	tmux new-session -d -s sockperf_server 'sockperf server -p 9000'
+#attendo che il server sia pronto
+	sleep 2
+	sockperf throughput -i 127.0.0.1 -p 9000 -m 1024 -t 20  --full-rtt > $(RESULTS_DIR)/sockperf_throughput_results.txt
+	tmux kill-session -t sockperf_server
+#
+stream:
+	(cd benchmarks/memory/STREAM && gcc -O -DSTREAM_ARRAY_SIZE=33554432 stream.c -o streameseguibile)
+
+stream_run:
+	@benchmarks/memory/STREAM/streameseguibile > $(RESULTS_DIR)/stream_results.txt
