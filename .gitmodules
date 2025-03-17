@@ -10,3 +10,6 @@
 [submodule "benchmarks/IO/fio"]
 	path = benchmarks/IO/fio
 	url = https://github.com/axboe/fio.git
+[submodule "benchmarks/CPU/testfloat"]
+	path = benchmarks/CPU/testfloat
+	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
