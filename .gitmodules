@@ -7,3 +7,6 @@
 [submodule "benchmarks/syslevel/rt-tests"]
 	path = benchmarks/syslevel/rt-tests
 	url = https://github.com/vianpl/rt-tests.git
+[submodule "benchmarks/IO/fio"]
+	path = benchmarks/IO/fio
+	url = https://github.com/axboe/fio.git
