@@ -7,16 +7,16 @@
 RESULTS_DIR := results
 
 
-all: cyclictest coremark
+all: coremark
 
 coremark:
 	$(MAKE) -C benchmarks/CPU/coremark
 
 # Pulizia per tutti i benchmark
 clean:
-	$(MAKE) -C benchmark-list/cyclictest clean
 	$(MAKE) -C benchmarks/CPU/coremark clean
-	rm -rf $(RESULTS_DIR)/*
+	$(MAKE) -C benchmarks/syslevel/rt-tests clean
+	$(MAKE) -C benchmarks/IO/fio clean
 
 # Esecuzione di CoreMark e raccolta risultati in results
 getresultscoremark: | $(RESULTS_DIR)
