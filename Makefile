@@ -8,10 +8,7 @@ RESULTS_DIR := results
 BIN_DIR := bin
 
 
-all: coremark
-
-coremark:
-	$(MAKE) -C benchmarks/CPU/coremark
+all: coremark rt-tests fio
 
 # Pulizia per tutti i benchmark
 clean:
@@ -21,15 +18,29 @@ clean:
 	rm -rf $(RESULTS_DIR)/*
 	rm -rf $(BIN_DIR)/*
 
-# Esecuzione di CoreMark e raccolta risultati in results
+coremark: 
+	$(MAKE) -C benchmarks/CPU/coremark
+	find benchmarks/CPU/coremark -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \; 
+
+
+#esecuzione di CoreMark e raccolta risultati in results
 getresultscoremark: | $(RESULTS_DIR)
 	@benchmarks/CPU/coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
 	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
 
+linpack:
+	$(MAKE) -C benchmarks/CPU/linpack
+	find benchmarks/CPU/linpack -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+
+#eseuzione di linpack e raccolta risultati in results
+getresultslinpack: | $(RESULTS_DIR)
+	@benchmarks/CPU/linpack/linpack > $(RESULTS_DIR)/linpack_results.txt
+	echo "Risultati di Linpack salvati in $(RESULTS_DIR)/linpack_results.txt"
+
 rt-tests: $(BIN_DIR) #mi assicuro esista la cartella prima di eseguire il make
 	$(MAKE) -C benchmarks/syslevel/rt-tests all
 	find benchmarks/syslevel/rt-tests -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \; 
-# trovo tutti i file eseguibili e li copio nella cartella bin 
+
 #Esecuzione di hackbench
 run_hackbench: | $(RESULTS_DIR)
 	@benchmarks/syslevel/rt-tests/hackbench > $(RESULTS_DIR)/hackbench_results.txt
