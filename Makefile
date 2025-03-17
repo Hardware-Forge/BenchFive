@@ -4,7 +4,6 @@
 
 
 #directory di output
-BIN_DIR := bin
 RESULTS_DIR := results
 
 
@@ -17,27 +16,20 @@ coremark:
 clean:
 	$(MAKE) -C benchmark-list/cyclictest clean
 	$(MAKE) -C benchmarks/CPU/coremark clean
-	rm -rf $(BIN_DIR)/*
+	rm -rf $(RESULTS_DIR)/*
 
-# Esecuzione di CoreMark e raccolta risultati in bin
-getresultscoremark: | $(BIN_DIR)
-	$(MAKE) -C benchmarks/CPU/coremark run > $(BIN_DIR)/coremark_results.txt
-	echo "Risultati di CoreMark salvati in $(BIN_DIR)/coremark_results.txt"
+# Esecuzione di CoreMark e raccolta risultati in results
+getresultscoremark: | $(RESULTS_DIR)
+	@benchmarks/CPU/coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
+	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
 
-# Creazione directory bin nel caso venisse cancellata
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
-# Creazione directory results nel caso venisse cancellata
-$(RESULTS_DIR):
-	mkdir -p $(RESULTS_DIR)
-
-rt-tests: $(BIN_DIR) #mi assicuro esista la cartella prima di eseguire il make
+rt-tests: $(RESULTS_DIR) #mi assicuro esista la cartella prima di eseguire il make
 	$(MAKE) -C benchmarks/syslevel/rt-tests all
-	find benchmarks/syslevel/rt-tests -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \; 
+	find benchmarks/syslevel/rt-tests -maxdepth 1 -type f -executable -exec cp {} $(RESULTS_DIR)/ \; 
 # trovo tutti i file eseguibili e li copio nella cartella bin 
 #Esecuzione di hackbench
-run_hackbench:
-	@benchmarks/syslevel/rt-tests/hackbench > results.txt
+run_hackbench: | $(RESULTS_DIR)
+	@benchmarks/syslevel/rt-tests/hackbench > $(RESULTS_DIR)/hackbench_results.txt
 #Esecuzione di hwlatdetect
 run_hwlatdetect:
 	@benchmarks/syslevel/rt-tests/hwlatdetect
@@ -68,7 +60,7 @@ create_fio_file:
 	[seq-read]\nrw=read\nnumjobs=2\n\n\
 	[seq-write]\nrw=write\nnumjobs=2\n\n\
 	[rand-read]\nrw=randread\nnumjobs=4\n\n\
-	[rand-write]\nrw=randwrite\nnumjobs=4\n\n\
+	[rand-write]\nrw=randwrite\nnumjobs=4\n\n
 	[mixed-rw]\nrw=randrw\nrwmixread=70\nnumjobs=4\n" > benchmarks/IO/fio/config.fio
 	@rm -f benchmarks/IO/fio/testfile*
 
