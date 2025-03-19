@@ -10,8 +10,6 @@ BIN_DIR := bin
 
 all: coremark rt-tests fio
 
-#-----------------------------------------------------CPU----------------------------------------------
-
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/CPU/coremark clean
@@ -38,21 +36,6 @@ linpack:
 getresultslinpack: | $(RESULTS_DIR)
 	@benchmarks/CPU/linpack/linpack > $(RESULTS_DIR)/linpack_results.txt
 	echo "Risultati di Linpack salvati in $(RESULTS_DIR)/linpack_results.txt"
-
-
-#da sistenmare testfloat
-testfloat: 
-	$(MAKE) -C benchmarks/CPU/testfloat/build/Linux-x86_64-GCC all
-	find benchmarks/CPU/testfloat -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
-
-getresultstestfloat: | $(RESULTS_DIR)
-	@benchmarks/CPU/testfloat/testfloat > $(RESULTS_DIR)/testfloat_results.txt
-	echo "Risultati di Testfloat salvati in $(RESULTS_DIR)/testfloat_results.txt"
-
-
-
-
-#-----------------------------------------------------SYSLEVEL----------------------------------------------
 
 rt-tests: $(BIN_DIR) #mi assicuro esista la cartella prima di eseguire il make
 	$(MAKE) -C benchmarks/syslevel/rt-tests all
@@ -81,9 +64,6 @@ getresultscyclictest:
 	sleep 3
 	tmux kill-session -t cyclictest_session
 	@echo "Risultati di Cyclictest salvati in $(RESULTS_DIR)/cyclictest_results.txt"
-
-
-#-----------------------------------------------------IO----------------------------------------------
 
 fio:
 	(cd benchmarks/IO/fio && ./configure && $(MAKE) -C benchmarks/IO/fio all && $(MAKE) -C benchmarks/IO/fio install)
@@ -124,3 +104,22 @@ stream:
 
 stream_run:
 	@benchmarks/memory/STREAM/streameseguibile > $(RESULTS_DIR)/stream_results.txt
+
+# Installa Phoronix Test Suite
+phoronix:
+	@echo "Installazione di Phoronix Test Suite..."
+	@sudo apt update && sudo apt install -y phoronix-test-suite
+	@echo "Phoronix Test Suite installato!"
+
+# Installa benchmark specifici
+install_cachebench:
+	@echo "Installazione dei benchmark..."
+	@phoronix-test-suite install cachebench
+	@echo "✅ Benchmark installati con successo!"
+
+# Esegui i benchmark specifici
+run_benchmarks:
+	@echo "🔧 Esecuzione dei benchmark..."
+	@printf "4\nn\n" | phoronix-test-suite run cachebench
+
+	@echo "Benchmark eseguiti con successo!"
