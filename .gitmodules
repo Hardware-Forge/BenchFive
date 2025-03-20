@@ -19,10 +19,6 @@
 [submodule "benchmarks/memory/STREAM"]	
 	path = benchmarks/memory/STREAM
 	url = https://github.com/jeffhammond/STREAM.git
-
-[submodule "sockperf"]
-	path = sockperf
-	url = https://github.com/Mellanox/sockperf.git
 [submodule "benchmarks/IO/sockperf"]
 	path = benchmarks/IO/sockperf
 	url = https://github.com/Mellanox/sockperf.git
