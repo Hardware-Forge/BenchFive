@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf
 
 #output directory
 RESULTS_DIR := ../../results
@@ -9,7 +9,9 @@ all: coremark
 clean:
 	$(MAKE) -C coremark clean || true
 	$(MAKE) -C linpack clean || true
-	$(MAKE) -C testfloat clean || true	
+	$(MAKE) -C testfloat clean || true
+	$(MAKE) -C dhrystone clean || true
+	$(MAKE) -C whetstone clean || true	
 	rm -rf $(RESULTS_DIR)/*
 	rm -rf $(BIN_DIR)/*
 	rm -rf "$(SOFTFLOAT_DIR)"
@@ -29,9 +31,15 @@ getresultscoremark: | $(RESULTS_DIR)
 	@coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
 	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
 
+
+#probabilmente questo necessita di un cross compiler perche è gia per risc v (al momento ho messo dei - per ignorare gli errori ma non va lo stesso)
 dhrystone:
-	$(MAKE) -C dhrystone
-	find dhrystone -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+	-$(MAKE) -C dhrystone
+	-find dhrystone -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+
+getresultsdhrystone: | $(RESULTS_DIR)
+	@dhrystone/dhrystone > $(RESULTS_DIR)/dhrystone_results.txt
+	echo "Risultati di Dhrystone salvati in $(RESULTS_DIR)/dhrystone_results.txt"
 	
 
 #---------------------------------------------------Floating point performance----------------------------------------------
