@@ -23,3 +23,6 @@
 [submodule "sockperf"]
 	path = sockperf
 	url = https://github.com/Mellanox/sockperf.git
+[submodule "benchmarks/IO/sockperf"]
+	path = benchmarks/IO/sockperf
+	url = https://github.com/Mellanox/sockperf.git
