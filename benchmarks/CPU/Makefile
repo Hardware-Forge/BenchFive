@@ -28,6 +28,10 @@ coremark:
 getresultscoremark: | $(RESULTS_DIR)
 	@coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
 	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
+
+dhrystone:
+	$(MAKE) -C dhrystone
+	find dhrystone -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
 	
 
 #---------------------------------------------------Floating point performance----------------------------------------------
