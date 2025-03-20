@@ -9,11 +9,13 @@ all: coremark
 clean:
 	$(MAKE) -C coremark clean || true
 	$(MAKE) -C linpack clean || true
-	$(MAKE) -C testfloat clean || true
+	$(MAKE) -C testfloat clean || true	
 	rm -rf $(RESULTS_DIR)/*
 	rm -rf $(BIN_DIR)/*
+	rm -rf "$(SOFTFLOAT_DIR)"
 	rm -f $(BIN_DIR)/whetstone
 	rm -f whetstone/whetstone
+
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
 
@@ -77,3 +79,14 @@ getresultswhetstone: | $(RESULTS_DIR)
 	../../bin/whetstone 100000 > ../../results/whetstone_results.txt
 	@echo "Risultati di Whetstone salvati in $(RESULTS_DIR)/whetstone_results.txt"
 
+
+
+
+#---------------------------------------------------Branch Prediction----------------------------------------------
+
+run_perf:
+	mkdir -p $(RESULTS_DIR)
+	sudo perf stat -a -e branch-misses,branches sleep 5 > $(RESULTS_DIR)/perf_results.txt 2>&1
+	@echo "Risultati di perf salvati in $(RESULTS_DIR)/perf_results.txt"
+
+#2>&1 → Reindirizza sia l'output standard che gli errori nel file
