@@ -31,3 +31,6 @@
 [submodule "benchmarks/GPU/vkmark"]
 	path = benchmarks/GPU/vkmark
 	url = https://github.com/vkmark/vkmark.git
+[submodule "benchmarks/CPU/sbc-bench"]
+	path = benchmarks/CPU/sbc-bench
+	url = https://github.com/ThomasKaiser/sbc-bench.git
