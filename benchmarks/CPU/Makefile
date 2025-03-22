@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench download_passmark
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench download_passmark synchrobench getresultssynchrobench
 
 #output directory
 RESULTS_DIR := ../../results
@@ -129,3 +129,11 @@ un_perf: | $(RESULTS_DIR) install_perf
 
 #---------------------------------------------------Concurrency----------------------------------------------
 
+#non va ancora, da sistemare....
+synchrobench: | $(BIN_DIR)
+	$(MAKE) -C synchrobench/c-cpp
+	cp synchrobench/c-cpp $(BIN_DIR)/
+
+getresultssynchrobench: | $(RESULTS_DIR)
+	$(BIN_DIR)/synchrobench > $(RESULTS_DIR)/synchrobench_results.txt
+	@echo "Risultati di synchrobench salvati in $(RESULTS_DIR)/synchrobench_results.txt"
