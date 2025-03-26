@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench download_passmark synchrobench getresultssynchrobench
 
 #output directory
 RESULTS_DIR := ../../results
@@ -17,6 +17,8 @@ clean:
 	rm -rf "$(SOFTFLOAT_DIR)"
 	rm -f $(BIN_DIR)/whetstone
 	rm -f whetstone/whetstone
+
+#qui va fatto il comando setup generale git submodule update --init --recursive
 
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
@@ -40,7 +42,20 @@ dhrystone:
 getresultsdhrystone: | $(RESULTS_DIR)
 	@dhrystone/dhrystone > $(RESULTS_DIR)/dhrystone_results.txt
 	echo "Risultati di Dhrystone salvati in $(RESULTS_DIR)/dhrystone_results.txt"
-	
+
+
+PASSMARK_URL=https://www.passmark.com/downloads/PerformanceTest_Linux_x86-64.zip
+
+download_passmark:
+	wget -O $(BIN_DIR)/PerformanceTest_Linux_x86-64.zip $(PASSMARK_URL)
+	unzip -o $(BIN_DIR)/PerformanceTest_Linux_x86-64.zip -d $(BIN_DIR)
+	rm $(BIN_DIR)/PerformanceTest_Linux_x86-64.zip
+
+getresultspassmark: | $(BIN_DIR) download_passmark
+	sudo chmod +x $(BIN_DIR)/PerformanceTest/pt_linux_x64
+	sudo ./$(BIN_DIR)/PerformanceTest/pt_linux_x64 > $(RESULTS_DIR)/passmark_results.txt
+	echo "Risultati di Passmark salvati in $(RESULTS_DIR)/passmark_results.txt"
+
 
 #---------------------------------------------------Floating point performance----------------------------------------------
 
@@ -64,7 +79,6 @@ getresultstestfloat: | $(RESULTS_DIR)
 #altra nota: da un errore a riga 49 ma probabilmente è perche lanciando il test il mio pc non li passa tutti quindi fornisce un erroe (ho messo @- per ignorare)
 
 #managing testfloat dependencies
-
 ROOT_DIR := "$(CURDIR)"
 
 SOFTFLOAT_DIR := $(ROOT_DIR)/berkeley-softfloat-3
@@ -92,13 +106,34 @@ getresultswhetstone: | $(RESULTS_DIR)
 	@echo "Risultati di Whetstone salvati in $(RESULTS_DIR)/whetstone_results.txt"
 
 
+getresultssbcbench: | $(RESULTS_DIR)
+
+	cd sbc-bench && sudo chmod +x sbc-bench.sh && sudo ./sbc-bench.sh > ../../../results/sbc_results.txt
+	@echo "Risultati di sbc-bench salvati in $(RESULTS_DIR)/sbc_results.txt"
+
 
 
 #---------------------------------------------------Branch Prediction----------------------------------------------
 
-run_perf:
+install_perf:
+	sudo apt-get install linux-tools-common linux-tools-generic
+	sudo apt update && sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(shell uname -r)
+
+un_perf: | $(RESULTS_DIR) install_perf
 	mkdir -p $(RESULTS_DIR)
 	sudo perf stat -a -e branch-misses,branches sleep 5 > $(RESULTS_DIR)/perf_results.txt 2>&1
 	@echo "Risultati di perf salvati in $(RESULTS_DIR)/perf_results.txt"
 
 #2>&1 → Reindirizza sia l'output standard che gli errori nel file
+
+
+#---------------------------------------------------Concurrency----------------------------------------------
+
+#non va ancora, da sistemare....
+synchrobench: | $(BIN_DIR)
+	$(MAKE) -C synchrobench/c-cpp
+	cp synchrobench/c-cpp $(BIN_DIR)/
+
+getresultssynchrobench: | $(RESULTS_DIR)
+	$(BIN_DIR)/synchrobench > $(RESULTS_DIR)/synchrobench_results.txt
+	@echo "Risultati di synchrobench salvati in $(RESULTS_DIR)/synchrobench_results.txt"

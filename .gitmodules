@@ -37,3 +37,9 @@
 [submodule "benchmarks/memory/ramspeed"]
 	path = benchmarks/memory/ramspeed
 	url = https://github.com/wtarreau/ramspeed.git
+[submodule "benchmarks/CPU/sbc-bench"]
+	path = benchmarks/CPU/sbc-bench
+	url = https://github.com/ThomasKaiser/sbc-bench.git
+[submodule "benchmarks/CPU/synchrobench"]
+	path = benchmarks/CPU/synchrobench
+	url = https://github.com/gramoli/synchrobench.git
