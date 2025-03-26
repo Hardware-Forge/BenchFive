@@ -31,3 +31,9 @@
 [submodule "benchmarks/GPU/vkmark"]
 	path = benchmarks/GPU/vkmark
 	url = https://github.com/vkmark/vkmark.git
+[submodule "benchmarks/memory/tinymembench"]
+	path = benchmarks/memory/tinymembench
+	url = https://github.com/nuumio/tinymembench.git
+[submodule "benchmarks/memory/ramspeed"]
+	path = benchmarks/memory/ramspeed
+	url = https://github.com/wtarreau/ramspeed.git
