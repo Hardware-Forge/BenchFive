@@ -43,3 +43,6 @@
 [submodule "benchmarks/CPU/synchrobench"]
 	path = benchmarks/CPU/synchrobench
 	url = https://github.com/gramoli/synchrobench.git
+[submodule "benchmarks/memory/likwid"]
+	path = benchmarks/memory/likwid
+	url = https://github.com/RRZE-HPC/likwid.git
