@@ -19,9 +19,6 @@
 [submodule "benchmarks/IO/sockperf"]
 	path = benchmarks/IO/sockperf
 	url = https://github.com/Mellanox/sockperf.git
-[submodule "benchmarks/CPU/softfloat"]
-	path = benchmarks/CPU/softfloat
-	url = https://github.com/ucb-bar/berkeley-softfloat-3.git
 [submodule "benchmarks/CPU/dhrystone"]
 	path = benchmarks/CPU/dhrystone
 	url = https://github.com/sifive/benchmark-dhrystone.git

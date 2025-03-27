@@ -69,7 +69,7 @@ getresultslinpack: | $(RESULTS_DIR)
 	echo "Risultati di Linpack salvati in $(RESULTS_DIR)/linpack_results.txt"
 
 
-testfloat: 
+testfloat: 2
 	$(MAKE) -C testfloat/build/Linux-x86_64-GCC all
 	find testfloat -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
 #nota: sui risultati di testfloat c'è una vasta scelta di funzioni vediamo poi cosa vogliamo fare (magari chiedere all'utente cosa vuole runnare), per ora ho fatto una all
