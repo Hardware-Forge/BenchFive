@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setupn whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench download_passmark synchrobench getresultssynchrobench
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setup_testfloat whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench download_passmark synchrobench getresultssynchrobench 7zip getresults7zip Zstandard getresultszstandard install_perf un_perf cpuminer getresultscpuminer
 
 #output directory
 RESULTS_DIR := ../../results
@@ -12,6 +12,10 @@ clean:
 	$(MAKE) -C testfloat clean || true
 	$(MAKE) -C dhrystone clean || true
 	$(MAKE) -C whetstone clean || true	
+	$(MAKE) -C synchrobench clean || true
+	$(MAKE) -C 7zip clean || true
+	$(MAKE) -C Zstandard clean || true
+	$(MAKE) -C cpuminer clean || true
 	rm -rf $(RESULTS_DIR)/*
 	rm -rf $(BIN_DIR)/*
 	rm -rf "$(SOFTFLOAT_DIR)"
@@ -69,7 +73,7 @@ getresultslinpack: | $(RESULTS_DIR)
 	echo "Risultati di Linpack salvati in $(RESULTS_DIR)/linpack_results.txt"
 
 
-testfloat: 2
+testfloat: 
 	$(MAKE) -C testfloat/build/Linux-x86_64-GCC all
 	find testfloat -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
 #nota: sui risultati di testfloat c'è una vasta scelta di funzioni vediamo poi cosa vogliamo fare (magari chiedere all'utente cosa vuole runnare), per ora ho fatto una all
@@ -85,7 +89,7 @@ SOFTFLOAT_DIR := $(ROOT_DIR)/berkeley-softfloat-3
 SOFTFLOAT_REPO := https://github.com/ucb-bar/berkeley-softfloat-3.git
 SOFTFLOAT_BUILD_DIR := $(SOFTFLOAT_DIR)/build/Linux-x86_64-GCC
 
-setup:
+setup_testfloat:
 	@echo "Cartella di lavoro: $(ROOT_DIR)"
 	@if [ ! -d "$(SOFTFLOAT_DIR)" ]; then \
 		echo "Clonazione di Berkeley SoftFloat..."; \
@@ -106,12 +110,6 @@ getresultswhetstone: | $(RESULTS_DIR)
 	@echo "Risultati di Whetstone salvati in $(RESULTS_DIR)/whetstone_results.txt"
 
 
-getresultssbcbench: | $(RESULTS_DIR)
-
-	cd sbc-bench && sudo chmod +x sbc-bench.sh && sudo ./sbc-bench.sh > ../../../results/sbc_results.txt
-	@echo "Risultati di sbc-bench salvati in $(RESULTS_DIR)/sbc_results.txt"
-
-
 
 #---------------------------------------------------Branch Prediction----------------------------------------------
 
@@ -119,7 +117,7 @@ install_perf:
 	sudo apt-get install linux-tools-common linux-tools-generic
 	sudo apt update && sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(shell uname -r)
 
-un_perf: | $(RESULTS_DIR) install_perf
+run_perf: | $(RESULTS_DIR) install_perf
 	mkdir -p $(RESULTS_DIR)
 	sudo perf stat -a -e branch-misses,branches sleep 5 > $(RESULTS_DIR)/perf_results.txt 2>&1
 	@echo "Risultati di perf salvati in $(RESULTS_DIR)/perf_results.txt"
@@ -137,3 +135,54 @@ synchrobench: | $(BIN_DIR)
 getresultssynchrobench: | $(RESULTS_DIR)
 	$(BIN_DIR)/synchrobench > $(RESULTS_DIR)/synchrobench_results.txt
 	@echo "Risultati di synchrobench salvati in $(RESULTS_DIR)/synchrobench_results.txt"
+
+
+#---------------------------------------------------Compression/Decompression----------------------------------------------
+
+#ancora non va
+7zip:
+	$(MAKE) -f $(CURDIR)/7zip/makefile.linux
+	find 7zip -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+	
+
+
+getresults7zip: | $(RESULTS_DIR)
+	@7zip/7zip > $(RESULTS_DIR)/7zip_results.txt
+	@echo "Risultati di 7zip salvati in $(RESULTS_DIR)/7zip_results.txt"
+
+
+
+Zstandard:
+	$(MAKE) -C Zstandard
+	find Zstandard/programs/zstd -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+
+getresultsZstandard: | $(RESULTS_DIR)
+	./Zstandard/programs/zstd -b10000000 -i10 > $(RESULTS_DIR)/zstandard_results.txt 
+	echo "Test su 10 MB di buffer ripetuto 10 volte"
+	echo "Risultati di zstandard salvati in $(RESULTS_DIR)/zstandard_results.txt"
+
+
+#---------------------------------------------------Parallel processing performance----------------------------------------------
+
+#gestione dipendenze 
+setup_cpuminer: 
+	sudo apt-get install libcurl4-openssl-dev
+	sudo apt-get install libjansson-dev
+	sudo apt-get install libssl-dev
+	sudo apt-get install build-essential
+	sudo apt-get install autoconf automake
+	sudo apt-get install pkg-config
+
+# Flags per la compilazione
+CFLAGS += -falign-functions=16
+
+
+cpuminer:
+	cd cpuminer && ./autogen.sh && ./nomacro.pl && ./configure CFLAGS="-march=native" --with-crypto --with-curl && $(MAKE)
+	find cpuminer -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+
+
+getresultscpuminer: | $(RESULTS_DIR)
+	cpuminer/cpuminer > $(RESULTS_DIR)/cpuminer_results.txt
+	echo "Risultati di cpuminer salvati in $(RESULTS_DIR)/cpuminer_results.txt"
+#eventualmente da impostare un timeout
