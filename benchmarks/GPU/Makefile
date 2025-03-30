@@ -3,13 +3,13 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
+getresults: getresultsglmark2 getresultsvkmark
+
 setupgpu:
 	@apt install -y meson ninja-build libx11-dev libwayland-dev libvulkan-dev \libxrandr-dev libxi-dev libegl1-mesa-dev libgles2-mesa-dev
 	@apt install libglm-dev
 	@apt install libassimp-dev
 	@apt install libxcb-icccm4-dev wayland-protocols libdrm-dev libgbm-dev
-
-installglmark2:
 	@apt install glmark2
 
 
@@ -25,3 +25,4 @@ installvkmark:
 
 getresultsvkmark:
 	vkmark > $(RESULTS_DIR)/glmark2.txt
+

@@ -1,7 +1,9 @@
 #directory di output
 RESULTS_DIR := ../results
 BIN_DIR := ../bin
-all: getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread
+all: install_sysbench 
+
+getresults: getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/IO/sysbench clean
