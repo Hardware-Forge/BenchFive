@@ -19,11 +19,13 @@ all:
 	(cd $(memory_dir) $(MAKE) all) && 
 	(cd $(io_dir) $(MAKE) all) &&
 	(cd $(syslevel_dir) $(MAKE) all) &&
+	(cd $(cpu_dir) $(MAKE) all) &&
 	(cd benchmarks $(MAKE) all)
 run:
 	(cd $(memory_dir) $(MAKE) getresults) && 
 	(cd $(io_dir) $(MAKE) getresults) &&
 	(cd $(syslevel_dir) $(MAKE) getresults) &&
+	(cd $(cpu_dir) $(MAKE) getresults) &&
 	(cd benchmarks $(MAKE) getresults) &&
 	(cd $(gpu_dirs) $(MAKE) getresults)
 # Pulizia per tutti i benchmark

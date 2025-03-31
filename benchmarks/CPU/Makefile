@@ -4,7 +4,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: coremark
+all: coremark dhrystone linpack testfloat whetstone synchrobench 7zip Zstandard cpuminer
+
+getresults: getresultscoremark getresultsdhrystone getresultslinpack getresultstestfloat getresultswhetstone getresultssynchrobench getresults7zip getresultsZstandard getresultscpuminer
+
 
 clean:
 	$(MAKE) -C coremark clean || true
@@ -22,7 +25,6 @@ clean:
 	rm -f $(BIN_DIR)/whetstone
 	rm -f whetstone/whetstone
 
-#qui va fatto il comando setup generale git submodule update --init --recursive
 
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
@@ -127,14 +129,20 @@ run_perf: | $(RESULTS_DIR) install_perf
 
 #---------------------------------------------------Concurrency----------------------------------------------
 
-#non va ancora, da sistemare....
 synchrobench: | $(BIN_DIR)
 	$(MAKE) -C synchrobench/c-cpp
-	cp synchrobench/c-cpp $(BIN_DIR)/
+	cp synchrobench/c-cpp/bin/* $(BIN_DIR)/
 
 getresultssynchrobench: | $(RESULTS_DIR)
-	$(BIN_DIR)/synchrobench > $(RESULTS_DIR)/synchrobench_results.txt
-	@echo "Risultati di synchrobench salvati in $(RESULTS_DIR)/synchrobench_results.txt"
+	@echo "Eseguo Synchrobench..." > $(RESULTS_DIR)/synchrobench_results.txt
+	@for exe in $(BIN_DIR)/*; do \
+		if [ -x $$exe ]; then \
+			echo "Eseguendo $$exe..." >> $(RESULTS_DIR)/synchrobench_results.txt; \
+			$$exe >> $(RESULTS_DIR)/synchrobench_results.txt 2>&1; \
+			echo "" >> $(RESULTS_DIR)/synchrobench_results.txt; \
+		fi \
+	done
+	@echo "Risultati di Synchrobench salvati in $(RESULTS_DIR)/synchrobench_results.txt"
 
 
 #---------------------------------------------------Compression/Decompression----------------------------------------------
