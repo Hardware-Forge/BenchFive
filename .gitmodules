@@ -46,3 +46,6 @@
 [submodule "benchmarks/CPU/Zstandard"]
 	path = benchmarks/CPU/Zstandard
 	url = https://github.com/mamh-mixed/openzfs-zstd.git
+[submodule "benchmarks/CPU/stockfish"]
+	path = benchmarks/CPU/stockfish
+	url = https://github.com/official-stockfish/Stockfish.git

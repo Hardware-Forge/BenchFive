@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setup_testfloat whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf getresultssbcbench synchrobench getresultssynchrobench 7zip getresults7zip Zstandard getresultszstandard install_perf un_perf clean_results getresults
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setup_testfloat whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf synchrobench getresultssynchrobench 7zip getresults7zip Zstandard getresultszstandard install_perf un_perf stockfish getresultsstockfish clean_results getresults
 
 #output directory
 RESULTS_DIR := ../../results
@@ -163,4 +163,22 @@ getresultsZstandard: | $(RESULTS_DIR)
 
 #---------------------------------------------------SIMD perfomrmance----------------------------------------------
 
-#stockfish...
+STOCKFISH_ARCH ?= native  # Modifica questo valore se vuoi un target specifico (es. x86-64-avx2)
+STOCKFISH_TARGET = profile-build  # Usa PGO (Profile-Guided Optimization)
+
+stockfish:
+	$(MAKE) -C stockfish/src -j $(shell nproc) $(STOCKFISH_TARGET) ARCH=$(STOCKFISH_ARCH)
+	find stockfish/src -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
+
+STOCKFISH_DIR := stockfish/src
+BENCH_HASH := 128  # MB di hash
+BENCH_THREADS := auto  # Threads (1 per single-core, auto per multi-core)
+BENCH_TIME := 5000  # ms (se vuoi tempo fisso)
+BENCH_DEPTH := 24   # Depth massima (commenta se usi movetime)
+#N_RESULTS_DIR:= ../../../results
+
+getresultsstockfish: | $(RESULTS_DIR)
+	@cd $(STOCKFISH_DIR) && ./stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) 
+#	default depth > $(N_RESULTS_DIR)/stockfish_bench.txt 2>&1 --da fixare
+#	@echo "Risultati salvati in $(RESULTS_DIR)/stockfish_results.txt"
