@@ -46,6 +46,3 @@
 [submodule "benchmarks/CPU/Zstandard"]
 	path = benchmarks/CPU/Zstandard
 	url = https://github.com/mamh-mixed/openzfs-zstd.git
-[submodule "benchmarks/CPU/cpuminer"]
-	path = benchmarks/CPU/cpuminer
-	url = https://github.com/tkinjo1985/cpuminer-multi.git
