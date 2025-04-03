@@ -20,7 +20,8 @@ clean:
 	$(MAKE) -C Zstandard clean || true
 	cd 7zip/CPP/7zip/Bundles/LzmaCon && \
     $(MAKE) -f makefile.gcc clean || true && \
-    rm -rf _o || true
+	$(MAKE) -C stockfish/src clean || true
+	rm -rf _o || true
 	rm -rf $(BIN_DIR)/*
 	rm -rf "$(SOFTFLOAT_DIR)"
 	rm -f $(BIN_DIR)/whetstone
@@ -172,13 +173,11 @@ stockfish:
 	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
 
 STOCKFISH_DIR := stockfish/src
-BENCH_HASH := 128  # MB di hash
-BENCH_THREADS := auto  # Threads (1 per single-core, auto per multi-core)
-BENCH_TIME := 5000  # ms (se vuoi tempo fisso)
-BENCH_DEPTH := 24   # Depth massima (commenta se usi movetime)
-#N_RESULTS_DIR:= ../../../results
+BENCH_HASH := 128  # hash MB
+BENCH_THREADS := $(shell nproc --all) #it stresses all the cores
+BENCH_TIME := 5000  # [ms]
+BENCH_DEPTH := 24   # max depth
 
 getresultsstockfish: | $(RESULTS_DIR)
-	@cd $(STOCKFISH_DIR) && ./stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) 
-#	default depth > $(N_RESULTS_DIR)/stockfish_bench.txt 2>&1 --da fixare
-#	@echo "Risultati salvati in $(RESULTS_DIR)/stockfish_results.txt"
+	@$(STOCKFISH_DIR)/stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) default depth > $(RESULTS_DIR)/stockfish_results.txt 2>&1
+	@echo "Risultati salvati in $(RESULTS_DIR)/stockfish_results.txt"
