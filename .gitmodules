@@ -52,3 +52,6 @@
 [submodule "benchmarks/stress-ng"]
 	path = benchmarks/stress-ng
 	url = https://github.com/ColinIanKing/stress-ng.git
+[submodule "benchmarks/CPU/canneal"]
+	path = benchmarks/CPU/canneal
+	url = https://github.com/HuangWenChen/Optimize-PARSEC-CANNEAL.git
