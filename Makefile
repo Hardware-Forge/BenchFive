@@ -40,7 +40,7 @@ run:
 	(cd $(cpu_dir) && make getresults) && \
 	(cd benchmarks && make getresults) && \
 	(cd $(gpu_dir) && make getresults)
-@echo "Tutti i benchmark sono stati eseguiti con successo!"
+	@echo "Tutti i benchmark sono stati eseguiti con successo!"
 	@echo "I risultati sono stati salvati in $(RESULTS_DIR)."
 
 
@@ -59,10 +59,12 @@ runphoronix:
 
 # Pulizia per tutti i benchmark
 clean:
-	$(MAKE) -C benchmarks/CPU/coremark clean
-	$(MAKE) -C benchmarks/syslevel/rt-tests clean
-	$(MAKE) -C benchmarks/IO/fio clean
-	$(MAKE) -C benchmarks/IO/sysbench clean
+	$(MAKE) -C benchmarks/CPU clean
+	$(MAKE) -C benchmarks/syslevel clean
+	$(MAKE) -C benchmarks/IO clean
+	$(MAKE) -C benchmarks/memory clean
+	$(MAKE) -C benchmarks/GPU clean
+	$(MAKE) -C benchmarks clean
 	@phoronix-test-suite remove cachebench
 	@phoronix-test-suite remove unpack-linux
 	@apt remove --purge phoronix-test-suite -y
