@@ -187,34 +187,11 @@ getresultsstockfish: | $(RESULTS_DIR)
 
 #---------------------------------------------------Atomic operations----------------------------------------------
 
-#canneal:
-#	$(MAKE) -C canneal/src
-#	chmod +x canneal/src/canneal_orig
-#
-#parameters	for canneal
-#NTHREADS := 4
-#NSWAPS := 200000
-#TEMP := 1000
-#NETLIST := inputs/2500000.nets
-#NSTEPS := 1000 
-#
-#getresultscanneal: | $(RESULTS_DIR)
-#	./canneal/src/canneal_orig $(NTHREADS) $(NSWAPS) $(TEMP) $(NETLIST) $(NSTEPS) > $(RESULTS_DIR)/canneal_results.txt
-#	echo "Risultati salvati in $(RESULTS_DIR)/canneal_results.txt"
-
-
-# Compilazione
 canneal:
 	@echo "Compilazione in corso..."
 	$(MAKE) -C canneal/src
 	chmod +x canneal/src/canneal_orig
 	@echo "Compilazione completata"
-
-
-#THREADS := 4
-#SWAPS := 200000
-#TEMP := 1000
-#STEPS := 1000
 
 INPUT_DIR := $(shell pwd)/canneal/inputs
 EXECUTABLE := $(shell pwd)/canneal/src/canneal_orig
@@ -227,54 +204,6 @@ THREADS := 1
 SWAPS := 100
 TEMP := 100
 STEPS := 10
-
-getresultscanneal:
-	@echo "=== VERIFICA FILE INPUT ==="
-	@echo "Cercando: $(INPUT_FILE)"
-	@if [ ! -f "$(INPUT_FILE)" ]; then \
-		echo "\nERRORE: File di input mancante!"; \
-		echo "File disponibili in $(INPUT_DIR):"; \
-		ls -la $(INPUT_DIR)/; \
-		echo "\nScegli un file esistente e rilanciare con:"; \
-		echo "make getresultscanneal INPUT_FILE=canneal/inputs/NOMEFILE"; \
-		exit 1; \
-	else \
-		echo "OK - File input trovato"; \
-	fi
-
-	@echo "\n=== VERIFICA ESEGUIBILE ==="
-	@echo "Cercando: $(EXECUTABLE)"
-	@if [ ! -f "$(EXECUTABLE)" ]; then \
-		echo "\nERRORE: Eseguibile non trovato!"; \
-		echo "Compilare prima con:"; \
-		echo "make -C canneal/src"; \
-		exit 1; \
-	else \
-		echo "OK - Eseguibile trovato"; \
-	fi
-
-	@echo "\n=== AVVIO BENCHMARK ==="
-	@mkdir -p $(RESULTS_DIR)
-	@echo "Parametri:"
-	@echo "- Threads: $(THREADS)"
-	@echo "- Swaps: $(SWAPS)"
-	@echo "- Temperatura: $(TEMP)"
-	@echo "- Passi: $(STEPS)"
-	@echo "- Input: $(INPUT_FILE)"
-	
-	@echo "\nEsecuzione in corso..."
-	@cd canneal/src && \
-	./canneal_orig $(THREADS) $(SWAPS) $(TEMP) ../inputs/$(notdir $(INPUT_FILE)) $(STEPS) > $(RESULTS_DIR)/canneal_results.txt 2>&1
-	
-	@if [ $$? -eq 0 ]; then \
-		echo "\nSUCCESSO! Risultati:"; \
-		head -n 5 $(RESULTS_DIR)/canneal_results.txt; \
-	else \
-		echo "\nERRORE DURANTE L'ESECUZIONE"; \
-		echo "Log completo disponibile in:"; \
-		echo "$(RESULTS_DIR)/canneal_results.txt"; \
-		exit 1; \
-	fi
 
 getresultscanneal:
 	@echo "=== VERIFICA PRELIMINARE ==="
