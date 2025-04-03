@@ -55,3 +55,9 @@
 [submodule "benchmarks/CPU/cpuminer"]
 	path = benchmarks/CPU/cpuminer
 	url = https://github.com/tkinjo1985/cpuminer-multi.git
+[submodule "benchmarks/CPU/canneal"]
+	path = benchmarks/CPU/canneal
+	url = https://github.com/HuangWenChen/Optimize-PARSEC-CANNEAL.git
+[submodule "benchmarks/GPU/FFmpeg"]
+	path = benchmarks/GPU/FFmpeg
+	url = https://github.com/FFmpeg/FFmpeg.git
