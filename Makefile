@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all run clean
 #directory di output
 RESULTS_DIR := results
 BIN_DIR := bin
@@ -10,24 +10,53 @@ gpu_dir := benchmarks/GPU
 
 setup:
 	@git submodule update --init --recursive
-	@apt-get install php-cli php-xml
+	@apt-get install php-cli php-xmlS
 	@apt-get install tmux
+	@apt install -y autoconf
+	@apt install -y libtool
+	@apt install -y g++
+	@apt install -y libnuma-de
+	@apt install -y pkg-config
+	@apt install -y libmysqlclient-dev
+	@apt install -y libaio1 libaio-dev
+	@mkdir -p $(RESULTS_DIR)
+	@mkdir -p $(BIN_DIR) 
 
 
 #compilo tutti i benchmark
-all: 
-	(cd $(memory_dir) $(MAKE) all) && 
-	(cd $(io_dir) $(MAKE) all) &&
-	(cd $(syslevel_dir) $(MAKE) all) &&
-	(cd $(cpu_dir) $(MAKE) all) &&
-	(cd benchmarks $(MAKE) all)
+all:
+	(cd $(memory_dir) && make all) && \
+	(cd $(io_dir) && make all) && \
+	(cd $(syslevel_dir) && make all) && \
+	(cd $(cpu_dir) && make all) && \
+	(cd benchmarks && make all) && \
+	@$(MAKE) -C $(gpu_dir) all
+	@echo "Tutti i benchmark sono stati compilati con successo!"
+	@echo "Esegui 'make run' per eseguire i benchmark."
 run:
-	(cd $(memory_dir) $(MAKE) getresults) && 
-	(cd $(io_dir) $(MAKE) getresults) &&
-	(cd $(syslevel_dir) $(MAKE) getresults) &&
-	(cd $(cpu_dir) $(MAKE) getresults) &&
-	(cd benchmarks $(MAKE) getresults) &&
-	(cd $(gpu_dirs) $(MAKE) getresults)
+	(cd $(memory_dir) && make getresults) && \
+	(cd $(io_dir) && make getresults) && \
+	(cd $(syslevel_dir) && make getresults) && \
+	(cd $(cpu_dir) && make getresults) && \
+	(cd benchmarks && make getresults) && \
+	(cd $(gpu_dir) && make getresults)
+@echo "Tutti i benchmark sono stati eseguiti con successo!"
+	@echo "I risultati sono stati salvati in $(RESULTS_DIR)."
+
+
+install_phoronix_benchmarks:
+	@$(MAKE) phoronix
+	@$(MAKE) install_cachebench
+	@$(MAKE) install_unpacking_linux_kernel
+	
+
+
+runphoronix:
+	@echo "Esecuzione di Phoronix Test Suite..."
+	@$(MAKE) getresultscachebench
+	@$(MAKE) getresultsunpacking_linux_kernel
+	
+
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/CPU/coremark clean

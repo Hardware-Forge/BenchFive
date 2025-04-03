@@ -29,7 +29,6 @@ clean_results:
 	rm -f $(RESULTS_DIR)/sysbench.txt
 	rm -f $(RESULTS_DIR)/sysbench_fileio.txt
 
-
 #-------------------------------------------------------sysbench-------------------------------------------------------
 #installazione di sysbench
 install_sysbench:
