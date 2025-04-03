@@ -1,4 +1,4 @@
-.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setup_testfloat whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf synchrobench getresultssynchrobench 7zip getresults7zip Zstandard getresultszstandard install_perf un_perf stockfish getresultsstockfish clean_results getresults
+.PHONY: all clean run coremark getresultscoremark testfloat getresultstestfloat linpack getresultslinpack setup_testfloat whetstone getresultswhetstone dhrystone getresultsdhrystone run_perf synchrobench getresultssynchrobench 7zip getresults7zip Zstandard getresultszstandard install_perf un_perf stockfish getresultsstockfish canneal getresultscanneal setup_canneal clean_results getresults
 
 #output directory
 RESULTS_DIR := ../../results
@@ -20,7 +20,10 @@ clean:
 	$(MAKE) -C Zstandard clean || true
 	cd 7zip/CPP/7zip/Bundles/LzmaCon && \
     $(MAKE) -f makefile.gcc clean || true && \
-    rm -rf _o || true
+	$(MAKE) -C stockfish/src clean || true
+	$(MAKE) -C canneal/src clean || true
+
+	rm -rf _o || true
 	rm -rf $(BIN_DIR)/*
 	rm -rf "$(SOFTFLOAT_DIR)"
 	rm -f $(BIN_DIR)/whetstone
@@ -172,13 +175,148 @@ stockfish:
 	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
 
 STOCKFISH_DIR := stockfish/src
-BENCH_HASH := 128  # MB di hash
-BENCH_THREADS := auto  # Threads (1 per single-core, auto per multi-core)
-BENCH_TIME := 5000  # ms (se vuoi tempo fisso)
-BENCH_DEPTH := 24   # Depth massima (commenta se usi movetime)
-#N_RESULTS_DIR:= ../../../results
+BENCH_HASH := 128  # hash MB
+BENCH_THREADS := $(shell nproc --all) #it stresses all the cores
+BENCH_TIME := 5000  # [ms]
+BENCH_DEPTH := 24   # max depth
 
 getresultsstockfish: | $(RESULTS_DIR)
-	@cd $(STOCKFISH_DIR) && ./stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) 
-#	default depth > $(N_RESULTS_DIR)/stockfish_bench.txt 2>&1 --da fixare
-#	@echo "Risultati salvati in $(RESULTS_DIR)/stockfish_results.txt"
+	@$(STOCKFISH_DIR)/stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) default depth > $(RESULTS_DIR)/stockfish_results.txt 2>&1
+	@echo "Risultati salvati in $(RESULTS_DIR)/stockfish_results.txt"
+
+
+#---------------------------------------------------Atomic operations----------------------------------------------
+
+#canneal:
+#	$(MAKE) -C canneal/src
+#	chmod +x canneal/src/canneal_orig
+#
+#parameters	for canneal
+#NTHREADS := 4
+#NSWAPS := 200000
+#TEMP := 1000
+#NETLIST := inputs/2500000.nets
+#NSTEPS := 1000 
+#
+#getresultscanneal: | $(RESULTS_DIR)
+#	./canneal/src/canneal_orig $(NTHREADS) $(NSWAPS) $(TEMP) $(NETLIST) $(NSTEPS) > $(RESULTS_DIR)/canneal_results.txt
+#	echo "Risultati salvati in $(RESULTS_DIR)/canneal_results.txt"
+
+
+# Compilazione
+canneal:
+	@echo "Compilazione in corso..."
+	$(MAKE) -C canneal/src
+	chmod +x canneal/src/canneal_orig
+	@echo "Compilazione completata"
+
+
+#THREADS := 4
+#SWAPS := 200000
+#TEMP := 1000
+#STEPS := 1000
+
+INPUT_DIR := $(shell pwd)/canneal/inputs
+EXECUTABLE := $(shell pwd)/canneal/src/canneal_orig
+
+# File di input (usa il più piccolo per test)
+INPUT_FILE := $(INPUT_DIR)/10.nets
+
+# Parametri ridotti per test
+THREADS := 1
+SWAPS := 100
+TEMP := 100
+STEPS := 10
+
+getresultscanneal:
+	@echo "=== VERIFICA FILE INPUT ==="
+	@echo "Cercando: $(INPUT_FILE)"
+	@if [ ! -f "$(INPUT_FILE)" ]; then \
+		echo "\nERRORE: File di input mancante!"; \
+		echo "File disponibili in $(INPUT_DIR):"; \
+		ls -la $(INPUT_DIR)/; \
+		echo "\nScegli un file esistente e rilanciare con:"; \
+		echo "make getresultscanneal INPUT_FILE=canneal/inputs/NOMEFILE"; \
+		exit 1; \
+	else \
+		echo "OK - File input trovato"; \
+	fi
+
+	@echo "\n=== VERIFICA ESEGUIBILE ==="
+	@echo "Cercando: $(EXECUTABLE)"
+	@if [ ! -f "$(EXECUTABLE)" ]; then \
+		echo "\nERRORE: Eseguibile non trovato!"; \
+		echo "Compilare prima con:"; \
+		echo "make -C canneal/src"; \
+		exit 1; \
+	else \
+		echo "OK - Eseguibile trovato"; \
+	fi
+
+	@echo "\n=== AVVIO BENCHMARK ==="
+	@mkdir -p $(RESULTS_DIR)
+	@echo "Parametri:"
+	@echo "- Threads: $(THREADS)"
+	@echo "- Swaps: $(SWAPS)"
+	@echo "- Temperatura: $(TEMP)"
+	@echo "- Passi: $(STEPS)"
+	@echo "- Input: $(INPUT_FILE)"
+	
+	@echo "\nEsecuzione in corso..."
+	@cd canneal/src && \
+	./canneal_orig $(THREADS) $(SWAPS) $(TEMP) ../inputs/$(notdir $(INPUT_FILE)) $(STEPS) > $(RESULTS_DIR)/canneal_results.txt 2>&1
+	
+	@if [ $$? -eq 0 ]; then \
+		echo "\nSUCCESSO! Risultati:"; \
+		head -n 5 $(RESULTS_DIR)/canneal_results.txt; \
+	else \
+		echo "\nERRORE DURANTE L'ESECUZIONE"; \
+		echo "Log completo disponibile in:"; \
+		echo "$(RESULTS_DIR)/canneal_results.txt"; \
+		exit 1; \
+	fi
+
+getresultscanneal:
+	@echo "=== VERIFICA PRELIMINARE ==="
+	@echo "1. Controllo eseguibile..."
+	@if [ ! -f "canneal/src/canneal_orig" ]; then \
+		echo "ERRORE CRITICO: canneal_orig non trovato in canneal/src/"; \
+		echo "Percorso assoluto atteso:"; \
+		echo "$(shell pwd)/canneal/src/canneal_orig"; \
+		echo "\nSoluzioni:"; \
+		echo "1. Compilare: make -C canneal/src"; \
+		echo "2. Verificare i permessi: chmod +x canneal/src/canneal_orig"; \
+		exit 1; \
+	else \
+		echo "OK - Eseguibile trovato"; \
+	fi
+	
+	@echo "\n2. Controllo file input..."
+	@if [ ! -f "$(INPUT_FILE)" ]; then \
+		echo "ERRORE: File input non trovato"; \
+		echo "File disponibili:"; \
+		ls canneal/inputs/*.nets; \
+		exit 1; \
+	else \
+		echo "OK - Input trovato: $(INPUT_FILE)"; \
+	fi
+	
+	@echo "\n=== AVVIO BENCHMARK ==="
+	@echo "Parametri:" 
+	@echo "- Threads: $(THREADS)"
+	@echo "- Swaps: $(SWAPS)"
+	@echo "- Temperatura: $(TEMP)"
+	@echo "- Passi: $(STEPS)"
+	
+	@mkdir -p $(RESULTS_DIR)
+	@echo "\nEsecuzione in corso..."
+	@./canneal/src/canneal_orig $(THREADS) $(SWAPS) $(TEMP) $(INPUT_FILE) $(STEPS) > $(RESULTS_DIR)/canneal_results.txt 2>&1
+	
+	@if [ $$? -eq 0 ]; then \
+		echo "\nSUCCESSO! Risultati:"; \
+		head -n 5 $(RESULTS_DIR)/canneal_results.txt; \
+	else \
+		echo "\nERRORE! Log completo:"; \
+		cat $(RESULTS_DIR)/canneal_results.txt; \
+		exit 1; \
+	fi
