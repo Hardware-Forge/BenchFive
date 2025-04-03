@@ -4,10 +4,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: coremark dhrystone linpack testfloat whetstone synchrobench 7zip Zstandard cpuminer
+all: coremark linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer
 
-getresults: getresultscoremark getresultsdhrystone getresultslinpack getresultstestfloat getresultswhetstone getresultssynchrobench getresults7zip getresultsZstandard
-
+getresults: getresultscoremark  getresultslinpack getresultstestfloat getresultswhetstone getresults7zip getresultsZstandard
+#getresultssynchrobench getresultsdhrystone  dhrystone tolti
 
 clean:
 	$(MAKE) -C coremark clean || true
