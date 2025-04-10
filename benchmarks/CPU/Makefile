@@ -35,8 +35,8 @@ clean_results:
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
 
-coremark: 
-	$(MAKE) -C coremark
+coremark:
+	$(MAKE) -C coremark CC=riscv64-linux-gnu-gcc
 	find coremark -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
 
 
