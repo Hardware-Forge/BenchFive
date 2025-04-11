@@ -1,63 +1,63 @@
 [submodule "benchmarks/CPU/coremark"]
 	path = benchmarks/CPU/coremark
 	url = https://github.com/eembc/coremark.git
-[submodule "benchmarks/CPU/linpack"]
-	path = benchmarks/CPU/linpack
-	url = https://github.com/ereyes01/linpack.git
-[submodule "benchmarks/syslevel/rt-tests"]
-	path = benchmarks/syslevel/rt-tests
-	url = https://github.com/vianpl/rt-tests.git
-[submodule "benchmarks/IO/fio"]
-	path = benchmarks/IO/fio
-	url = https://github.com/axboe/fio.git
-[submodule "benchmarks/CPU/testfloat"]
-	path = benchmarks/CPU/testfloat
-	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
-[submodule "benchmarks/memory/STREAM"]	
-	path = benchmarks/memory/STREAM
-	url = https://github.com/jeffhammond/STREAM.git
-[submodule "benchmarks/IO/sockperf"]
-	path = benchmarks/IO/sockperf
-	url = https://github.com/Mellanox/sockperf.git
-[submodule "benchmarks/CPU/dhrystone"]
-	path = benchmarks/CPU/dhrystone
-	url = https://github.com/sifive/benchmark-dhrystone.git
-[submodule "benchmarks/sysbench"]
-	path = benchmarks/sysbench
-	url = https://github.com/akopytov/sysbench.git
-[submodule "benchmarks/GPU/vkmark"]
-	path = benchmarks/GPU/vkmark
-	url = https://github.com/vkmark/vkmark.git
-[submodule "benchmarks/memory/tinymembench"]
-	path = benchmarks/memory/tinymembench
-	url = https://github.com/nuumio/tinymembench.git
-[submodule "benchmarks/memory/ramspeed"]
-	path = benchmarks/memory/ramspeed
-	url = https://github.com/wtarreau/ramspeed.git
-[submodule "benchmarks/CPU/synchrobench"]
-	path = benchmarks/CPU/synchrobench
-	url = https://github.com/gramoli/synchrobench.git
-[submodule "benchmarks/memory/likwid"]
-	path = benchmarks/memory/likwid
-	url = https://github.com/RRZE-HPC/likwid.git
-[submodule "benchmarks/CPU/7zip"]
-	path = benchmarks/CPU/7zip
-	url = https://github.com/ip7z/7zip.git
-[submodule "benchmarks/CPU/Zstandard"]
-	path = benchmarks/CPU/Zstandard
-	url = https://github.com/mamh-mixed/openzfs-zstd.git
-[submodule "benchmarks/CPU/stockfish"]
-	path = benchmarks/CPU/stockfish
-	url = https://github.com/official-stockfish/Stockfish.git
-[submodule "benchmarks/stress-ng"]
-	path = benchmarks/stress-ng
-	url = https://github.com/ColinIanKing/stress-ng.git
-[submodule "benchmarks/CPU/cpuminer"]
-	path = benchmarks/CPU/cpuminer
-	url = https://github.com/tkinjo1985/cpuminer-multi.git
-[submodule "benchmarks/CPU/canneal"]
-	path = benchmarks/CPU/canneal
-	url = https://github.com/HuangWenChen/Optimize-PARSEC-CANNEAL.git
-[submodule "benchmarks/GPU/FFmpeg"]
-	path = benchmarks/GPU/FFmpeg
-	url = https://github.com/FFmpeg/FFmpeg.git
+# [submodule "benchmarks/CPU/linpack"]
+# 	path = benchmarks/CPU/linpack
+# 	url = https://github.com/ereyes01/linpack.git
+# [submodule "benchmarks/syslevel/rt-tests"]
+# 	path = benchmarks/syslevel/rt-tests
+# 	url = https://github.com/vianpl/rt-tests.git
+# [submodule "benchmarks/IO/fio"]
+# 	path = benchmarks/IO/fio
+# 	url = https://github.com/axboe/fio.git
+# [submodule "benchmarks/CPU/testfloat"]
+# 	path = benchmarks/CPU/testfloat
+# 	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
+# [submodule "benchmarks/memory/STREAM"]	
+# 	path = benchmarks/memory/STREAM
+# 	url = https://github.com/jeffhammond/STREAM.git
+# [submodule "benchmarks/IO/sockperf"]
+# 	path = benchmarks/IO/sockperf
+# 	url = https://github.com/Mellanox/sockperf.git
+# [submodule "benchmarks/CPU/dhrystone"]
+# 	path = benchmarks/CPU/dhrystone
+# 	url = https://github.com/sifive/benchmark-dhrystone.git
+# [submodule "benchmarks/sysbench"]
+# 	path = benchmarks/sysbench
+# 	url = https://github.com/akopytov/sysbench.git
+# [submodule "benchmarks/GPU/vkmark"]
+# 	path = benchmarks/GPU/vkmark
+# 	url = https://github.com/vkmark/vkmark.git
+# [submodule "benchmarks/memory/tinymembench"]
+# 	path = benchmarks/memory/tinymembench
+# 	url = https://github.com/nuumio/tinymembench.git
+# [submodule "benchmarks/memory/ramspeed"]
+# 	path = benchmarks/memory/ramspeed
+# 	url = https://github.com/wtarreau/ramspeed.git
+# [submodule "benchmarks/CPU/synchrobench"]
+# 	path = benchmarks/CPU/synchrobench
+# 	url = https://github.com/gramoli/synchrobench.git
+# [submodule "benchmarks/memory/likwid"]
+# 	path = benchmarks/memory/likwid
+# 	url = https://github.com/RRZE-HPC/likwid.git
+# [submodule "benchmarks/CPU/7zip"]
+# 	path = benchmarks/CPU/7zip
+# 	url = https://github.com/ip7z/7zip.git
+# [submodule "benchmarks/CPU/Zstandard"]
+# 	path = benchmarks/CPU/Zstandard
+# 	url = https://github.com/mamh-mixed/openzfs-zstd.git
+# [submodule "benchmarks/CPU/stockfish"]
+# 	path = benchmarks/CPU/stockfish
+# 	url = https://github.com/official-stockfish/Stockfish.git
+# [submodule "benchmarks/stress-ng"]
+# 	path = benchmarks/stress-ng
+# 	url = https://github.com/ColinIanKing/stress-ng.git
+# [submodule "benchmarks/CPU/cpuminer"]
+# 	path = benchmarks/CPU/cpuminer
+# 	url = https://github.com/tkinjo1985/cpuminer-multi.git
+# [submodule "benchmarks/CPU/canneal"]
+# 	path = benchmarks/CPU/canneal
+# 	url = https://github.com/HuangWenChen/Optimize-PARSEC-CANNEAL.git
+# [submodule "benchmarks/GPU/FFmpeg"]
+# 	path = benchmarks/GPU/FFmpeg
+# 	url = https://github.com/FFmpeg/FFmpeg.git
