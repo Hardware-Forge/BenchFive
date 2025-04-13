@@ -4,7 +4,8 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: coremark linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal 
+all: coremark 
+#linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal 
 
 getresults: getresultscoremark  getresultslinpack getresultstestfloat getresultswhetstone getresults7zip getresultsZstandard getresultsstockfish getresultscanneal
 #getresultssynchrobench getresultsdhrystone  dhrystone tolti
