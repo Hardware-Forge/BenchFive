@@ -9,6 +9,7 @@ syslevel_dir := benchmarks/syslevel
 gpu_dir := benchmarks/GPU
 
 setup:
+	git submodule update --init --recursive
 	@mkdir -p $(RESULTS_DIR)
 	@mkdir -p $(BIN_DIR) 
 
