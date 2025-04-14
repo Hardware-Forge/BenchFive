@@ -1,6 +1,12 @@
 [submodule "benchmarks/CPU/coremark"]
 	path = benchmarks/CPU/coremark
 	url = https://github.com/eembc/coremark.git
+[submodule "benchmarks/CPU/coremark-pro"]
+	path = benchmarks/CPU/coremark-pro
+	url = https://github.com/eembc/coremark-pro.git
+[submodule "benchmarks/CPU/7zip"]
+	path = benchmarks/CPU/7zip
+	url = https://github.com/ip7z/7zip.git
 # [submodule "benchmarks/CPU/linpack"]
 # 	path = benchmarks/CPU/linpack
 # 	url = https://github.com/ereyes01/linpack.git
@@ -40,9 +46,6 @@
 # [submodule "benchmarks/memory/likwid"]
 # 	path = benchmarks/memory/likwid
 # 	url = https://github.com/RRZE-HPC/likwid.git
-# [submodule "benchmarks/CPU/7zip"]
-# 	path = benchmarks/CPU/7zip
-# 	url = https://github.com/ip7z/7zip.git
 # [submodule "benchmarks/CPU/Zstandard"]
 # 	path = benchmarks/CPU/Zstandard
 # 	url = https://github.com/mamh-mixed/openzfs-zstd.git
