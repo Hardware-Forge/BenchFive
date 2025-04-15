@@ -16,9 +16,8 @@ setup:
 
 #compilo tutti i benchmark
 all:
-	(cd $(cpu_dir) && make all) && \
-	@echo "Tutti i benchmark sono stati compilati con successo!"
-	@echo "Esegui 'make run' per eseguire i benchmark."
+	$(MAKE) -C $(cpu_dir) all
+	@echo "Build completata"
 run:
 	(cd $(cpu_dir) && make getresults) && \
 	@echo "Tutti i benchmark sono stati eseguiti con successo!"
