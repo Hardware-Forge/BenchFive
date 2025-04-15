@@ -4,7 +4,7 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: coremark 
+all: coremark getresultscoremark
 #linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal 
 
 getresults: getresultscoremark  getresultslinpack getresultstestfloat getresultswhetstone getresults7zip getresultsZstandard getresultsstockfish getresultscanneal
@@ -36,15 +36,19 @@ clean_results:
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
 
+#coreMark compiling and execution
 coremark:
-	$(MAKE) -C coremark CC=riscv64-linux-gnu-gcc
-	find coremark -maxdepth 1 -type f -executable -exec cp {} $(BIN_DIR)/ \;
+	$(MAKE) -C coremark 
 
 
-#coreMark execution and saving the score in results
+#saving the score in results
 getresultscoremark: | $(RESULTS_DIR)
-	@coremark/coremark.exe > $(RESULTS_DIR)/coremark_results.txt
-	echo "Risultati di CoreMark salvati in $(RESULTS_DIR)/coremark_results.txt"
+	@echo "=== Risultato da run1.log ===" > $(RESULTS_DIR)/coremark_results.txt
+	@cat coremark/run1.log >> $(RESULTS_DIR)/coremark_results.txt
+	@echo "" >> $(RESULTS_DIR)/coremark_results.txt
+	@echo "=== Risultato da run2.log ===" >> $(RESULTS_DIR)/coremark_results.txt
+	@cat coremark/run2.log >> $(RESULTS_DIR)/coremark_results.txt
+	@echo "Risultati di CoreMark copiati in $(RESULTS_DIR)/coremark_results.txt"
 
 
 #probabilmente questo necessita di un cross compiler perche è gia per risc v (al momento ho messo dei - per ignorare gli errori ma non va lo stesso)
