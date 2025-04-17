@@ -1,3 +1,5 @@
+#---------------------------------------------------Main Makefile------------------------------------------------
+
 .PHONY: all run clean
 #directory di output
 RESULTS_DIR := results
@@ -14,10 +16,12 @@ setup:
 	@mkdir -p $(BIN_DIR) 
 
 
-#compilo tutti i benchmark
+# Compilazione di tutti i benchmark
 all:
 	$(MAKE) -C $(cpu_dir) all
 	@echo "Build completata"
+
+# Esecuzione di tutti i benchmark e salvataggio dei risulati in results
 run:
 	$(MAKE) -C $(cpu_dir) getresults
 	@echo "Esecuzione benchmarks completata"

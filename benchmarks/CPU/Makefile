@@ -1,3 +1,5 @@
+#---------------------------------------------------CPU Makefile------------------------------------------------
+
 .PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro
 
 #output directory
