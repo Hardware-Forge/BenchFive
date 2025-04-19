@@ -1,6 +1,6 @@
 #---------------------------------------------------CPU Makefile------------------------------------------------
 
-.PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro
+.PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro 7zip getresults7zip
 
 #output directory
 RESULTS_DIR := ../../results
@@ -10,7 +10,7 @@ BIN_DIR := ../../bin
 all: coremark getresultscoremark coremark-pro 
 #linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal 
 
-getresults: getresultscoremark getresultscoremark-pro 
+getresults: getresultscoremark getresultscoremark-pro_singlecore getresultscoremark-pro_multicore
 #getresultssynchrobench getresultsdhrystone  dhrystone tolti
 
 clean:
@@ -52,28 +52,67 @@ coremark-pro: FORCE
 	
 COREMARK_PRO_BIN_DIR = coremark-pro/builds/linux64/gcc64/bin
 COREMARK_PRO_RESULTS_DIR = $(RESULTS_DIR)/coremark-pro
+COREMARK_PRO_SUMMARY_SINGLE   = $(COREMARK_PRO_RESULTS_DIR)/coremark-pro_singlecore_results.txt
+COREMARK_PRO_SUMMARY_MULTI    = $(COREMARK_PRO_RESULTS_DIR)/coremark-pro_multicore_results.txt
+# Numero di contesti (thread) per default: core disponibili
+THREADS ?= $(shell nproc)
 
 FORCE:
 
-#coremark-pro execution and saving the score in results
-getresultscoremark-pro:
+# Execution of coremark-pro singlecore execution and saving the score in results
+getresultscoremark-pro_singlecore:
 	@mkdir -p $(COREMARK_PRO_RESULTS_DIR)
+	@echo "Running all workloads in single-core (1 context)..."
 	@for bench in $(shell ls $(COREMARK_PRO_BIN_DIR)); do \
-		echo "Running $$bench..."; \
+		echo " - $$bench"; \
 		$(COREMARK_PRO_BIN_DIR)/$$bench > $(COREMARK_PRO_RESULTS_DIR)/$$bench.txt 2>&1; \
 	done
-	@echo "CoreMark-Pro results saved in $(COREMARK_PRO_RESULTS_DIR)"
+	@echo "Generating single-core summary..."
+	@awk 'BEGIN { sum=0; count=0; print "CoreMark-Pro Single-Core Results\n================================" } \
+	/(items|workloads)\/sec/ { \
+		file=FILENAME; sub(/.*\//, "", file); split($$0, parts, "="); val=parts[2]; \
+		print file": "val" items/sec"; sum+=val; count++; \
+	} \
+	END { if (count>0) printf "\nScore: %.6f\n", sum/count; else print "\nScore: 0.000000" }' $(COREMARK_PRO_RESULTS_DIR)/*.txt > $(COREMARK_PRO_SUMMARY_SINGLE)
+	@echo "Single-core summary saved to $(COREMARK_PRO_SUMMARY_SINGLE)"
+	@find $(COREMARK_PRO_RESULTS_DIR) -type f ! -name $(notdir $(COREMARK_PRO_SUMMARY_SINGLE)) -delete
+
+# Execution of coremark-pro multicore execution and saving the score in results
+getresultscoremark-pro_multicore:
+	@mkdir -p $(COREMARK_PRO_RESULTS_DIR)
+	@rm -f $(COREMARK_PRO_RESULTS_DIR)/*.txt
+	@echo "Running all workloads in multi-core ($(THREADS) contexts)..."
+	@for bench in $(shell ls $(COREMARK_PRO_BIN_DIR)); do \
+		echo " - $$bench"; \
+		$(COREMARK_PRO_BIN_DIR)/$$bench -v0 -c$(THREADS) \
+			> $(COREMARK_PRO_RESULTS_DIR)/$$bench.txt 2>&1; \
+	done
+	@echo "Generating multi-core summary..."
+	@awk 'BEGIN { sum=0; count=0; print "CoreMark-Pro Multi-Core Results\n================================" } \
+	/(items|workloads)\/sec/ { \
+		file=FILENAME; sub(/.*\//,"",file); split($$0,parts,"="); \
+		val=parts[2]; gsub(/[^0-9\.]/,"",val); \
+		print file": "val" items/sec"; sum+=val; count++; \
+	} \
+	END { if (count>0) printf "\nScore: %.6f\n", sum/count; else print "\nScore: 0.000000" }' \
+		$(COREMARK_PRO_RESULTS_DIR)/*.txt > $(COREMARK_PRO_SUMMARY_MULTI)
+	@find $(COREMARK_PRO_RESULTS_DIR) -type f \
+		! -name $(notdir $(COREMARK_PRO_SUMMARY_MULTI)) -delete
+	@echo "Multi-core summary saved to $(COREMARK_PRO_SUMMARY_MULTI)"
 
 
 
-# 7zip:
-# 	cd 7zip/CPP/7zip/Bundles/LzmaCon && \
-# 	$(MAKE) PLATFORM=riscv CC=riscv64-linux-gnu-gcc
-# 	cp 7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma $(BIN_DIR)/
-# 	@echo "7zip build completato e copiato in $(BIN_DIR)"
+#---------------------------------------------------Data compression----------------------------------------------
 
 
-# getresults7zip:
-# 	@mkdir -p $(RESULTS_DIR)
-# 	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
-# 	@echo "Risultati di 7zip salvati in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
+7zip:
+	cd 7zip/CPP/7zip/Bundles/LzmaCon && \
+	$(MAKE) -f makefile.gcc PLATFORM=riscv CC=riscv64-linux-gnu-gcc
+	cp 7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma $(BIN_DIR)/
+	@echo "7zip build completato e copiato in $(BIN_DIR)"
+
+
+getresults7zip:
+	@mkdir -p $(RESULTS_DIR)
+	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
+	@echo "Risultati di 7zip salvati in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
