@@ -55,9 +55,9 @@
 # [submodule "benchmarks/CPU/canneal"]
 # 	path = benchmarks/CPU/canneal
 # 	url = https://github.com/HuangWenChen/Optimize-PARSEC-CANNEAL.git
-# [submodule "benchmarks/GPU/FFmpeg"]
-# 	path = benchmarks/GPU/FFmpeg
-# 	url = https://github.com/FFmpeg/FFmpeg.git
+[submodule "benchmarks/GPU/FFmpeg"]
+ 	path = benchmarks/GPU/FFmpeg
+ 	url = https://github.com/FFmpeg/FFmpeg.git
 [submodule "benchmarks/CPU/coremark-pro"]
 	path = benchmarks/CPU/coremark-pro
 	url = https://github.com/eembc/coremark-pro.git
