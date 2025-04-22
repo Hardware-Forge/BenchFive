@@ -7,10 +7,10 @@ RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
 
-all: coremark getresultscoremark coremark-pro 
+all: coremark getresultscoremark coremark-pro 7zip
 #linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal 
 
-getresults: getresultscoremark getresultscoremark-pro_singlecore getresultscoremark-pro_multicore
+getresults: getresultscoremark getresultscoremark-pro_singlecore getresultscoremark-pro_multicore getresults7zip
 #getresultssynchrobench getresultsdhrystone  dhrystone tolti
 
 clean:
@@ -111,10 +111,11 @@ getresultscoremark-pro_multicore:
 
 
 7zip:
-	cd 7zip/CPP/7zip/Bundles/LzmaCon && \
-	$(MAKE) -f makefile.gcc PLATFORM=riscv CC=riscv64-linux-gnu-gcc
+	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon \
+	        -f makefile.gcc 
 	cp 7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma $(BIN_DIR)/
 	@echo "7zip build completato e copiato in $(BIN_DIR)"
+
 
 
 getresults7zip:
