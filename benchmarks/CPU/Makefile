@@ -50,8 +50,12 @@ getresultscoremark: | $(RESULTS_DIR)
 	@echo "Risultati di CoreMark copiati in $(RESULTS_DIR)/coremark_results.txt"
 
 #compiling
-coremark-pro:
+coremark-pro: FORCE
 	$(MAKE) -C coremark-pro TARGET=linux64 build
+
+
+FORCE:
+	@echo "Compilazione Coremark-PRO"
 
 
 getresultscoremark-pro:
