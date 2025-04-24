@@ -20,18 +20,19 @@ clean:
 	$(MAKE) -C whetstone clean  || true
 	$(MAKE) -C coremark-pro clean || true
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon clean || true
+	find 7zip/CPP/7zip -type f \( -name '*.o' -o -name '*.obj' \) -delete || true
+	find 7zip/CPP/7zip/Bundles -type f \( -executable -o -name '*.exe' -o -name '*.dll' \) -delete || true
 
-	rm -rf _o || true
-	rm -rf $(BIN_DIR)/*
-	rm -rf "$(SOFTFLOAT_DIR)"
-	rm -rf $(COREMARK_PRO_BIN_DIR)/*
-	rm -rf $(COREMARK_PRO_BIN_DIR)/*
-	rm -f $(BIN_DIR)/whetstone
-	rm -f whetstone/whetstone
 
 clean_results:
-	rm -rf $(RESULTS_DIR)/*
-
+	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
+		echo "Cleaning files in $(RESULTS_DIR)..."; \
+		rm -f "$(RESULTS_DIR)"/*; \
+	else \
+		echo "ERROR: Invalid or unsafe RESULTS_DIR ('$(RESULTS_DIR)') — skipping clean."; \
+		exit 1; \
+	fi
+	
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
 

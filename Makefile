@@ -37,8 +37,21 @@ clean:
 #	@phoronix-test-suite remove cachebench
 #	@phoronix-test-suite remove unpack-linux
 #	@apt remove --purge phoronix-test-suite -y
-	rm -rf $(RESULTS_DIR)/*
-	rm -rf $(BIN_DIR)/*
+
+	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
+		echo "Cleaning files in $(RESULTS_DIR)..."; \
+		rm -f "$(RESULTS_DIR)"/*; \
+	else \
+		echo "ERROR: Invalid or unsafe RESULTS_DIR ('$(RESULTS_DIR)') — skipping clean."; \
+		exit 1; \
+	fi
 
 clean_results:
-	rm -rf $(RESULTS_DIR)/*
+	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
+		echo "Cleaning files in $(RESULTS_DIR)..."; \
+		rm -f "$(RESULTS_DIR)"/*; \
+	else \
+		echo "ERROR: Invalid or unsafe RESULTS_DIR ('$(RESULTS_DIR)') — skipping clean."; \
+		exit 1; \
+	fi
+
