@@ -21,7 +21,15 @@ setupgpu:
 	@apt install libvpx-dev
 	@apt install -y yt-dlp
 	@apt install ocl-icd-opencl-dev
-
+	@apt install pkg-config
+	@libxcb1-dev
+	@libxcb-icccm4-dev
+	@apt install \
+	  libxcb-randr0-dev \
+	  libxcb-cursor-dev \
+	  libxcb-keysyms1-dev \
+	  libxcb-image0-dev \
+	  libxcb-xfixes0-dev
 
 installvkmark:
 	@echo "Installazione di vkmark"
@@ -65,4 +73,4 @@ getresults_geekbench:
 
 download_video:
 	@echo "Download yt video..."
-	yt-dlp -o input.%(ext)s https://youtu.be/WEwgbKr5R9I?si=LnxOWp5lQzedHwq6
+	yt-dlp --geo-bypass -o input.%(ext)s https://youtu.be/WEwgbKr5R9I?si=LnxOWp5lQzedHwq6
