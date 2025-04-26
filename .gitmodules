@@ -16,12 +16,12 @@
 # [submodule "benchmarks/CPU/testfloat"]
 # 	path = benchmarks/CPU/testfloat
 # 	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
-# [submodule "benchmarks/memory/STREAM"]	
-# 	path = benchmarks/memory/STREAM
-# 	url = https://github.com/jeffhammond/STREAM.git
-# [submodule "benchmarks/IO/sockperf"]
-# 	path = benchmarks/IO/sockperf
-# 	url = https://github.com/Mellanox/sockperf.git
+ [submodule "benchmarks/memory/STREAM"]	
+ 	path = benchmarks/memory/STREAM
+ 	url = https://github.com/jeffhammond/STREAM.git
+ [submodule "benchmarks/IO/sockperf"]
+ 	path = benchmarks/IO/sockperf
+ 	url = https://github.com/Mellanox/sockperf.git
 # [submodule "benchmarks/CPU/dhrystone"]
 # 	path = benchmarks/CPU/dhrystone
 # 	url = https://github.com/sifive/benchmark-dhrystone.git

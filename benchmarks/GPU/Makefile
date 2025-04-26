@@ -22,8 +22,9 @@ setupgpu:
 	@apt install -y yt-dlp
 	@apt install ocl-icd-opencl-dev
 	@apt install pkg-config
-	@libxcb1-dev
-	@libxcb-icccm4-dev
+	@apt install libxcb1-dev
+	@apt install libxcb-icccm4-dev
+	@apt install libvulkan1 mesa-vulkan-drivers vulkan-tools
 	@apt install \
 	  libxcb-randr0-dev \
 	  libxcb-cursor-dev \
@@ -71,6 +72,6 @@ getresults_geekbench:
 	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(RESULTS_DIR)/geekbench.txt 2>&1
 	@echo "Risultati di Geekbench 6 salvati in $(RESULTS_DIR)/geekbench.txt"
 
-download_video:
-	@echo "Download yt video..."
-	yt-dlp --geo-bypass -o input.%(ext)s https://youtu.be/WEwgbKr5R9I?si=LnxOWp5lQzedHwq6
+download_4k_sample_fs:
+	@echo "download sample FileSamples 4K 28s, 126 MB come input.mp4..."
+	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_2560x1440.mp4"
