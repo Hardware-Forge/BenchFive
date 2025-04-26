@@ -15,15 +15,13 @@ getresultsstream:
 	@STREAM/streameseguibile > $(RESULTS_DIR)/stream_results.txt
 
 CACHE_L3 := $(shell getconf LEVEL3_CACHE_SIZE)
-DIMARR := $(shell expr $(CACHE_L3) \* 4)
-
-cache:
-	@echo "Dimensione cache L3: $(DIMARR) bytes"
+CACHE_L2 := $(shell getconf LEVEL2_CACHE_SIZE)
+DIMARR := $(shell expr $(CACHE_L3) + $(CACHE_L2) \* 4)
 
 
 #------------------------------------------------------------tinymembench------------------------------------------------------------
 tinymembench:
-	@(cd tinymembench && CFLAGS="-O2 -march=atom -mtune=atom" $(MAKE))
+	@(cd tinymembench && $(MAKE))
 	@cp tinymembench/tinymembench $(BIN_DIR)/tinymembench
 getresults_tinymembench:
 	@tinymembench/tinymembench > $(RESULTS_DIR)/tinymembench_results.txt
@@ -36,6 +34,8 @@ ramspeed:
 	@cp ramspeed/ramwalk $(BIN_DIR)/ramwalk	
 getresults_ramspeed:
 	@ramspeed/ramlat > $(RESULTS_DIR)/ramlat_results.txt
+	@ramspeed/rambw > $(RESULTS_DIR)/rambw_results.txt
+	@ramspeed/ramwalk > $(RESULTS_DIR)/ramwalk_results.txt
 
 
 #------------------------------------------------------------likwid------------------------------------------------------------

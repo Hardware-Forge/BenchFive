@@ -10,18 +10,18 @@
 # [submodule "benchmarks/syslevel/rt-tests"]
 # 	path = benchmarks/syslevel/rt-tests
 # 	url = https://github.com/vianpl/rt-tests.git
-# [submodule "benchmarks/IO/fio"]
-# 	path = benchmarks/IO/fio
-# 	url = https://github.com/axboe/fio.git
+ [submodule "benchmarks/IO/fio"]
+	path = benchmarks/IO/fio
+	url = https://github.com/axboe/fio.git
 # [submodule "benchmarks/CPU/testfloat"]
 # 	path = benchmarks/CPU/testfloat
 # 	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
  [submodule "benchmarks/memory/STREAM"]	
  	path = benchmarks/memory/STREAM
  	url = https://github.com/jeffhammond/STREAM.git
- [submodule "benchmarks/IO/sockperf"]
- 	path = benchmarks/IO/sockperf
- 	url = https://github.com/Mellanox/sockperf.git
+# [submodule "benchmarks/IO/sockperf"]
+# 	path = benchmarks/IO/sockperf
+# 	url = https://github.com/Mellanox/sockperf.git
 # [submodule "benchmarks/CPU/dhrystone"]
 # 	path = benchmarks/CPU/dhrystone
 # 	url = https://github.com/sifive/benchmark-dhrystone.git
@@ -31,18 +31,18 @@
  [submodule "benchmarks/GPU/vkmark"]
 	path = benchmarks/GPU/vkmark
 	url = https://github.com/vkmark/vkmark.git
-# [submodule "benchmarks/memory/tinymembench"]
-# 	path = benchmarks/memory/tinymembench
-# 	url = https://github.com/nuumio/tinymembench.git
-# [submodule "benchmarks/memory/ramspeed"]
-# 	path = benchmarks/memory/ramspeed
-# 	url = https://github.com/wtarreau/ramspeed.git
+ [submodule "benchmarks/memory/tinymembench"]
+	path = benchmarks/memory/tinymembench
+	url = https://github.com/nuumio/tinymembench.git
+ [submodule "benchmarks/memory/ramspeed"]
+	path = benchmarks/memory/ramspeed
+	url = https://github.com/wtarreau/ramspeed.git
 # [submodule "benchmarks/CPU/synchrobench"]
 # 	path = benchmarks/CPU/synchrobench
 # 	url = https://github.com/gramoli/synchrobench.git
-# [submodule "benchmarks/memory/likwid"]
-# 	path = benchmarks/memory/likwid
-# 	url = https://github.com/RRZE-HPC/likwid.git
+ [submodule "benchmarks/memory/likwid"]
+	path = benchmarks/memory/likwid
+	url = https://github.com/RRZE-HPC/likwid.git
 # [submodule "benchmarks/CPU/Zstandard"]
 # 	path = benchmarks/CPU/Zstandard
 # 	url = https://github.com/mamh-mixed/openzfs-zstd.git
@@ -64,3 +64,6 @@
 [submodule "benchmarks/CPU/7zip"]
 	path = benchmarks/CPU/7zip
 	url = https://github.com/ip7z/7zip.git
+[submodule "fio"]
+	path = fio
+	url = https://github.com/axboe/fio.git

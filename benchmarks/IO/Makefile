@@ -3,6 +3,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
+setupio:
+	@apt install libtool autotools-dev
+
+
 all: fio sockperf create_fio_file create_fio_filecmd
 
 getresults: create_fio_file create_fio_filecmd getresultsfio getresultsfio_cmd getresultssockperf_pingpong getresultssockperf_throughput getresultsfio_cmd
