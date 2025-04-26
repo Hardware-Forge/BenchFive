@@ -1,12 +1,12 @@
 
-.PHONY: tinymembench ramspeed likwid
+.PHONY: tinymembench ramspeed 
 
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: stream tinymembench ramspeed likwid
+all: stream tinymembench ramspeed 
 
-getresults: getresultsstream getresults_tinymembench getresults_ramspeed getresults_likwid_cachecpy getresults_likwid_cacherd
+getresults: getresultsstream getresults_tinymembench getresults_ramspeed  
 
 stream:
 	@(cd STREAM && gcc -O -DSTREAM_ARRAY_SIZE=$(DIMARR) stream.c -o streameseguibile)
@@ -28,7 +28,7 @@ getresults_tinymembench:
 
 #------------------------------------------------------------ramspeed------------------------------------------------------------
 ramspeed:
-	@(cd ramspeed && $(MAKE))
+	$(MAKE) -C ramspeed CFLAGS="-O3 -Wall -fomit-frame-pointer"
 	@cp ramspeed/ramlat $(BIN_DIR)/ramlat
 	@cp ramspeed/rambw $(BIN_DIR)/rambw
 	@cp ramspeed/ramwalk $(BIN_DIR)/ramwalk	
@@ -38,15 +38,6 @@ getresults_ramspeed:
 	@ramspeed/ramwalk > $(RESULTS_DIR)/ramwalk_results.txt
 
 
-#------------------------------------------------------------likwid------------------------------------------------------------
-likwid:
-	(cd likwid && $(MAKE) && $(MAKE) install)
-#Copia dati nella cache (cache-to-cache bandwidth)
-getresults_likwid_cachecpy:
-	@likwid-bench -t clcopy -w S0:1MB > $(RESULTS_DIR)/likwid_resultscpy.txt
-#Caricamento dati dalla cache (read bandwidth)
-getresults_likwid_cacherd:
-	@likwid-bench -t clload -w S0:1MB > $(RESULTS_DIR)/likwid_resultsrd.txt
 
 
 clean:
@@ -60,9 +51,6 @@ clean:
 	@rm -f $(BIN_DIR)/rambw
 	@rm -f $(BIN_DIR)/ramwalk
 	@rm -f $(RESULTS_DIR)/ramlat_results.txt
-	@(cd likwid && $(MAKE) clean)
-	@rm -f $(RESULTS_DIR)/likwid_resultscpy.txt
-	@rm -f $(RESULTS_DIR)/likwid_resultsrd.txt
 
 clean_results:
 	@rm -f $(RESULTS_DIR)/stream_results.txt

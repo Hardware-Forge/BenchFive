@@ -7,9 +7,9 @@
 # [submodule "benchmarks/CPU/linpack"]
 # 	path = benchmarks/CPU/linpack
 # 	url = https://github.com/ereyes01/linpack.git
-# [submodule "benchmarks/syslevel/rt-tests"]
-# 	path = benchmarks/syslevel/rt-tests
-# 	url = https://github.com/vianpl/rt-tests.git
+ [submodule "benchmarks/syslevel/rt-tests"]
+	path = benchmarks/syslevel/rt-tests
+	url = https://github.com/vianpl/rt-tests.git
  [submodule "benchmarks/IO/fio"]
 	path = benchmarks/IO/fio
 	url = https://github.com/axboe/fio.git
@@ -25,9 +25,9 @@
 # [submodule "benchmarks/CPU/dhrystone"]
 # 	path = benchmarks/CPU/dhrystone
 # 	url = https://github.com/sifive/benchmark-dhrystone.git
-# [submodule "benchmarks/sysbench"]
-# 	path = benchmarks/sysbench
-# 	url = https://github.com/akopytov/sysbench.git
+ [submodule "benchmarks/sysbench"]
+	path = benchmarks/sysbench
+	url = https://github.com/akopytov/sysbench.git
  [submodule "benchmarks/GPU/vkmark"]
 	path = benchmarks/GPU/vkmark
 	url = https://github.com/vkmark/vkmark.git
@@ -40,9 +40,9 @@
 # [submodule "benchmarks/CPU/synchrobench"]
 # 	path = benchmarks/CPU/synchrobench
 # 	url = https://github.com/gramoli/synchrobench.git
- [submodule "benchmarks/memory/likwid"]
-	path = benchmarks/memory/likwid
-	url = https://github.com/RRZE-HPC/likwid.git
+# [submodule "benchmarks/memory/likwid"]
+#	path = benchmarks/memory/likwid
+#	url = https://github.com/RRZE-HPC/likwid.git
 # [submodule "benchmarks/CPU/Zstandard"]
 # 	path = benchmarks/CPU/Zstandard
 # 	url = https://github.com/mamh-mixed/openzfs-zstd.git
