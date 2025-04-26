@@ -23,8 +23,23 @@ getresultsfio_cmd:
 	@fio fio/configcmd.fio > $(RESULTS_DIR)/fio_resultscmd.txt
 
 #configuro e installo sockperf, le parentesi sono necessarie per eseguire i comandi nella stessa shell
-sockperf:
-	(cd sockperf && ./autogen.sh && ./configure && $(MAKE) && $(MAKE) install)
+.PHONY: install_sockperf
+
+install_sockperf:
+	@echo "=== Installazione di sockperf per RISC-V ==="
+	cp config.sub config.guess sockperf/config/aux/
+
+	patch -p1 < sockperf-riscv.patch
+
+	cd sockperf && autoreconf -fvi
+
+	cd sockperf && ./configure --host=riscv64-unknown-linux-gnu
+
+	cd sockperf && make
+	cd sockperf && sudo make install
+
+	@echo "sockperf installato su RISC-V"
+
 #avvio un test di sockperf
 getresultssockperf_pingpong:
 	tmux new-session -d -s sockperf_server 'sockperf server -p 9000'

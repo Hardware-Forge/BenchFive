@@ -4,6 +4,12 @@ BIN_DIR := ../bin
 
 setup:
 	@apt install libmysqlclient-dev
+	@apt install libck-dev
+	@apt install -y \
+          automake autoconf libtool pkg-config \
+          lua5.3 liblua5.3-dev \
+          libck-dev
+
 
 all: install_sysbench install_stress_ng
 
@@ -35,9 +41,20 @@ clean_results:
 
 #-------------------------------------------------------sysbench-------------------------------------------------------
 #installazione di sysbench
-install_sysbench:
-	(cd LuaJIT && make && make install)
-	(cd sysbench && ./autogen.sh && ./configure && make -j && make install)
+install_sysbench3:
+	@echo "=== Generazione script di configurazione sysbench ==="
+    cd sysbench && \
+      ./autogen.sh
+
+	@echo "=== Configuro sysbench per usare Lua e Concurrency Kit di sistema ==="
+    cd sysbench && \
+      ./configure \
+        --with-system-luajit \
+        --with-system-ck
+	@echo "=== Compilo e installo sysbench ==="
+    cd sysbench && \
+      make -j$(nproc) && \
+      sudo make install 
 
 getresultssysbench_memory:
 	@echo "Esecuzione di sysbench..."

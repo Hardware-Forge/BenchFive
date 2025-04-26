@@ -1,14 +1,17 @@
 
-
+.PHONY:rt-tests
 
 
 #directory di output
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
+setup:
+	@apt install libnuma-dev
+
 all: rt-tests
 
-run_all: run_hackbench run_hwlatdetect run_deadline_test run_cyclictest rungetresultscyclictest
+run_all: run_hackbench rungetresultscyclictest
 
 rt-tests: $(BIN_DIR) #mi assicuro esista la cartella prima di eseguire il make
 	(cd rt-tests && $(MAKE) all)
