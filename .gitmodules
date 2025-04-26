@@ -61,3 +61,6 @@
 [submodule "benchmarks/IO/fio"]
 	path = benchmarks/IO/fio
 	url = https://github.com/axboe/fio.git
+[submodule "benchmarks/LuaJIT"]
+	path = benchmarks/LuaJIT
+	url = https://github.com/infiWang/LuaJIT.git

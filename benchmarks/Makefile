@@ -1,6 +1,10 @@
 #directory di output
 RESULTS_DIR := ../results
 BIN_DIR := ../bin
+
+setup:
+	@apt install libmysqlclient-dev
+
 all: install_sysbench install_stress_ng
 
 getresults: getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread getresultsstress-ng_mv getresultsstress-ng_ram
@@ -32,6 +36,7 @@ clean_results:
 #-------------------------------------------------------sysbench-------------------------------------------------------
 #installazione di sysbench
 install_sysbench:
+	(cd LuaJIT && make && make install)
 	(cd sysbench && ./autogen.sh && ./configure && make -j && make install)
 
 getresultssysbench_memory:
