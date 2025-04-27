@@ -22,42 +22,18 @@ create_fio_filecmd:
 getresultsfio_cmd:
 	@fio fio/configcmd.fio > $(RESULTS_DIR)/fio_resultscmd.txt
 
-#configuro e installo sockperf, le parentesi sono necessarie per eseguire i comandi nella stessa shell
-.PHONY: install_sockperf
+iperf3:
+	(cd iperf3 && ./configure && make -j$(nproc) && sudo make install)
 
-install_sockperf:
-	@echo "=== Installazione di sockperf per RISC-V ==="
-	cp config.sub config.guess sockperf/config/aux/
+getresultsiperf3:
+	screen -dmS iperf_server iperf3 -s &&
+	sleep 1 &&                                                                                            
+	screen -dmS iperf_client bash -c "iperf3 -c 127.0.0.1 -t 10 > $(RESULTS_DIR)/iperf3_results.txt"                      
 
-	patch -p1 < sockperf-riscv.patch
 
-	cd sockperf && autoreconf -fvi
-
-	cd sockperf && ./configure --host=riscv64-unknown-linux-gnu
-
-	cd sockperf && make
-	cd sockperf && sudo make install
-
-	@echo "sockperf installato su RISC-V"
-
-#avvio un test di sockperf
-getresultssockperf_pingpong:
-	tmux new-session -d -s sockperf_server 'sockperf server -p 9000'
-#attendo che il server sia pronto
-	sleep 2
-	sockperf ping-pong -i 127.0.0.1 -p 9000 -t 10 > $(RESULTS_DIR)/sockperf_pingpong_results.txt
-	tmux kill-session -t sockperf_server
-
-getresultssockperf_throughput:
-	tmux new-session -d -s sockperf_server 'sockperf server -p 9000'
-#attendo che il server sia pronto
-	sleep 2
-	sockperf throughput -i 127.0.0.1 -p 9000 -m 1024 -t 20  --full-rtt > $(RESULTS_DIR)/sockperf_throughput_results.txt
-	tmux kill-session -t sockperf_server
 
 clean:
 	$(MAKE) -C benchmarks/IO/fio clean
-	$(MAKE) -C benchmarks/IO/sockperf clean
 	rm -f $(RESULTS_DIR)/fio_resultscmd.txt
 clean_results:
 	rm -r $(RESULTS_DIR)/fio_resultscmd.txt

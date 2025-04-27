@@ -56,5 +56,3 @@ clean_results:
 	@rm -f $(RESULTS_DIR)/stream_results.txt
 	@rm -f $(RESULTS_DIR)/tinymembench_results.txt
 	@rm -f $(RESULTS_DIR)/ramlat_results.txt
-	@rm -f $(RESULTS_DIR)/likwid_resultscpy.txt
-	@rm -f $(RESULTS_DIR)/likwid_resultsrd.txt

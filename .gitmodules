@@ -13,9 +13,6 @@
  [submodule "benchmarks/memory/STREAM"]	
  	path = benchmarks/memory/STREAM
  	url = https://github.com/jeffhammond/STREAM.git
- [submodule "benchmarks/IO/sockperf"]
-	path = benchmarks/IO/sockperf
-	url = https://github.com/Mellanox/sockperf.git
 # [submodule "benchmarks/CPU/dhrystone"]
 # 	path = benchmarks/CPU/dhrystone
 # 	url = https://github.com/sifive/benchmark-dhrystone.git
@@ -62,3 +59,6 @@
 	path = benchmarks/IO/fio
 	url = https://github.com/axboe/fio.git
 
+[submodule "benchmarks/IO/iperf3"]
+	path = benchmarks/IO/iperf3
+	url = https://github.com/esnet/iperf.git
