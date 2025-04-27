@@ -41,15 +41,24 @@ clean_results:
 	rm -f $(RESULTS_DIR)/sysbench_fileio.txt
 	rm -f $(RESULTS_DIR)/stress-ng_cputemp.txt
 
+#-------------------------------------------------------stress-ng-------------------------------------------------------
+install_stress_ng:
+	(cd stress-ng && CC=gcc gmake clean && CC=gcc gmake)
+getresultsstress-ng_mv:
+	@stress-ng --vm 2 --vm-bytes 2G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_mv.txt
+getresultsstress-ng_ram:
+	@stress-ng --vm 4 --vm-bytes 1G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_ram.txt
+getresultsstress-ng_cputemp:
+	@stress-ng --cpu 0 --tz -t 30s > $(RESULTS_DIR)/stress-ng_cputemp.txt
 #-------------------------------------------------------sysbench-------------------------------------------------------
 #installazione di sysbench
 install_sysbench3:
 	@echo "=== Generazione script di configurazione sysbench ==="
-    cd sysbench && ./autogen.sh
+	(cd sysbench && ./autogen.sh)
 	@echo "=== Configuro sysbench per usare Lua e Concurrency Kit di sistema ==="
-    cd sysbench && ./configure --with-system-luajit --with-system-ck
+    (cd sysbench && ./configure --with-system-luajit --with-system-ck)
 	@echo "=== Compilo e installo sysbench ==="
-    cd sysbench && make -j$(nproc) && sudo make install
+    (cd sysbench && make -j$(nproc) && sudo make install)
 
 getresultssysbench_memory:
 	@echo "Esecuzione di sysbench..."
@@ -71,15 +80,3 @@ getresultssysbench_mutex:
 getresultssysbench_thread:
 	@sysbench threads --threads=2 --thread-yields=1000 --thread-locks=2 --thread-locks=1000 run > $(RESULTS_DIR)/sysbench_thread.txt
 
-
-
-#prova
-#-------------------------------------------------------stress-ng-------------------------------------------------------
-install_stress_ng:
-	(cd stress-ng && CC=gcc gmake clean && CC=gcc gmake)
-getresultsstress-ng_mv:
-	@stress-ng --vm 2 --vm-bytes 2G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_mv.txt
-getresultsstress-ng_ram:
-	@stress-ng --vm 4 --vm-bytes 1G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_ram.txt
-getresultsstress-ng_cputemp:
-	@stress-ng --cpu 0 --tz -t 30s > $(RESULTS_DIR)/stress-ng_cputemp.txt
