@@ -62,3 +62,6 @@
 [submodule "benchmarks/IO/iperf3"]
 	path = benchmarks/IO/iperf3
 	url = https://github.com/esnet/iperf.git
+[submodule "benchmarks/stress-ng"]
+	path = benchmarks/stress-ng
+	url = https://github.com/ColinIanKing/stress-ng.git

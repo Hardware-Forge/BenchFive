@@ -7,9 +7,9 @@ setupio:
 	@apt install libaio1t64 libaio-dev 
 
 
-all: fio create_fio_filecmd
+all: setupio fio create_fio_filecmd iperf3
 
-getresults: getresultsfio_cmd
+getresults: getresultsfio_cmd getresultsiperf3
 
 fio:
 	(cd fio && ./configure && make all && make install)
@@ -34,6 +34,9 @@ getresultsiperf3:
 
 clean:
 	$(MAKE) -C benchmarks/IO/fio clean
+	$(MAKE) -C benchmarks/IO/iperf3 clean
 	rm -f $(RESULTS_DIR)/fio_resultscmd.txt
+	rm -f $(RESULTS_DIR)/iperf3_results.txt
 clean_results:
 	rm -r $(RESULTS_DIR)/fio_resultscmd.txt
+	rm -r $(RESULTS_DIR)/iperf3_results.txt

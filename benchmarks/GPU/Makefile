@@ -3,10 +3,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-getresults: getresultsglmark2 getresultsvkmarkn 
+getresults: getresultsvkmarkn getresultsFFmpeg_codificah265 && getresultsFFmpeg_decodifica
 #ATTENZIONE: PER ESEGIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
 
-all: setupgpu installvkmark install_FFmpeg getresultsFFmpeg_decodifica
+all: setupgpu installvkmark install_FFmpeg 
 
 
 #per glmark2 ho anche la repo https://github.com/glmark2/glmark2.git
@@ -46,7 +46,9 @@ install_FFmpeg:
 
 getresultsFFmpeg_decodifica:
 	@echo "Esecuzione di FFmpeg"
-	ffmpeg -i input.mp4 -f null - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
+	ffmpeg -i output_h265.mp4 -f null - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
+	rm -f output_h265.mp4
+
 
 getresultsFFmpeg_codificah264:
 	@echo "Esecuzione di FFmpeg"
@@ -59,19 +61,8 @@ getresultsFFmpeg_codificah265:
 getresultsvkmark:
 	vkmark > $(RESULTS_DIR)/vkmark.txt
 
-
-install_geekbench:
-	@echo "Scaricamento e installazione di Geekbench 6..."
-	curl -O https://cdn.geekbench.com/Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
-	tar -xvzf Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
-	rm Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
-	@echo "Geekbench 6 installato nella directory corrente."
-
-getresults_geekbench:
-	@echo "Esecuzione di Geekbench 6..."
-	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(RESULTS_DIR)/geekbench.txt 2>&1
-	@echo "Risultati di Geekbench 6 salvati in $(RESULTS_DIR)/geekbench.txt"
-
 download_4k_sample_fs:
-	@echo "download sample FileSamples 4K 28s, 126 MB come input.mp4..."
-	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_2560x1440.mp4"
+	@echo "download sample FileSamples 720p 28s, 16 MB come input.mp4..."
+	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"
+
+# video in 1440 https://filesamples.com/samples/video/mp4/sample_2560x1440.mp4

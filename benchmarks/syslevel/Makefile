@@ -9,7 +9,7 @@ BIN_DIR := ../../bin
 setup:
 	@apt install libnuma-dev
 
-all: rt-tests
+all: setup rt-tests
 
 run_all: run_hackbench rungetresultscyclictest
 

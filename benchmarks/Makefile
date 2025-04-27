@@ -11,9 +11,9 @@ setup:
           libck-dev
 
 
-all: install_sysbench install_stress_ng
+all: setup && install_sysbench install_stress_ng
 
-getresults: getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread getresultsstress-ng_mv getresultsstress-ng_ram
+getresults: getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread getresultsstress-ng_mv getresultsstress-ng_ram getresultsstress-ng_cputemp
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/sysbench clean
@@ -38,6 +38,7 @@ clean_results:
 	rm -f $(RESULTS_DIR)/sysbench_thread.txt
 	rm -f $(RESULTS_DIR)/sysbench.txt
 	rm -f $(RESULTS_DIR)/sysbench_fileio.txt
+	rm -f $(RESULTS_DIR)/stress-ng_cputemp.txt
 
 #-------------------------------------------------------sysbench-------------------------------------------------------
 #installazione di sysbench
@@ -67,7 +68,7 @@ getresultssysbench_fileio:
 
 
 
-#-------------------------------------------------------cpudacontrollare-------------------------------------------------------
+#-------------------------------------------------------cpu-------------------------------------------------------
 getresultssysbench_cpu:
 	@echo "Esecuzione di sysbench..."
 	@sysbench cpu --cpu-max-prime=20000 run > $(RESULTS_DIR)/sysbench_cpu.txt
@@ -83,7 +84,8 @@ getresultssysbench_thread:
 install_stress_ng:
 	(cd stress-ng && CC=gcc gmake clean && CC=gcc gmake)
 getresultsstress-ng_mv:
-	@stress-ng --vm 2 --vm-bytes 2G --timeout 60s --metrics-brief > $(RESULTS_DIR)/stress-ng_mv.txt
+	@stress-ng --vm 2 --vm-bytes 2G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_mv.txt
 getresultsstress-ng_ram:
-	@stress-ng --vm 4 --vm-bytes 1G --timeout 60s --metrics-brief > $(RESULTS_DIR)/stress-ng_ram.txt
-
+	@stress-ng --vm 4 --vm-bytes 1G --timeout 20s --metrics-brief > $(RESULTS_DIR)/stress-ng_ram.txt
+getresultsstress-ng_cputemp:
+	@stress-ng --cpu 0 --tz -t 30s > $(RESULTS_DIR)/stress-ng_cputemp.txt

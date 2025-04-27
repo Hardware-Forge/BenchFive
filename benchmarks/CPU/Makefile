@@ -78,3 +78,17 @@ getresults7zip:
 	@mkdir -p $(RESULTS_DIR)
 	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
 	@echo "Risultati di 7zip salvati in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
+
+#---------------------------------------------------geekbench---------------------------------------------
+
+install_geekbench:
+	@echo "Scaricamento e installazione di Geekbench 6..."
+	curl -O https://cdn.geekbench.com/Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
+	tar -xvzf Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
+	rm Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
+	@echo "Geekbench 6 installato nella directory corrente."
+
+getresults_geekbench:
+	@echo "Esecuzione di Geekbench 6..."
+	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(RESULTS_DIR)/geekbench.txt 2>&1
+	@echo "Risultati di Geekbench 6 salvati in $(RESULTS_DIR)/geekbench.txt"
