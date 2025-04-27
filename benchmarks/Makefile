@@ -1,3 +1,4 @@
+.PHONY: all clean setup install_sysbench install_stress_ng getresults getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread getresultsstress-ng_mv getresultsstress-ng_ram getresultsstress-ng_cputemp clean_results
 #directory di output
 RESULTS_DIR := ../results
 BIN_DIR := ../bin
@@ -44,18 +45,11 @@ clean_results:
 #installazione di sysbench
 install_sysbench3:
 	@echo "=== Generazione script di configurazione sysbench ==="
-    cd sysbench && \
-      ./autogen.sh
-
+    cd sysbench && ./autogen.sh
 	@echo "=== Configuro sysbench per usare Lua e Concurrency Kit di sistema ==="
-    cd sysbench && \
-      ./configure \
-        --with-system-luajit \
-        --with-system-ck
+    cd sysbench && ./configure --with-system-luajit --with-system-ck
 	@echo "=== Compilo e installo sysbench ==="
-    cd sysbench && \
-      make -j$(nproc) && \
-      sudo make install 
+    cd sysbench && make -j$(nproc) && sudo make install
 
 getresultssysbench_memory:
 	@echo "Esecuzione di sysbench..."

@@ -1,4 +1,4 @@
-.PHONY: all clean getresults fio sockperf getresultsfio getresultssockperf_pingpong getresultssockperf_throughput getresultsfio_cmd clean_results
+.PHONY: all clean getresults fio sockperf getresultsfio getresultssockperf_pingpong getresultssockperf_throughput getresultsfio_cmd clean_results iperf3 getresultsiperf3 setupio
 #directory di output
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
@@ -26,10 +26,8 @@ iperf3:
 	(cd iperf3 && ./configure && make -j$(nproc) && sudo make install)
 
 getresultsiperf3:
-	screen -dmS iperf_server iperf3 -s &&
-	sleep 1 &&                                                                                            
-	screen -dmS iperf_client bash -c "iperf3 -c 127.0.0.1 -t 10 > $(RESULTS_DIR)/iperf3_results.txt"                      
-
+	screen -dmS iperf_server iperf3 -s && sleep 1 && screen -dmS iperf_client bash -c "iperf3 -c 127.0.0.1 -t 10 > $(RESULTS_DIR)/iperf3_results.txt"
+	@sleep 10
 
 
 clean:
