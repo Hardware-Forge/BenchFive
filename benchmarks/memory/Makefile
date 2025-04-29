@@ -10,6 +10,7 @@ getresults: getresultsstream getresults_tinymembench getresults_ramspeed
 
 stream:
 	@(cd STREAM && gcc -O -DSTREAM_ARRAY_SIZE=$(DIMARR) stream.c -o streameseguibile)
+	@cp STREAM/streameseguibile $(BIN_DIR)/streameseguibile
 
 getresultsstream:
 	@STREAM/streameseguibile > $(RESULTS_DIR)/stream_results.txt
