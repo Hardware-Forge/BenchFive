@@ -1,6 +1,6 @@
 #---------------------------------------------------CPU Makefile------------------------------------------------
 
-.PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro 7zip getresults7zip
+.PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro 7zip getresults7zip install_geekbench getresults_geekbench stockfish getresultsstockfish
 #getresultscoremark-pro_singlecore getresultscoremark-pro_multicore 7zip getresults7zip
 
 #output directory
@@ -20,6 +20,11 @@ clean:
 	$(MAKE) -C whetstone clean  || true
 	$(MAKE) -C coremark-pro clean || true
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon clean || true
+	$(MAKE) -C stockfish/src clean-all || true
+	@echo " → Rimuovo binari e oggetti compilati"
+	@$(MAKE) -C stockfish/src objclean       || true
+	@echo " → Rimuovo file di profiling e benchmark"
+	@$(MAKE) -C stockfish/src profileclean   || true
 	find 7zip/CPP/7zip -type f \( -name '*.o' -o -name '*.obj' \) -delete || true
 	find 7zip/CPP/7zip/Bundles -type f \( -executable -o -name '*.exe' -o -name '*.dll' \) -delete || true
 
@@ -92,3 +97,31 @@ getresults_geekbench:
 	@echo "Esecuzione di Geekbench 6..."
 	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(RESULTS_DIR)/geekbench.txt 2>&1
 	@echo "Risultati di Geekbench 6 salvati in $(RESULTS_DIR)/geekbench.txt"
+
+
+#---------------------------------------------------SIMD performance---------------------------------------------
+
+# stockfish:
+# 	$(MAKE) -C stockfish/src -j $(shell nproc) $(STOCKFISH_TARGET) ARCH=$(STOCKFISH_ARCH)
+# 	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
+
+# getresultsstockfish: | $(RESULTS_DIR)
+# 	@$(STOCKFISH_DIR)/stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) default depth > $(RESULTS_DIR)/stockfish_results.txt 2>&1
+
+
+ STOCKFISH_DIR := stockfish/src
+ BENCH_THREADS := $(shell nproc --all) #it stresses all the cores
+ BENCH_TIME := 5000  # [ms]
+ BENCH_DEPTH := 24   # max depth
+
+STOCKFISH_ARCH ?= native  # Modifica questo valore se vuoi un target specifico (es. x86-64-avx2)
+STOCKFISH_TARGET = profile-build  # Usa PGO (Profile-Guided Optimization)
+
+stockfish:
+	$(MAKE) -C stockfish/src -j $(shell nproc) $(STOCKFISH_TARGET) ARCH=$(STOCKFISH_ARCH)
+	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
+
+getresultsstockfish:
+	./stockfish/src/stockfish bench > $(RESULTS_DIR)/stockfish_results.txt 2>&1
+	@echo "Risultati di Stockfish salvati in $(RESULTS_DIR)/stockfish_results.txt"
+

@@ -65,3 +65,6 @@
 [submodule "benchmarks/stress-ng"]
 	path = benchmarks/stress-ng
 	url = https://github.com/ColinIanKing/stress-ng.git
+[submodule "benchmarks/CPU/stockfish"]
+	path = benchmarks/CPU/stockfish
+	url = https://github.com/official-stockfish/Stockfish.git
