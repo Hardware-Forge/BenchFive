@@ -114,11 +114,11 @@ getresults_geekbench:
  BENCH_TIME := 5000  # [ms]
  BENCH_DEPTH := 24   # max depth
 
-STOCKFISH_ARCH ?= native  # Modifica questo valore se vuoi un target specifico (es. x86-64-avx2)
+STOCKFISH_ARCH := riscv64  # Modifica questo valore se vuoi un target specifico (es. x86-64-avx2)
 STOCKFISH_TARGET = profile-build  # Usa PGO (Profile-Guided Optimization)
 
 stockfish:
-	$(MAKE) -C stockfish/src -j $(shell nproc) $(STOCKFISH_TARGET) ARCH=$(STOCKFISH_ARCH)
+	$(MAKE) -C stockfish/src -j1 build ARCH=$(STOCKFISH_ARCH)
 	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
 
 getresultsstockfish:
