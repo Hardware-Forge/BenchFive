@@ -8,10 +8,10 @@ RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
 
-all: coremark coremark-pro 7zip
+all: coremark coremark-pro 7zip stockfish
 #linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal
 
-getresults: getresultscoremark getresultscoremark-pro getresults7zip
+getresults: getresultscoremark getresultscoremark-pro getresults7zip getresultsstockfish
 #getresultscoremark-pro_singlecore getresultscoremark-pro_multicore getresults7zip
 #getresultssynchrobench getresultsdhrystone  dhrystone tolti
 

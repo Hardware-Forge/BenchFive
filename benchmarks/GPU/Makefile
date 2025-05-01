@@ -39,7 +39,7 @@ installvkmark:
 
 #--enable-libvpx 
 install_FFmpeg:
-	(cd FFmpeg && ./configure --target-os=linux --enable-gpl --enable-libx264 --enable-libx265 && make -j$(nproc))
+	(cd FFmpeg && ./configure --target-os=linux --enable-gpl --enable-libx264 --enable-libx265 && make)
 	@echo "FFmpeg installato"
 
 getresultsFFmpeg_decodifica:
@@ -57,7 +57,7 @@ getresultsFFmpeg_codificah265:
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 output_h265.mp4 > $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresultsvkmark:
-	./vkmark/src/vkmark > $(RESULTS_DIR)/vkmark.txt
+	./vkmark/build/src/vkmark > $(RESULTS_DIR)/vkmark.txt
 
 download_4k_sample_fs:
 	@echo "download sample FileSamples 720p 28s, 16 MB come input.mp4..."
