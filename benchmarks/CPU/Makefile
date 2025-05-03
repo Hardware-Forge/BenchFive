@@ -9,11 +9,8 @@ BIN_DIR := ../../bin
 
 
 all: coremark coremark-pro 7zip stockfish
-#linpack setup_testfloat testfloat whetstone 7zip Zstandard cpuminer stockfish canneal
 
 getresults: getresultscoremark getresultscoremark-pro getresults7zip getresultsstockfish
-#getresultscoremark-pro_singlecore getresultscoremark-pro_multicore getresults7zip
-#getresultssynchrobench getresultsdhrystone  dhrystone tolti
 
 clean:
 	$(MAKE) -C coremark clean || true
@@ -100,13 +97,6 @@ getresults_geekbench:
 
 
 #---------------------------------------------------SIMD performance---------------------------------------------
-
-# stockfish:
-# 	$(MAKE) -C stockfish/src -j $(shell nproc) $(STOCKFISH_TARGET) ARCH=$(STOCKFISH_ARCH)
-# 	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
-
-# getresultsstockfish: | $(RESULTS_DIR)
-# 	@$(STOCKFISH_DIR)/stockfish bench $(BENCH_HASH) $(BENCH_THREADS) $(BENCH_DEPTH) default depth > $(RESULTS_DIR)/stockfish_results.txt 2>&1
 
 
  STOCKFISH_DIR := stockfish/src

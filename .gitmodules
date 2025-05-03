@@ -16,9 +16,6 @@
 # [submodule "benchmarks/CPU/dhrystone"]
 # 	path = benchmarks/CPU/dhrystone
 # 	url = https://github.com/sifive/benchmark-dhrystone.git
- [submodule "benchmarks/sysbench"]
-	path = benchmarks/sysbench
-	url = https://github.com/akopytov/sysbench.git
  [submodule "benchmarks/GPU/vkmark"]
 	path = benchmarks/GPU/vkmark
 	url = https://github.com/vkmark/vkmark.git

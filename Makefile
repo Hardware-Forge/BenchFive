@@ -19,11 +19,20 @@ setup:
 # Compilazione di tutti i benchmark
 all:
 	$(MAKE) -C $(cpu_dir) all
+	$(MAKE) -C $(memory_dir) all
+	$(MAKE) -C $(io_dir) all
+	$(MAKE) -C $(syslevel_dir) all
+	$(MAKE) -C $(gpu_dir) all
 	@echo "Build completata"
 
 # Esecuzione di tutti i benchmark e salvataggio dei risulati in results
 run:
 	$(MAKE) -C $(cpu_dir) getresults
+	$(MAKE) -C $(memory_dir) getresults
+	$(MAKE) -C $(io_dir) getresults
+	$(MAKE) -C $(syslevel_dir) getresults
+	$(MAKE) -C $(gpu_dir) getresults
+
 	@echo "Esecuzione benchmarks completata"
 
 # Pulizia per tutti i benchmark
