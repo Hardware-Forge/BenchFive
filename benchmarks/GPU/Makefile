@@ -57,10 +57,8 @@ getresultsFFmpeg_codificah265:
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 output_h265.mp4 > $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresultsvkmark:
-	./vkmark/build/src/vkmark > $(RESULTS_DIR)/vkmark.txt
+	./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
 download_4k_sample_fs:
 	@echo "download sample FileSamples 720p 28s, 16 MB come input.mp4..."
 	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"
-
-# video in 1440 https://filesamples.com/samples/video/mp4/sample_2560x1440.mp4
