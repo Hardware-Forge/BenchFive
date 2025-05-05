@@ -1,7 +1,7 @@
 #---------------------------------------------------CPU Makefile------------------------------------------------
 
 .PHONY: all clean clean_results run getresults coremark getresultscoremark coremark_pro getresultscoremark-pro 7zip getresults7zip install_geekbench getresults_geekbench stockfish getresultsstockfish
-#getresultscoremark-pro_singlecore getresultscoremark-pro_multicore 7zip getresults7zip
+
 
 #output directory
 RESULTS_DIR := ../../results
@@ -18,9 +18,9 @@ clean:
 	$(MAKE) -C coremark-pro clean || true
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon clean || true
 	$(MAKE) -C stockfish/src clean-all || true
-	@echo " → Rimuovo binari e oggetti compilati"
+	@echo " → Removing binaries and compiled files"
 	@$(MAKE) -C stockfish/src objclean       || true
-	@echo " → Rimuovo file di profiling e benchmark"
+	@echo " → Removing profile data"
 	@$(MAKE) -C stockfish/src profileclean   || true
 	find 7zip/CPP/7zip -type f \( -name '*.o' -o -name '*.obj' \) -delete || true
 	find 7zip/CPP/7zip/Bundles -type f \( -executable -o -name '*.exe' -o -name '*.dll' \) -delete || true
@@ -45,12 +45,12 @@ coremark:
 
 #saving the score in results
 getresultscoremark: | $(RESULTS_DIR)
-	@echo "=== Risultato da run1.log ===" > $(RESULTS_DIR)/coremark_results.txt
+	@echo "=== run1.log results ===" > $(RESULTS_DIR)/coremark_results.txt
 	@cat coremark/run1.log >> $(RESULTS_DIR)/coremark_results.txt
 	@echo "" >> $(RESULTS_DIR)/coremark_results.txt
-	@echo "=== Risultato da run2.log ===" >> $(RESULTS_DIR)/coremark_results.txt
+	@echo "=== run2.log results ===" >> $(RESULTS_DIR)/coremark_results.txt
 	@cat coremark/run2.log >> $(RESULTS_DIR)/coremark_results.txt
-	@echo "Risultati di CoreMark copiati in $(RESULTS_DIR)/coremark_results.txt"
+	@echo "CoreMark results saved in $(RESULTS_DIR)/coremark_results.txt"
 
 #compiling
 coremark-pro: FORCE
@@ -58,11 +58,11 @@ coremark-pro: FORCE
 
 
 FORCE:
-	@echo "Compilazione Coremark-PRO"
+	@echo "Compiling Coremark-PRO..."
 
 
 getresultscoremark-pro:
-	@echo "Running all Coremark-PRO workloads"
+	@echo "Running all Coremark-PRO workloads..."
 	$(MAKE) -C coremark-pro TARGET=linux64 XCMD='-c4' certify-all > $(RESULTS_DIR)/coremark-pro.txt
 
 
@@ -79,7 +79,7 @@ getresultscoremark-pro:
 getresults7zip:
 	@mkdir -p $(RESULTS_DIR)
 	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
-	@echo "Risultati di 7zip salvati in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
+	@echo "7zip results saved in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
 
 #---------------------------------------------------geekbench---------------------------------------------
 
@@ -109,9 +109,9 @@ STOCKFISH_TARGET = profile-build  # Usa PGO (Profile-Guided Optimization)
 
 stockfish:
 	$(MAKE) -C stockfish/src -j1 build ARCH=$(STOCKFISH_ARCH)
-	@echo "Stockfish compilato con ARCH=$(STOCKFISH_ARCH)"
+	@echo "Stockfish compiled with ARCH=$(STOCKFISH_ARCH)"
 
 getresultsstockfish:
 	./stockfish/src/stockfish bench > $(RESULTS_DIR)/stockfish_results.txt 2>&1
-	@echo "Risultati di Stockfish salvati in $(RESULTS_DIR)/stockfish_results.txt"
+	@echo "Stockfish results saved in $(RESULTS_DIR)/stockfish_results.txt"
 
