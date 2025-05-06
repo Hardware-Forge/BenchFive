@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BENCH_DIR="$SCRIPT_DIR/benchmarks"
-RESULTS_DIR="$BENCH_DIR/results"
+RESULTS_DIR="$/results"
 
 HEADER_PRINTED=0 
 
@@ -33,16 +33,16 @@ get_cpu_mhz() {
 
 setup(){
   git submodule update --init --recursive; 
-  (cd "$BENCH_DIR" && make setup); 
+  (make setup); 
 }
 clean(){ 
-  (cd "$BENCH_DIR" && make clean); 
+  (make clean); 
 }
 build(){ 
-  (cd "$BENCH_DIR" && make all); 
+  (make all); 
 }
 run(){ 
-  (cd "$BENCH_DIR" && make run); 
+  (make run); 
 }
 
 result() {
