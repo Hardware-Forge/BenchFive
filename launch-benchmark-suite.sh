@@ -6,7 +6,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BENCH_DIR="$SCRIPT_DIR/benchmarks"
-RESULTS_DIR="$/results"
+RESULTS_DIR="$SCRIPT_DIR/results"
+
+# Create results directory if it doesn't exist
+mkdir -p "$RESULTS_DIR"
 
 HEADER_PRINTED=0 
 
@@ -52,7 +55,7 @@ result() {
         echo "CPU MHz: $CPU_MHZ"
         echo
         printf "%-20s | %12s | %15s\n" "Benchmark" "Iterations/s" "Iter/s per MHz"
-        printf -- "--------------------|--------------|---------------\n"
+        printf -- "---------------------|--------------|---------------\n"
         HEADER_PRINTED=1
     fi
 
@@ -65,7 +68,12 @@ parse_coremark() {
     local f="$RESULTS_DIR/coremark_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
-    awk '/performance run/ && /Iterations\/Sec/ {print $NF}' "$f" |
+    # Extract the performance run result (first run)
+    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
+        if ($1 == "Iterations/Sec") {
+            print $3
+        }
+    }' "$f" |
     while read -r ips; do
         result "coremark" "$ips"
     done
@@ -81,9 +89,10 @@ main() {
     build
     run
 
-    parse_coremark
+    parse_coremark 
     # TODO: parse_* per gli altri benchmark…
 
+    echo "\n"
     echo "------------------All benchmarks have been completed------------------"
 }
 
