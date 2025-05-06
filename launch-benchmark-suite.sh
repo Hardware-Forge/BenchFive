@@ -14,23 +14,22 @@ HEADER_PRINTED=0
 get_cpu_mhz() {
     local freq
 
-    if freq=$(lscpu 2>/dev/null | awk -F':' '/CPU MHz:/ {gsub(/ /,""); print $2; exit}'); then
-        [[ -n "$freq" ]] && printf "%.0f\n" "$freq" && return
+      
+    if command -v lscpu &>/dev/null; then
+        freq=$(lscpu | awk -F':' '
+            /^CPU max MHz/ {gsub(/ /,""); print $2; exit}
+            /^CPU MHz/     {gsub(/ /,""); print $2; exit}')
+        [[ -n $freq ]] && printf "%.0f\n" "$freq" && return 0
     fi
 
-    if freq=$(awk '/^cpu MHz/ {sum += $4; n++} END {if (n) print sum/n}' /proc/cpuinfo 2>/dev/null); then
-        [[ -n "$freq" ]] && printf "%.0f\n" "$freq" && return
+   
+    if [[ -r /proc/cpuinfo ]]; then
+        freq=$(awk '/^cpu MHz/ {sum+=$4; n++} END{if(n) print sum/n}' /proc/cpuinfo)
+        [[ -n $freq ]] && printf "%.0f\n" "$freq" && return 0
     fi
 
-    if [[ -r /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq ]]; then
-        freq=$(< /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
-        [[ -n "$freq" ]] && printf "%.0f\n" "$((freq/1000))" && return
-    fi
-
-    return 1
+    return 1  
 }
-
-CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
 
 setup(){
   git submodule update --init --recursive; 
@@ -72,10 +71,11 @@ parse_coremark() {
     done
 }
 
-# ------------------------------------------------------------------------------
-#  Main
-# ------------------------------------------------------------------------------
 main() {
+
+    CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
+    (( CPU_MHZ > 0 )) || { echo "Detected CPU MHz is zero, aborting" >&2; exit 1; }
+
     clean
     setup
     build
