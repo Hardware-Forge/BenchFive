@@ -13,6 +13,35 @@ mkdir -p "$RESULTS_DIR"
 
 HEADER_PRINTED=0 
 
+get_cpu_name() {
+    if command -v lscpu &>/dev/null; then
+        lscpu | awk -F':[ \t]+' '/^Model name/ {print $2}'
+    elif [[ -r /proc/cpuinfo ]]; then
+        awk -F':[ \t]+' '/^model name/ {print $2; exit}' /proc/cpuinfo
+    else
+        echo "Unknown CPU"
+    fi
+}
+
+get_cpu_cores() {
+    if command -v lscpu &>/dev/null; then
+        lscpu | awk -F':[ \t]+' '/^CPU\(s\)/ {print $2}'
+    elif [[ -r /proc/cpuinfo ]]; then
+        grep -c "^processor" /proc/cpuinfo
+    else
+        echo "Unknown"
+    fi
+}
+
+get_ram_gb() {
+    if command -v free &>/dev/null; then
+        free -g | awk '/^Mem:/ {print $2}'
+    elif [[ -r /proc/meminfo ]]; then
+        awk '/^MemTotal:/ {printf "%.0f\n", $2/1024/1024}' /proc/meminfo
+    else
+        echo "Unknown"
+    fi
+}
 
 get_cpu_mhz() {
     local freq
@@ -79,20 +108,52 @@ parse_coremark() {
     done
 }
 
-main() {
+parse_coremark-pro() {
+    local f="$RESULTS_DIR/coremark-pro_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
+    # Extract the total score
+    awk '/^Score:/ {print $2}' "$f" |
+    while read -r score; do
+        result "coremark-pro" "$score"
+    done
+}
+
+main() {
+    # Title box
+    echo "╔══════════════════════════════════════════════╗"
+    echo "║         RISC-V Benchmark Suite               ║"
+    echo "╚══════════════════════════════════════════════╝"
+    echo
+    
     CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
     (( CPU_MHZ > 0 )) || { echo "Detected CPU MHz is zero, aborting" >&2; exit 1; }
+    
+    CPU_NAME=$(get_cpu_name)
+    CPU_CORES=$(get_cpu_cores)
+    RAM_GB=$(get_ram_gb)
+    
+    # System information box
+    echo "┌────────────────────────────────────────────┐"
+    echo "│           System Information               │"
+    echo "├────────────────────────────────────────────┤"
+    printf "│ CPU: %-37s │\n" "$CPU_NAME"
+    printf "│ CPU Frequency: %-27s MHz │\n" "$CPU_MHZ"
+    printf "│ CPU Cores: %-31s │\n" "$CPU_CORES"
+    printf "│ RAM: %-35s GB │\n" "$RAM_GB"
+    echo "└────────────────────────────────────────────┘"
+    echo
 
-    clean
-    setup
-    build
-    run
+ #   clean
+ #   setup
+ #   build
+ #   run
 
     parse_coremark 
+    parse_coremark-pro
     # TODO: parse_* per gli altri benchmark…
 
-    echo "\n"
+    echo
     echo "------------------All benchmarks have been completed------------------"
 }
 
