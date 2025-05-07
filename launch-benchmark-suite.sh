@@ -11,7 +11,9 @@ RESULTS_DIR="$SCRIPT_DIR/results"
 # Create results directory if it doesn't exist
 mkdir -p "$RESULTS_DIR"
 
-HEADER_PRINTED=0 
+HEADER_PRINTED=0
+
+#--------------------------Functions for system information:--------------------
 
 get_cpu_name() {
     if command -v lscpu &>/dev/null; then
@@ -36,7 +38,6 @@ get_cpu_cores() {
         cores="Unknown"
     fi
 
-    # Rimuove eventuali percentuali o altri caratteri non numerici
     cores=${cores//[^0-9]/}
 
     echo "${cores:-Unknown}"
@@ -77,12 +78,16 @@ COL_W=28
 BOX_W=44
 
 print_table_header() {
-    printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+    # intestazione
+    printf "%-20s │ %-${COL_W}s │ %-${COL_W}s │ %-${COL_W}s │ %-${COL_W}s\n" \
            "Benchmark" "Single-core score" "Single-core /MHz" \
            "Multi-core score"  "Multi-core /MHz"
     local total_w=$((20 + 4*COL_W + 4*3))
-    printf '%*s\n' "$total_w" '' | tr ' ' '-'
+
+    printf '─%.0s' $(seq 1 "$total_w")
+    printf '\n'
 }
+
 
 
 # ─── row() ───
@@ -199,13 +204,13 @@ parse_7zip() {
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
     awk '/^Avr:/ {
-        sc = $2        # compress speed KiB/s
-        mc = $7        # decompress speed KiB/s
-        print sc, mc
+        comp = $2        # compress speed KiB/s
+        decomp = $7        # decompress speed KiB/s
+        print comp, decomp
     }' "$f" |
     while read -r sc mc; do
-        result "7zip-compressing"   "$sc" ""
-        result "7zip-decompressing" ""      "$mc"
+        result "7zip-decompressing" ""      "$comp"
+        result "7zip-decompressing" ""      "$decomp"
     done
 }
 
@@ -227,9 +232,9 @@ parse_stockfish() {
 main() {
     clear
     # Title box
-    echo "╔═══════════════════════════════════════════╗"
-    echo "║          RISC-V Benchmark Suite           ║"
-    echo "╚═══════════════════════════════════════════╝"
+    echo "╔════════════════════════════════════════════╗"
+    echo "║          RISC-V Benchmark Suite            ║"
+    echo "╚════════════════════════════════════════════╝"
     echo
     
     CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
@@ -262,7 +267,7 @@ main() {
     # TODO: parse_* per gli altri benchmark…
 
     echo
-    echo "------------------All benchmarks have been completed------------------"
+    echo "--------------------------------------------------------All benchmarks have been completed-------------------------------------------------------"
 }
 
 main "$@"
