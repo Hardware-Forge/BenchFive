@@ -1,5 +1,6 @@
+#---------------------------------------------------GPU Makefile------------------------------------------------
 
-#directory di output
+#output directory
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 

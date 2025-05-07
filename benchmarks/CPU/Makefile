@@ -102,7 +102,7 @@ getresults_stockfish:
 
 #-----------------------------------------------------General---------------------------------------------
 
-GEEK_DIR := ../RESULTS_DIR
+GEEK_DIR := $(RESULTS_DIR)
 
 install_geekbench:
 	@echo "Scaricamento e installazione di Geekbench 6..."
@@ -113,5 +113,5 @@ install_geekbench:
 
 getresults_geekbench:
 	@echo "Esecuzione di Geekbench 6..."
-	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(RESULTS_DIR)/geekbench_results.txt 2>&1
-	@echo "Geekbench 6 results saved in $(RESULTS_DIR)/geekbench_results.txt"
+	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(GEEK_DIR)/geekbench_results.txt 2>&1
+	@echo "Geekbench 6 results saved in $(GEEK_DIR)/geekbench_results.txt"
