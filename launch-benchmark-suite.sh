@@ -78,35 +78,49 @@ run(){
 }
 
 result() {
-    local name="$1" ips="$2"
+    local name="$1" ips_sc="$2" ips_mc="$3"
 
     if [[ $HEADER_PRINTED -eq 0 ]]; then
         echo "CPU MHz: $CPU_MHZ"
         echo
-        printf "%-20s | %12s | %15s\n" "Benchmark" "Iterations/s" "Iter/s per MHz"
-        printf -- "---------------------|--------------|---------------\n"
+        printf "%-20s | %18s | %22s | %18s | %22s\n" \
+               "Benchmark" "Iterations/s" "Iter/s per MHz" "Iterations/s" "Iter/s per MHz"
+        printf "%-20s | %18s | %22s | %18s | %22s\n" \
+               "" "Single-core" "Single-core" "Multi-core" "Multi-core"
+        printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
         HEADER_PRINTED=1
     fi
 
-    local per_mhz
-    per_mhz=$(awk -v i="$ips" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
-    printf "%-20s | %12.3f | %15s\n" "$name" "$ips" "$per_mhz"
+    local per_mhz_sc per_mhz_mc
+    if [[ $ips_sc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        per_mhz_sc=$(awk -v i="$ips_sc" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
+    else
+        per_mhz_sc="---"
+    fi
+    if [[ $ips_mc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        per_mhz_mc=$(awk -v i="$ips_mc" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
+    else
+        per_mhz_mc="---"
+    fi
+
+    printf "%-20s | %18s | %22s | %18s | %22s\n" \
+           "$name" "$ips_sc" "$per_mhz_sc" "$ips_mc" "$per_mhz_mc"
 }
+
 
 parse_coremark() {
     local f="$RESULTS_DIR/coremark_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
-    # Extract the performance run result (first run)
     awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
-        if ($1 == "Iterations/Sec") {
-            print $3
-        }
+        if ($1 == "Iterations/Sec") print $3
     }' "$f" |
-    while read -r ips; do
-        result "coremark" "$ips"
+    while read -r ips_sc; do
+        # coremark is only single-core
+        result "coremark" "$ips_sc" "---"
     done
 }
+
 
 parse_coremark-pro() {
     local f="$RESULTS_DIR/coremark-pro_results.txt"
@@ -150,7 +164,7 @@ main() {
  #   run
 
     parse_coremark 
-    parse_coremark-pro
+#   parse_coremark-pro
     # TODO: parse_* per gli altri benchmark…
 
     echo
