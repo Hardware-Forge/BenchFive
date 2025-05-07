@@ -177,18 +177,50 @@ parse_coremark() {
     done
 }
 
-
-
 parse_coremark-pro() {
     local f="$RESULTS_DIR/coremark-pro_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
-    # Extract the total score
-    awk '/^Score:/ {print $2}' "$f" |
-    while read -r score; do
-        result "coremark-pro" "$score"
+    awk '$1 == "CoreMark-PRO" {
+        mc = $2
+        sc = $3
+        print sc, mc
+    }' "$f" |
+    while read -r ips_sc ips_mc; do
+        result "coremark-pro" "$ips_sc" "$ips_mc"
     done
 }
+
+parse_7zip() {
+    local f="$RESULTS_DIR/7zip_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+
+    awk '/^Avr:/ {
+        sc = $2        # compress speed KiB/s
+        mc = $7        # decompress speed KiB/s
+        print sc, mc
+    }' "$f" |
+    while read -r sc mc; do
+        result "7zip-compressing"   "$sc" "---"
+        result "7zip-decompressing" "---"   "$mc"
+    done
+}
+
+
+parse_stockfish() {
+    local f="$RESULTS_DIR/stockfish_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+
+    awk -F: '/Nodes\/second/ {
+        # rimuove spazi iniziali/finali
+        gsub(/^[ \t]+|[ \t]+$/, "", $2)
+        print $2
+    }' "$f" |
+    while read -r nodes_per_sec; do
+        result "stockfish" "$nodes_per_sec" ""
+    done
+}
+
 
 main() {
     clear
@@ -203,7 +235,7 @@ main() {
     CPU_CORES=$(get_cpu_cores) || { echo "Unable to detect CPU cores" >&2; exit 1; }
     RAM_GB=$(get_ram_gb) || { echo "Unable to detect RAM GB" >&2; exit 1; }
     
-
+    
     # System information box
     echo "┌$(printf '─%.0s' $(seq 1 $BOX_W))┐"
     row_center "System Information"
@@ -214,15 +246,15 @@ main() {
     row "RAM: ${RAM_GB} GB"
     echo "└$(printf '─%.0s' $(seq 1 $BOX_W))┘"
 
-
-
  #   clean
  #   setup
  #   build
  #   run
 
     parse_coremark 
-#   parse_coremark-pro
+    parse_coremark-pro
+    parse_7zip
+    parse_stockfish
     # TODO: parse_* per gli altri benchmark…
 
     echo

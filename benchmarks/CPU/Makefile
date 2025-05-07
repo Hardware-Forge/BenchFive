@@ -75,11 +75,12 @@ getresultscoremark-pro:
 	@echo "7zip build completato"
 
 
-
 getresults7zip:
 	@mkdir -p $(RESULTS_DIR)
-	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
-	@echo "7zip results saved in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
+	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b -mmt=1 \	
+	  > $(RESULTS_DIR)/7zip_bench_sc_$(TIMESTAMP).txt
+	@echo "7zip single-core results saved in $(RESULTS_DIR)/7zip_bench_sc_$(TIMESTAMP).txt"
+
 
 #---------------------------------------------------geekbench---------------------------------------------
 
@@ -98,14 +99,7 @@ getresults_geekbench:
 
 #---------------------------------------------------SIMD performance---------------------------------------------
 
-
- STOCKFISH_DIR := stockfish/src
- BENCH_THREADS := $(shell nproc --all) #it stresses all the cores
- BENCH_TIME := 5000  # [ms]
- BENCH_DEPTH := 24   # max depth
-
-STOCKFISH_ARCH := riscv64  # Modifica questo valore se vuoi un target specifico (es. x86-64-avx2)
-STOCKFISH_TARGET = profile-build  # Usa PGO (Profile-Guided Optimization)
+STOCKFISH_ARCH := riscv64 
 
 stockfish:
 	$(MAKE) -C stockfish/src -j1 build ARCH=$(STOCKFISH_ARCH)
@@ -114,4 +108,3 @@ stockfish:
 getresultsstockfish:
 	./stockfish/src/stockfish bench > $(RESULTS_DIR)/stockfish_results.txt 2>&1
 	@echo "Stockfish results saved in $(RESULTS_DIR)/stockfish_results.txt"
-
