@@ -74,12 +74,10 @@ getresultscoremark-pro:
 	        -f makefile.gcc 
 	@echo "7zip build completato"
 
-
 getresults7zip:
 	@mkdir -p $(RESULTS_DIR)
-	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b -mmt=1 \	
-	  > $(RESULTS_DIR)/7zip_bench_sc_$(TIMESTAMP).txt
-	@echo "7zip single-core results saved in $(RESULTS_DIR)/7zip_bench_sc_$(TIMESTAMP).txt"
+	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
+	@echo "7zip results saved in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
 
 
 #---------------------------------------------------geekbench---------------------------------------------
