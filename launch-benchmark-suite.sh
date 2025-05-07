@@ -71,10 +71,19 @@ get_cpu_mhz() {
 }
 
 
-# functions for graphics:
+#--------------------------Functions for graphics:------------------------------
 
-#width between the columns
+COL_W=28
 BOX_W=44
+
+print_table_header() {
+    printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+           "Benchmark" "Single-core score" "Single-core /MHz" \
+           "Multi-core score"  "Multi-core /MHz"
+    local total_w=$((20 + 4*COL_W + 4*3))
+    printf '%*s\n' "$total_w" '' | tr ' ' '-'
+}
+
 
 # ─── row() ───
 row() {
@@ -109,8 +118,7 @@ center() {
            "$padL" "" "$text" "$padR" ""
 }
 
-
-# Functions to launch the benchmark suite
+#-------------------Functions to launch the benchmark suite-----------------
 
 setup(){
   git submodule update --init --recursive; 
@@ -126,12 +134,11 @@ run(){
   (make run); 
 }
 
-COL_W=28
 
 result() {
     local name="$1" sc="$2" mc="$3"
 
-    # mappa benchmark → unità
+    
     local unit
     case "$name" in
         coremark|coremark-pro)                 unit="Iteration/s" ;;
@@ -140,16 +147,7 @@ result() {
         *)                                     unit=""            ;;
     esac
 
-    # ─── header (una sola volta) ───
-    if (( HEADER_PRINTED == 0 )); then
-        printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
-               "Benchmark" "Single-core Score" "Single-core /MHz" \
-               "Multi-core Score" "Multi-core /MHz"
-        printf -- "---------------------|%s\n" "$(printf '─%.0s' $(seq 1 $((COL_W*4+3))))"
-        HEADER_PRINTED=1
-    fi
 
-    # ─── calcoli per MHz ───
     local per_sc="---" per_mc="---"
     if [[ $sc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
         per_sc=$(awk -v v="$sc" -v mhz="$CPU_MHZ" 'BEGIN{printf "%.2f", v/mhz}')
@@ -164,7 +162,6 @@ result() {
         mc="${mc:----}"
     fi
 
-    # ─── stampa riga dati ───
     printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
            "$name" "$sc" "$per_sc" "$mc" "$per_mc"
 }
@@ -218,12 +215,11 @@ parse_stockfish() {
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
     awk -F: '/Nodes\/second/ {
-        # rimuove spazi iniziali/finali
         gsub(/^[ \t]+|[ \t]+$/, "", $2)
         print $2
     }' "$f" | 
     while read -r nodes_per_sec; do
-        result "stockfish" "$nps" ""
+        result "stockfish" "$nodes_per_sec" ""
     done
 }
 
@@ -231,9 +227,9 @@ parse_stockfish() {
 main() {
     clear
     # Title box
-    echo "╔══════════════════════════════════════════════╗"
-    echo "║         RISC-V Benchmark Suite               ║"
-    echo "╚══════════════════════════════════════════════╝"
+    echo "╔═══════════════════════════════════════════╗"
+    echo "║          RISC-V Benchmark Suite           ║"
+    echo "╚═══════════════════════════════════════════╝"
     echo
     
     CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
@@ -251,12 +247,14 @@ main() {
     row "CPU cores: $CPU_CORES"
     row "RAM: ${RAM_GB} GB"
     echo "└$(printf '─%.0s' $(seq 1 $BOX_W))┘"
+    echo
 
  #   clean
  #   setup
  #   build
  #   run
-
+ 
+    print_table_header
     parse_coremark 
     parse_coremark-pro
     parse_7zip

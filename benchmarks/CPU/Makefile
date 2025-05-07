@@ -63,7 +63,7 @@ FORCE:
 
 getresultscoremark-pro:
 	@echo "Running all Coremark-PRO workloads..."
-	$(MAKE) -C coremark-pro TARGET=linux64 XCMD='-c4' certify-all > $(RESULTS_DIR)/coremark-pro.txt
+	$(MAKE) -C coremark-pro TARGET=linux64 XCMD='-c4' certify-all > $(RESULTS_DIR)/coremark-pro_results.txt
 
 
 #---------------------------------------------------Data compression----------------------------------------------
@@ -76,8 +76,8 @@ getresultscoremark-pro:
 
 getresults7zip:
 	@mkdir -p $(RESULTS_DIR)
-	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt
-	@echo "7zip results saved in $(RESULTS_DIR)/7zip_bench_$(TIMESTAMP).txt"
+	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_results.txt
+	@echo "7zip results saved in $(RESULTS_DIR)/7zip_results.txt"
 
 
 #---------------------------------------------------geekbench---------------------------------------------
