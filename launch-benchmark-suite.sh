@@ -132,16 +132,16 @@ result() {
     if [[ $HEADER_PRINTED -eq 0 ]]; then
     printf "%-20s | %s | %s | %s | %s\n" \
     "$(center 20 "Benchmark")" \
-    "$(center 18 "Iterations/s")" \
-    "$(center 22 "Iterations/s per MHz")" \
-    "$(center 18 "Iterations/s")" \
-    "$(center 22 "Iterations/s per MHz")"
-
-    printf "%-20s | %s | %s | %s | %s\n" "" \
     "$(center 18 "Single-core")" \
     "$(center 22 "Single-core")" \
     "$(center 18 "Multi-core")" \
     "$(center 22 "Multi-core")"
+
+    printf "%-20s | %s | %s | %s | %s\n" "" \
+    "$(center 18 "Score")" \
+    "$(center 22 "Score per Mhz")" \
+    "$(center 18 "Score")" \
+    "$(center 22 "Score per Mhz")"
 
     printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
     HEADER_PRINTED=1
@@ -172,8 +172,8 @@ parse_coremark() {
     awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
-    while read -r ips_sc; do
-        result "coremark" "$ips_sc" ""   
+     while read -r ips; do
+        result "coremark" "${ips} Iteration/s" ""
     done
 }
 
@@ -186,8 +186,10 @@ parse_coremark-pro() {
         sc = $3
         print sc, mc
     }' "$f" |
-    while read -r ips_sc ips_mc; do
-        result "coremark-pro" "$ips_sc" "$ips_mc"
+    while read -r sc mc; do
+        result "coremark-pro" \
+               "${sc} Iteration/s" \
+               "${mc} Iteration/s"
     done
 }
 
@@ -200,11 +202,10 @@ parse_7zip() {
         mc = $7        # decompress speed KiB/s
         print sc, mc
     }' "$f" |
-    while read -r sc mc; do
-        result "7zip-compressing"   "$sc" "---"
-        result "7zip-decompressing" "---"   "$mc"
+     while read -r sc mc; do
+        result "7zip-compressing"   "${sc} MIPS" ""
+        result "7zip-decompressing" "" "${mc} MIPS"
     done
-}
 
 
 parse_stockfish() {

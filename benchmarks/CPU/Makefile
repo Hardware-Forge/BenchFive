@@ -71,7 +71,7 @@ getresultscoremark-pro:
 
 7zip:
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon \
-	        -f makefile.gcc 
+	-f makefile.gcc 
 	@echo "7zip build completato"
 
 getresults7zip:
