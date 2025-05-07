@@ -3,12 +3,6 @@
 # This script is used to automatically compile, run and show the results of the benchmark suite.
 
 set -euo pipefail
-#bug:
-exec > >(filter_100pct)
-exec 2>&1
-filter_100pct() {
-    sed '/^[[:space:]]*100%[[:space:]]*$/d'
-}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BENCH_DIR="$SCRIPT_DIR/benchmarks"
@@ -104,6 +98,12 @@ center() {
     printf "%*s%s%*s" \
            "$padL" "" "$text" "$padR" ""
 }
+
+#bugfix:
+filter_100pct() {
+    sed '/^[[:space:]]*100%[[:space:]]*$/d'
+}
+
 
 # Functions to launch the benchmark suite
 
@@ -223,5 +223,8 @@ main() {
     echo
     echo "------------------All benchmarks have been completed------------------"
 } 2>&1 | grep -v "100%"  # Filtra "100%" da stdout/stderr
+
+exec > >(filter_100pct)
+exec 2>&1
 
 main "$@"
