@@ -63,27 +63,43 @@ get_cpu_mhz() {
 
 # functions for graphics:
 
-BOX_W=44                  
+#width between the columns
+BOX_W=44
 
-row() {        
+# ─── row() ───
+row() {
+    # $1 = stringa completa da mettere
     printf "│ %-*s │\n" $((BOX_W-2)) "$1"
 }
 
+# ─── row_center() ───
+row_center() {
+    local text="$1"
+    local total=$((BOX_W-2))
+    local len=${#text}
+    (( len > total )) && { row "$text"; return; }
 
-row_center() {    
-    local len=${#1}
-    local padL=$(( (BOX_W-2-len)/2 ))
-    local padR=$(( BOX_W-2-len-padL ))
-    printf "│ %*s%s%*s │\n" "$padL" "" "$1" "$padR" ""
+    local padL=$(( (total - len) / 2 ))
+    local padR=$(( total - len - padL ))
+    printf "│ %*s%s%*s │\n" \
+           "$padL" "" "$text" "$padR" ""
 }
 
-center () { 
-    local w=$1 txt="$2" len=${#2}
-    local L=$(( (w-len)/2 )) R=$(( w-len-L ))
-    printf "%*s%s%*s" "$L" "" "$txt" "$R" ""
+# ─── center() ───
+center() {
+    local width=$1
+    local text="$2"
+    local len=${#text}
+    # se il testo è più lungo, lo restituiamo inalterato
+    (( len >= width )) && { printf "%s" "$text"; return; }
+
+    local padL=$(( (width - len) / 2 ))
+    local padR=$(( width - len - padL ))
+    printf "%*s%s%*s" \
+           "$padL" "" "$text" "$padR" ""
 }
 
-# functions to launch the benchmark suite
+# Functions to launch the benchmark suite
 
 setup(){
   git submodule update --init --recursive; 
@@ -106,17 +122,17 @@ result() {
     echo "CPU MHz: $CPU_MHZ"
     echo
     printf "%-20s | %s | %s | %s | %s\n" \
-           "$(center 20 "Benchmark")" \
-           "$(center 18 "Iterations/s")" \
-           "$(center 22 "Iterations/s per MHz")" \
-           "$(center 18 "Iterations/s")" \
-           "$(center 22 "Iterations/s per MHz")"
+    "$(center 20 "Benchmark")" \
+    "$(center 18 "Iterations/s")" \
+    "$(center 22 "Iter/s per MHz")" \
+    "$(center 18 "Iterations/s")" \
+    "$(center 22 "Iter/s per MHz")"
 
     printf "%-20s | %s | %s | %s | %s\n" "" \
-           "$(center 18 "Single-core")" \
-           "$(center 22 "Single-core")" \
-           "$(center 18 "Multi-core")" \
-           "$(center 22 "Multi-core")"
+    "$(center 18 "Single-core")" \
+    "$(center 22 "Single-core")" \
+    "$(center 18 "Multi-core")" \
+    "$(center 22 "Multi-core")"
 
     printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
     HEADER_PRINTED=1
@@ -134,8 +150,9 @@ result() {
         per_mhz_mc="---"
     fi
 
-    printf "%-20s | %18s | %22s | %18s | %22s\n" \
-           "$name" "$ips_sc" "$per_mhz_sc" "$ips_mc" "$per_mhz_mc"
+   printf "%-20s | %18s | %22s | %18s | %22s\n" \
+    "$name" "$ips_sc" "$per_mhz_sc" "$ips_mc" "$per_mhz_mc"
+
 }
 
 
@@ -181,13 +198,12 @@ main() {
     echo "┌$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┐"
     row_center "System Information"
     echo "├$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┤"
-
     row "CPU name: $CPU_NAME"
     row "CPU frequency: ${CPU_MHZ} MHz"
     row "CPU cores: $CPU_CORES"
     row "RAM: ${RAM_GB} GB"
-
     echo "└$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┘"
+
 
 
  #   clean
