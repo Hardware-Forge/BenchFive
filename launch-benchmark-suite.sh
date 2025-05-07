@@ -74,15 +74,15 @@ get_cpu_mhz() {
 
 #--------------------------Functions for graphics:------------------------------
 
-COL_W=28
+COL_W=27
 BOX_W=44
 
 print_table_header() {
     local hdr
     hdr=$(printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s" \
            "Benchmark" \
-           "Single-core score" "Single-core /MHz" \
-           "Multi-core score"  "Multi-core /MHz")
+           "Single-core score" "Single-core score /MHz" \
+           "Multi-core score"  "Multi-core score /MHz")
     
     echo "$hdr"
     
@@ -272,7 +272,7 @@ main() {
     # TODO: parse_* per gli altri benchmark…
 
     echo
-    echo "--------------------------------------------------------All benchmarks have been completed----------------------------------------------------"
+    echo "------------------------------------------------------All benchmarks have been completed----------------------------------------------------"
 }
 
 main "$@"
