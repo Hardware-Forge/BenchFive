@@ -44,24 +44,46 @@ get_ram_gb() {
 }
 
 get_cpu_mhz() {
-    local freq
-
-      
     if command -v lscpu &>/dev/null; then
-        freq=$(lscpu | awk -F':' '
-            /^CPU max MHz/ {gsub(/ /,""); print $2; exit}
-            /^CPU MHz/     {gsub(/ /,""); print $2; exit}')
-        [[ -n $freq ]] && printf "%.0f\n" "$freq" && return 0
+        lscpu | awk -F':[ \t]+' '
+            /^CPU max MHz/ { printf("%.0f\n",$2); exit }
+            /^CPU MHz/     { printf("%.0f\n",$2); exit }
+        '
+    elif [[ -r /proc/cpuinfo ]]; then
+        awk '/^cpu MHz/ { sum += $4; n++ }
+             END {
+               if (n) printf("%.0f\n", sum/n)
+               else       print "Unknown"
+             }' /proc/cpuinfo
+    else
+        echo "Unknown"
     fi
-
-   
-    if [[ -r /proc/cpuinfo ]]; then
-        freq=$(awk '/^cpu MHz/ {sum+=$4; n++} END{if(n) print sum/n}' /proc/cpuinfo)
-        [[ -n $freq ]] && printf "%.0f\n" "$freq" && return 0
-    fi
-
-    return 1  
 }
+
+
+# functions for graphics:
+
+BOX_W=44                  
+
+row() {        
+    printf "│ %-*s │\n" $((BOX_W-2)) "$1"
+}
+
+
+row_center() {    
+    local len=${#1}
+    local padL=$(( (BOX_W-2-len)/2 ))
+    local padR=$(( BOX_W-2-len-padL ))
+    printf "│ %*s%s%*s │\n" "$padL" "" "$1" "$padR" ""
+}
+
+center () { 
+    local w=$1 txt="$2" len=${#2}
+    local L=$(( (w-len)/2 )) R=$(( w-len-L ))
+    printf "%*s%s%*s" "$L" "" "$txt" "$R" ""
+}
+
+# functions to launch the benchmark suite
 
 setup(){
   git submodule update --init --recursive; 
@@ -81,14 +103,23 @@ result() {
     local name="$1" ips_sc="$2" ips_mc="$3"
 
     if [[ $HEADER_PRINTED -eq 0 ]]; then
-        echo "CPU MHz: $CPU_MHZ"
-        echo
-        printf "%-20s | %18s | %22s | %18s | %22s\n" \
-               "Benchmark" "Iterations/s" "Iter/s per MHz" "Iterations/s" "Iter/s per MHz"
-        printf "%-20s | %18s | %22s | %18s | %22s\n" \
-               "" "Single-core" "Single-core" "Multi-core" "Multi-core"
-        printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
-        HEADER_PRINTED=1
+    echo "CPU MHz: $CPU_MHZ"
+    echo
+    printf "%-20s | %s | %s | %s | %s\n" \
+           "$(center 20 "Benchmark")" \
+           "$(center 18 "Iterations/s")" \
+           "$(center 22 "Iterations/s per MHz")" \
+           "$(center 18 "Iterations/s")" \
+           "$(center 22 "Iterations/s per MHz")"
+
+    printf "%-20s | %s | %s | %s | %s\n" "" \
+           "$(center 18 "Single-core")" \
+           "$(center 22 "Single-core")" \
+           "$(center 18 "Multi-core")" \
+           "$(center 22 "Multi-core")"
+
+    printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
+    HEADER_PRINTED=1
     fi
 
     local per_mhz_sc per_mhz_mc
@@ -116,10 +147,10 @@ parse_coremark() {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
     while read -r ips_sc; do
-        # coremark is only single-core
-        result "coremark" "$ips_sc" "---"
+        result "coremark" "$ips_sc" "-----"   
     done
 }
+
 
 
 parse_coremark-pro() {
@@ -141,22 +172,23 @@ main() {
     echo
     
     CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
-    (( CPU_MHZ > 0 )) || { echo "Detected CPU MHz is zero, aborting" >&2; exit 1; }
+    CPU_NAME=$(get_cpu_name) || { echo "Unable to detect CPU name" >&2; exit 1; }
+    CPU_CORES=$(get_cpu_cores) || { echo "Unable to detect CPU cores" >&2; exit 1; }
+    RAM_GB=$(get_ram_gb) || { echo "Unable to detect RAM GB" >&2; exit 1; }
     
-    CPU_NAME=$(get_cpu_name)
-    CPU_CORES=$(get_cpu_cores)
-    RAM_GB=$(get_ram_gb)
-    
+
     # System information box
-    echo "┌────────────────────────────────────────────┐"
-    echo "│           System Information               │"
-    echo "├────────────────────────────────────────────┤"
-    printf "│ CPU: %-37s │\n" "$CPU_NAME"
-    printf "│ CPU Frequency: %-27s MHz │\n" "$CPU_MHZ"
-    printf "│ CPU Cores: %-31s │\n" "$CPU_CORES"
-    printf "│ RAM: %-35s GB │\n" "$RAM_GB"
-    echo "└────────────────────────────────────────────┘"
-    echo
+    echo "┌$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┐"
+    row_center "System Information"
+    echo "├$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┤"
+
+    row "CPU name: $CPU_NAME"
+    row "CPU frequency: ${CPU_MHZ} MHz"
+    row "CPU cores: $CPU_CORES"
+    row "RAM: ${RAM_GB} GB"
+
+    echo "└$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┘"
+
 
  #   clean
  #   setup
