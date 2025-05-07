@@ -46,9 +46,9 @@ get_cpu_cores() {
 get_ram_gb() {
     if [[ -r /proc/meminfo ]]; then
         local kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
-        RAM_GB=$(( kb / 1024 / 1024 ))
+        echo $(( kb / 1024 / 1024 ))
     else
-        RAM_GB="Unknown"
+        echo "Unknown"
     fi
 }
 
@@ -126,43 +126,49 @@ run(){
   (make run); 
 }
 
+COL_W=28
+
 result() {
-    local name="$1" ips_sc="$2" ips_mc="$3"
+    local name="$1" sc="$2" mc="$3"
 
-    if [[ $HEADER_PRINTED -eq 0 ]]; then
-    printf "%-20s | %s | %s | %s | %s\n" \
-    "$(center 20 "Benchmark")" \
-    "$(center 18 "Single-core")" \
-    "$(center 22 "Single-core")" \
-    "$(center 18 "Multi-core")" \
-    "$(center 22 "Multi-core")"
+    # mappa benchmark → unità
+    local unit
+    case "$name" in
+        coremark|coremark-pro)                 unit="Iteration/s" ;;
+        7zip-compressing|7zip-decompressing)   unit="MIPS"        ;;
+        stockfish)                             unit="Nodes/s"     ;;
+        *)                                     unit=""            ;;
+    esac
 
-    printf "%-20s | %s | %s | %s | %s\n" "" \
-    "$(center 18 "Score")" \
-    "$(center 22 "Score per Mhz")" \
-    "$(center 18 "Score")" \
-    "$(center 22 "Score per Mhz")"
-
-    printf -- "---------------------|--------------------|------------------------|--------------------|------------------------\n"
-    HEADER_PRINTED=1
+    # ─── header (una sola volta) ───
+    if (( HEADER_PRINTED == 0 )); then
+        printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+               "Benchmark" "Single-core Score" "Single-core /MHz" \
+               "Multi-core Score" "Multi-core /MHz"
+        printf -- "---------------------|%s\n" "$(printf '─%.0s' $(seq 1 $((COL_W*4+3))))"
+        HEADER_PRINTED=1
     fi
 
-    local per_mhz_sc per_mhz_mc
-    if [[ $ips_sc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        per_mhz_sc=$(awk -v i="$ips_sc" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
+    # ─── calcoli per MHz ───
+    local per_sc="---" per_mc="---"
+    if [[ $sc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        per_sc=$(awk -v v="$sc" -v mhz="$CPU_MHZ" 'BEGIN{printf "%.2f", v/mhz}')
+        sc="${sc} ${unit}"
     else
-        per_mhz_sc="---"
+        sc="${sc:----}"
     fi
-    if [[ $ips_mc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        per_mhz_mc=$(awk -v i="$ips_mc" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
+    if [[ $mc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        per_mc=$(awk -v v="$mc" -v mhz="$CPU_MHZ" 'BEGIN{printf "%.2f", v/mhz}')
+        mc="${mc} ${unit}"
     else
-        per_mhz_mc=""
+        mc="${mc:----}"
     fi
 
-   printf "%-20s | %18s | %22s | %18s | %22s\n" \
-    "$name" "$ips_sc" "$per_mhz_sc" "$ips_mc" "$per_mhz_mc"
-
+    # ─── stampa riga dati ───
+    printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+           "$name" "$sc" "$per_sc" "$mc" "$per_mc"
 }
+
 
 
 parse_coremark() {
@@ -172,8 +178,8 @@ parse_coremark() {
     awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
-     while read -r ips; do
-        result "coremark" "${ips} Iteration/s" ""
+    while read -r ips; do
+        result "coremark" "$ips" ""
     done
 }
 
@@ -187,9 +193,7 @@ parse_coremark-pro() {
         print sc, mc
     }' "$f" |
     while read -r sc mc; do
-        result "coremark-pro" \
-               "${sc} Iteration/s" \
-               "${mc} Iteration/s"
+        result "coremark-pro" "$sc" "$mc"
     done
 }
 
@@ -202,10 +206,11 @@ parse_7zip() {
         mc = $7        # decompress speed KiB/s
         print sc, mc
     }' "$f" |
-     while read -r sc mc; do
-        result "7zip-compressing"   "${sc} MIPS" ""
-        result "7zip-decompressing" "" "${mc} MIPS"
+    while read -r sc mc; do
+        result "7zip-compressing"   "$sc" ""
+        result "7zip-decompressing" ""      "$mc"
     done
+}
 
 
 parse_stockfish() {
@@ -216,9 +221,9 @@ parse_stockfish() {
         # rimuove spazi iniziali/finali
         gsub(/^[ \t]+|[ \t]+$/, "", $2)
         print $2
-    }' "$f" |
+    }' "$f" | 
     while read -r nodes_per_sec; do
-        result "stockfish" "$nodes_per_sec" ""
+        result "stockfish" "$nps" ""
     done
 }
 
