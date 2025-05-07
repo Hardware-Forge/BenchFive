@@ -78,14 +78,19 @@ COL_W=28
 BOX_W=44
 
 print_table_header() {
-    # intestazione
-    printf "%-20s │ %-${COL_W}s │ %-${COL_W}s │ %-${COL_W}s │ %-${COL_W}s\n" \
-           "Benchmark" "Single-core score" "Single-core /MHz" \
-           "Multi-core score"  "Multi-core /MHz"
-    local total_w=$((20 + 4*COL_W + 4*3))
-
-    printf '─%.0s' $(seq 1 "$total_w")
-    printf '\n'
+    local hdr
+    hdr=$(printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s" \
+           "Benchmark" \
+           "Single-core score" "Single-core /MHz" \
+           "Multi-core score"  "Multi-core /MHz")
+    
+    echo "$hdr"
+    
+    local len=${#hdr}
+    printf '─%.0s' $(seq 1 $len)
+    echo
+    
+    HEADER_PRINTED=1
 }
 
 
@@ -209,7 +214,7 @@ parse_7zip() {
         print comp, decomp
     }' "$f" |
     while read -r comp decomp; do
-        result "7zip-decompressing" ""      "$comp"
+        result "7zip-compressing" ""      "$comp"
         result "7zip-decompressing" ""      "$decomp"
     done
 }
@@ -267,7 +272,7 @@ main() {
     # TODO: parse_* per gli altri benchmark…
 
     echo
-    echo "--------------------------------------------------------All benchmarks have been completed-------------------------------------------------------"
+    echo "--------------------------------------------------------All benchmarks have been completed----------------------------------------------------"
 }
 
 main "$@"
