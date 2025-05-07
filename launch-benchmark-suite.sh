@@ -3,6 +3,12 @@
 # This script is used to automatically compile, run and show the results of the benchmark suite.
 
 set -euo pipefail
+#bug:
+exec > >(filter_100pct)
+exec 2>&1
+filter_100pct() {
+    sed '/^[[:space:]]*100%[[:space:]]*$/d'
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BENCH_DIR="$SCRIPT_DIR/benchmarks"
@@ -34,14 +40,14 @@ get_cpu_cores() {
 }
 
 get_ram_gb() {
-    if command -v free &>/dev/null; then
-        free -g | awk '/^Mem:/ {print $2}'
-    elif [[ -r /proc/meminfo ]]; then
-        awk '/^MemTotal:/ {printf "%.0f\n", $2/1024/1024}' /proc/meminfo
+    if [[ -r /proc/meminfo ]]; then
+        local kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+        RAM_GB=$(( kb / 1024 / 1024 ))
     else
-        echo "Unknown"
+        RAM_GB="Unknown"
     fi
 }
+
 
 get_cpu_mhz() {
     if command -v lscpu &>/dev/null; then
@@ -145,7 +151,7 @@ result() {
     if [[ $ips_mc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
         per_mhz_mc=$(awk -v i="$ips_mc" -v m="$CPU_MHZ" 'BEGIN{printf "%.2f", i/m}')
     else
-        per_mhz_mc="---"
+        per_mhz_mc=""
     fi
 
    printf "%-20s | %18s | %22s | %18s | %22s\n" \
@@ -162,7 +168,7 @@ parse_coremark() {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
     while read -r ips_sc; do
-        result "coremark" "$ips_sc" "--------------------"   
+        result "coremark" "$ips_sc" ""   
     done
 }
 
@@ -180,6 +186,7 @@ parse_coremark-pro() {
 }
 
 main() {
+    clear
     # Title box
     echo "╔══════════════════════════════════════════════╗"
     echo "║         RISC-V Benchmark Suite               ║"
@@ -215,6 +222,6 @@ main() {
 
     echo
     echo "------------------All benchmarks have been completed------------------"
-}
+} 2>&1 | grep -v "100%"  # Filtra "100%" da stdout/stderr
 
 main "$@"
