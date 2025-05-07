@@ -204,11 +204,11 @@ parse_7zip() {
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
     awk '/^Avr:/ {
-        comp = $2        # compress speed KiB/s
-        decomp = $7        # decompress speed KiB/s
+        comp = $2        
+        decomp = $7        
         print comp, decomp
     }' "$f" |
-    while read -r sc mc; do
+    while read -r comp decomp; do
         result "7zip-decompressing" ""      "$comp"
         result "7zip-decompressing" ""      "$decomp"
     done
