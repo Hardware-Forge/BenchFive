@@ -119,14 +119,12 @@ result() {
     local name="$1" ips_sc="$2" ips_mc="$3"
 
     if [[ $HEADER_PRINTED -eq 0 ]]; then
-    echo "CPU MHz: $CPU_MHZ"
-    echo
     printf "%-20s | %s | %s | %s | %s\n" \
     "$(center 20 "Benchmark")" \
     "$(center 18 "Iterations/s")" \
-    "$(center 22 "Iter/s per MHz")" \
+    "$(center 22 "Iterations/s per MHz")" \
     "$(center 18 "Iterations/s")" \
-    "$(center 22 "Iter/s per MHz")"
+    "$(center 22 "Iterations/s per MHz")"
 
     printf "%-20s | %s | %s | %s | %s\n" "" \
     "$(center 18 "Single-core")" \
@@ -164,7 +162,7 @@ parse_coremark() {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
     while read -r ips_sc; do
-        result "coremark" "$ips_sc" "-----"   
+        result "coremark" "$ips_sc" "--------------------"   
     done
 }
 
@@ -195,14 +193,14 @@ main() {
     
 
     # System information box
-    echo "┌$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┐"
+    echo "┌$(printf '─%.0s' $(seq 1 $BOX_W))┐"
     row_center "System Information"
-    echo "├$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┤"
+    echo "├$(printf '─%.0s' $(seq 1 $BOX_W))┤"
     row "CPU name: $CPU_NAME"
     row "CPU frequency: ${CPU_MHZ} MHz"
     row "CPU cores: $CPU_CORES"
     row "RAM: ${RAM_GB} GB"
-    echo "└$(printf '─%.0s' $(seq 1 $((BOX_W-2))))┘"
+    echo "└$(printf '─%.0s' $(seq 1 $BOX_W))┘"
 
 
 
