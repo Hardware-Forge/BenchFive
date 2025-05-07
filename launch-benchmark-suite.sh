@@ -24,14 +24,24 @@ get_cpu_name() {
 }
 
 get_cpu_cores() {
-    if command -v lscpu &>/dev/null; then
-        lscpu | awk -F':[ \t]+' '/^CPU\(s\)/ {print $2}'
+    local cores
+
+    if command -v nproc &>/dev/null; then
+        cores=$(nproc --all)
+    elif command -v lscpu &>/dev/null; then
+        cores=$(lscpu | awk -F':[ \t]+' '/^CPU\(s\)/ {print $2}')
     elif [[ -r /proc/cpuinfo ]]; then
-        grep -c "^processor" /proc/cpuinfo
+        cores=$(grep -c "^processor" /proc/cpuinfo)
     else
-        echo "Unknown"
+        cores="Unknown"
     fi
+
+    # Rimuove eventuali percentuali o altri caratteri non numerici
+    cores=${cores//[^0-9]/}
+
+    echo "${cores:-Unknown}"
 }
+
 
 get_ram_gb() {
     if [[ -r /proc/meminfo ]]; then
@@ -97,11 +107,6 @@ center() {
     local padR=$(( width - len - padL ))
     printf "%*s%s%*s" \
            "$padL" "" "$text" "$padR" ""
-}
-
-#bugfix:
-filter_100pct() {
-    sed '/^[[:space:]]*100%[[:space:]]*$/d'
 }
 
 
@@ -222,9 +227,6 @@ main() {
 
     echo
     echo "------------------All benchmarks have been completed------------------"
-} 2>&1 | grep -v "100%"  # Filtra "100%" da stdout/stderr
-
-exec > >(filter_100pct)
-exec 2>&1
+}
 
 main "$@"
