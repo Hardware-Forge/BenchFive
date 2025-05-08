@@ -258,22 +258,24 @@ parse_geekbench() {
     local html="$RESULTS_DIR/geekbench_result.html"
     [[ -r $html ]] || { echo "warning: $html not found"; return; }
 
-    read -r sc mc < <(
-        grep -oP '(?<=<div class="score">)[0-9,]+' "$html" | head -n2
-    )
+    # ─── SINGLE-CORE ──────────────────────────────────────────────
+    sc=$(grep -A1 "<div class='score-container score-container-1" "$html" \
+          | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
+          | head -n1)
+
+    # ─── MULTI-CORE ───────────────────────────────────────────────+
+    local mc
+    mc=$(grep -A1 "<div class='score-container desktop'>" "$html" \
+          | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
+          | head -n1)
 
     sc=${sc//,/}
     mc=${mc//,/}
 
-    if [[ -z $sc || -z $mc ]]; then
-        echo "warning: unable to parse Geekbench scores"
-        return
-    fi
+    [[ -n $sc && -n $mc ]] || { echo "warning: Geekbench scores not found"; return; }
 
     result "geekbench" "$sc" "$mc"
 }
-
-
 
 
 main() {
