@@ -46,12 +46,15 @@ get_cpu_cores() {
 
 get_ram_gb() {
     if [[ -r /proc/meminfo ]]; then
-        local kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
-        echo $(( kb / 1024 / 1024 ))
+        awk '/^MemTotal:/ {
+            gb = $2/1024/1024
+            printf("%.2f\n", gb)
+        }' /proc/meminfo
     else
         echo "Unknown"
     fi
 }
+
 
 
 get_cpu_mhz() {
@@ -233,6 +236,43 @@ parse_stockfish() {
     done
 }
 
+get_geekbench_results() {
+    local txt="$RESULTS_DIR/geekbench_results.txt"
+    local out="$RESULTS_DIR/geekbench_result.html"
+
+    [[ -r $txt ]] || { echo "warning: $txt not found"; return; }
+
+    local url
+    url=$(grep -m1 -oE 'https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+' "$txt")
+
+    if [[ -z $url ]]; then
+        echo "warning: no URL found in $txt"
+        return
+    fi
+
+    echo "Downloading Geekbench result page:"
+    echo "  $url -> $out"
+    curl -L -o "$out" -- "$url" \
+        && echo "Saved to $out" \
+        || echo "error: download failed"
+    
+    parse_geekbench
+}
+
+parse_geekbench() {
+    local html="$RESULTS_DIR/geekbench_result.html"
+    [[ -r $html ]] || { echo "warning: $html not found"; return; }
+
+    read -r sc mc < <(
+        grep -oP "(?<=<div class='score'>)[0-9,\.]+(?=</div>)" "$html" | head -n2
+    )
+
+    sc=${sc//,/}
+    mc=${mc//,/}
+
+    result "geekbench" "$sc" "$mc"
+}
+
 
 main() {
     clear
@@ -269,6 +309,7 @@ main() {
     parse_coremark-pro
     parse_7zip
     parse_stockfish
+    parse_geekbench
     # TODO: parse_* per gli altri benchmark…
 
     echo
