@@ -46,14 +46,14 @@ get_cpu_cores() {
 
 get_ram_gb() {
     if [[ -r /proc/meminfo ]]; then
-        awk '/^MemTotal:/ {
-            gb = $2/1024/1024
-            printf("%.2f\n", gb)
-        }' /proc/meminfo
+        local kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+        # kb * 1024 = byte, /1e9 = GB decimali
+        printf "%.2f\n" "$(awk -v k="$kb" 'BEGIN{print k*1024/1e9}')"
     else
         echo "Unknown"
     fi
 }
+
 
 
 
@@ -250,11 +250,7 @@ get_geekbench_results() {
         return
     fi
 
-    echo "Downloading Geekbench result page:"
-    echo "  $url -> $out"
     curl -L -o "$out" -- "$url" \
-        && echo "Saved to $out" \
-        || echo "error: download failed"
     
     parse_geekbench
 }
@@ -263,15 +259,22 @@ parse_geekbench() {
     local html="$RESULTS_DIR/geekbench_result.html"
     [[ -r $html ]] || { echo "warning: $html not found"; return; }
 
-    read -r sc mc < <(
-        grep -oP "(?<=<div class='score'>)[0-9,\.]+(?=</div>)" "$html" | head -n2
-    )
+    local sc
+    sc=$(grep -B1 'Single-Core Score' "$html" \
+         | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
+         | head -n1)
+
+    local mc
+    mc=$(grep -B1 'Multi-Core Score' "$html" \
+         | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
+         | head -n1)
 
     sc=${sc//,/}
     mc=${mc//,/}
-
+    
     result "geekbench" "$sc" "$mc"
 }
+
 
 
 main() {
