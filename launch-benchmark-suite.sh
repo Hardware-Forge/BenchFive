@@ -250,12 +250,11 @@ get_geekbench_results() {
 
     curl -sL "$url" -o "$out" || return
 
-    parse_geekbench
 }
 
 
 parse_geekbench() {
-    local html="$RESULTS_DIR/geekbench_result.html"
+    local html="$RESULTS_DIR/geekbench_results.html"
     [[ -r $html ]] || { echo "warning: $html not found"; return; }
 
     # ─── SINGLE-CORE ──────────────────────────────────────────────
