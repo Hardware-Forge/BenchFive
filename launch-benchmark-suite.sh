@@ -238,42 +238,41 @@ parse_stockfish() {
 
 get_geekbench_results() {
     local txt="$RESULTS_DIR/geekbench_results.txt"
-    local out="$RESULTS_DIR/geekbench_result.html"
+    local out="$RESULTS_DIR/geekbench_results.html"
 
-    [[ -r $txt ]] || { echo "warning: $txt not found"; return; }
+    [[ -r $txt ]] || return
 
     local url
-    url=$(grep -m1 -oE 'https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+' "$txt")
+    url=$(grep -m1 -oE 'https://browser\.geekbench\.com/[A-Za-z0-9/_-]+' "$txt")
+    [[ -n $url ]] || return
 
-    if [[ -z $url ]]; then
-        echo "warning: no URL found in $txt"
-        return
-    fi
+    mkdir -p "$RESULTS_DIR"
 
-    curl -L -o "$out" -- "$url" \
-    
+    curl -sL "$url" -o "$out" || return
+
     parse_geekbench
 }
+
 
 parse_geekbench() {
     local html="$RESULTS_DIR/geekbench_result.html"
     [[ -r $html ]] || { echo "warning: $html not found"; return; }
 
-    local sc
-    sc=$(grep -B1 'Single-Core Score' "$html" \
-         | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
-         | head -n1)
-
-    local mc
-    mc=$(grep -B1 'Multi-Core Score' "$html" \
-         | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
-         | head -n1)
+    read -r sc mc < <(
+        grep -oP '(?<=<div class="score">)[0-9,]+' "$html" | head -n2
+    )
 
     sc=${sc//,/}
     mc=${mc//,/}
-    
+
+    if [[ -z $sc || -z $mc ]]; then
+        echo "warning: unable to parse Geekbench scores"
+        return
+    fi
+
     result "geekbench" "$sc" "$mc"
 }
+
 
 
 
@@ -312,6 +311,7 @@ main() {
     parse_coremark-pro
     parse_7zip
     parse_stockfish
+    get_geekbench_results
     parse_geekbench
     # TODO: parse_* per gli altri benchmark…
 
