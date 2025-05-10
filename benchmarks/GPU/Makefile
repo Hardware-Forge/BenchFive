@@ -45,21 +45,16 @@ install_FFmpeg:
 
 getresultsFFmpeg_decodifica:
 	@echo "Esecuzione di FFmpeg"
-	./FFmpeg/ffmpeg -i output_h265.mp4 -f null - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
+	./FFmpeg/ffmpeg -i output_h265.mp4 -f null -threads 1 - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
 	rm -f output_h265.mp4
-
-
-getresultsFFmpeg_codificah264:
-	@echo "Esecuzione di FFmpeg"
-	./FFmpeg/ffmpeg -i input.mp4 -c:v libx264 -preset fast -crf 23 output_h264.mp4 > $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresultsFFmpeg_codificah265:
 	@echo "Esecuzione di FFmpeg"
-	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 output_h265.mp4 > $(RESULTS_DIR)/ffmpeg_codifica.txt
+	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresultsvkmark:
 	./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
-download_4k_sample_fs:
+download_sample_fs:
 	@echo "download sample FileSamples 720p 28s, 16 MB come input.mp4..."
 	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"

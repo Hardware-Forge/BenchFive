@@ -134,7 +134,6 @@ center() {
 #-------------------Functions to launch the benchmark suite-----------------
 
 setup(){
-  git submodule update --init --recursive; 
   (make setup); 
 }
 clean(){ 
@@ -159,6 +158,12 @@ result() {
         stockfish)                             unit="Nodes/s"     ;;
         *)                                     unit=""            ;;
     esac
+
+    if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf ]]; then
+        printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+               "$name" "$sc$mc" "----" "----" "----"
+        return
+    fi
 
 
     local per_sc="---" per_mc="---"
@@ -262,7 +267,7 @@ parse_geekbench() {
           | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
           | head -n1)
 
-    # ─── MULTI-CORE ───────────────────────────────────────────────+
+    # ─── MULTI-CORE ───────────────────────────────────────────────
     local mc
     mc=$(grep -A1 "<div class='score-container desktop'>" "$html" \
           | grep -oP '(?<=<div class=.score.>)[0-9,]+' \
@@ -275,6 +280,114 @@ parse_geekbench() {
 
     result "geekbench" "$sc" "$mc"
 }
+parse_ffmpeg() {
+    local f="$RESULTS_DIR/ffmpeg_codifica.txt"
+    local f2="$RESULTS_DIR/ffmpeg_decodifica.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    [[ -r "$f2" ]] || { echo "warning: $f2 not found"; return; }
+
+    # ─── CODIFICA ───────────────────────────────────────────────
+    read time fps < <(
+    awk '/encoded/ {
+        match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)
+        print a[1], a[2]
+    }' $f 
+    )
+    result "ffmpeg_encode_time" "$time" "s" ""
+    result "ffmpeg_encode_fps" "$fps" "fps" ""
+
+
+    # ─── DECODIFICA ───────────────────────────────────────────────
+    read time speed < <(
+    awk '/frame=/{t=$0} END{
+        match(t, /time=([0-9:.]+)/, a)
+        match(t, /speed=([0-9.]+)x/, b)
+
+        # Converti "00:00:28.23" in secondi
+        split(a[1], parts, ":")
+        seconds = parts[1]*3600 + parts[2]*60 + parts[3]
+        
+        print seconds, b[1]
+    }' "$f2"
+    )
+    result "ffmpeg_decode_time" "$time" "s" ""
+    result "ffmpeg_decode_speed" "$speed" "x" ""
+}
+
+parse_fio() {
+    local f="$RESULTS_DIR/fio_resultscmd.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+
+    read bwr bww iopsr iopsw latr latw < <(
+        awk '
+        BEGIN {
+            section=""
+            read_lat_done=write_lat_done=0
+        }
+        # Catturo BW e IOPS di read
+        /^  read:/ {
+            section="read"
+            if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bwr = a[1]
+            if (match($0, /IOPS=([^,]+)/,      c)) iopsr = c[1]
+            next
+        }
+        # Catturo BW e IOPS di write
+        /^  write:/ {
+            section="write"
+            if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bww = a[1]
+            if (match($0, /IOPS=([^,;]+)/,      c)) iopsw = c[1]
+            next
+        }
+        # Catturo lat (usec): avg=... in base alla sezione corrente
+        /^[[:space:]]+lat \(usec\):.*avg=/ {
+            if (section=="read" && !read_lat_done) {
+                if (match($0, /avg=([0-9.]+)/, d)) {
+                    latr = d[1]
+                    read_lat_done = 1
+                }
+            }
+            else if (section=="write" && !write_lat_done) {
+                if (match($0, /avg=([0-9.]+)/, d)) {
+                    latw = d[1]
+                    write_lat_done = 1
+                }
+            }
+            next
+        }
+        END {
+            # Se qualche valore è rimasto vuoto, lo lasciamo comunque stampato (""), 
+            # così result non va in errore di arità
+            print bwr, bww, iopsr, iopsw, latr, latw
+        }
+        ' "$f"
+    )
+
+    result "fio_bandwidth_r" "$bwr" "MB/s" ""
+    result "fio_bandwidth_w" "$bww" "MB/s" ""
+    result "fio_iops_r" "$iopsr" "IOPS" ""
+    result "fio_iops_w" "$iopsw" "IOPS" ""
+    result "fio_lat_r" "$latr" "usec" ""
+    result "fio_lat_w" "$latw" "usec" ""
+}
+
+parse_iperf3() {
+    local f="$RESULTS_DIR/iperf3_results.txt"
+
+    # ─── NET THROUGHPUT (ultimo valore Gbits/sec) ────────────────
+    local throughput
+    throughput=$(awk '
+        /Gbits\/sec/ { last=$0 }
+        END {
+            if (match(last, /([0-9.]+)[[:space:]]*Gbits\/sec/, a))
+                printf("%.1f\n", a[1])
+        }' "$f"
+    )
+
+    result "iperf_net_throughput" "$throughput" "Gb/s" ""
+}
+
+
+
 
 
 main() {
@@ -302,18 +415,21 @@ main() {
     echo "└$(printf '─%.0s' $(seq 1 $BOX_W))┘"
     echo
 
- #   clean
- #   setup
- #   build
- #   run
+
+    # setup
+    # build
+    # run
  
-    print_table_header
-    parse_coremark 
-    parse_coremark-pro
-    parse_7zip
-    parse_stockfish
-    get_geekbench_results
-    parse_geekbench
+     print_table_header
+    # parse_coremark 
+    # parse_coremark-pro
+    # parse_7zip
+    # parse_stockfish
+    # get_geekbench_results
+    # parse_geekbench
+    parse_ffmpeg
+    parse_fio
+    parse_iperf3
     # TODO: parse_* per gli altri benchmark…
 
     echo

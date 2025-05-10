@@ -7,7 +7,6 @@ BIN_DIR := bin
 memory_dir := benchmarks/memory
 cpu_dir := benchmarks/CPU
 io_dir := benchmarks/IO
-syslevel_dir := benchmarks/syslevel
 gpu_dir := benchmarks/GPU
 
 setup:
@@ -38,29 +37,17 @@ run:
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/CPU clean
-#	$(MAKE) -C benchmarks/syslevel clean
-#	$(MAKE) -C benchmarks/IO clean
-#	$(MAKE) -C benchmarks/memory clean
-#	$(MAKE) -C benchmarks/GPU clean
-#	$(MAKE) -C benchmarks clean
-#	@phoronix-test-suite remove cachebench
-#	@phoronix-test-suite remove unpack-linux
-#	@apt remove --purge phoronix-test-suite -y
-
+	$(MAKE) -C benchmarks/syslevel clean
+	$(MAKE) -C benchmarks/IO clean
+	$(MAKE) -C benchmarks/memory clean
+	$(MAKE) -C benchmarks/GPU clean
+	$(MAKE) -C benchmarks clean
 	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
-		echo "Cleaning files in $(RESULTS_DIR)..."; \
-		rm -f "$(RESULTS_DIR)"/*; \
-	else \
-		echo "ERROR: Invalid or unsafe RESULTS_DIR ('$(RESULTS_DIR)') — skipping clean."; \
-		exit 1; \
+		rm -f "$(RESULTS_DIR)"/*;
 	fi
 
 clean_results:
 	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
-		echo "Cleaning files in $(RESULTS_DIR)..."; \
-		rm -f "$(RESULTS_DIR)"/*; \
-	else \
-		echo "ERROR: Invalid or unsafe RESULTS_DIR ('$(RESULTS_DIR)') — skipping clean."; \
-		exit 1; \
+		rm -f "$(RESULTS_DIR)"/*;
 	fi
 

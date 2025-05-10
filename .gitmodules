@@ -4,9 +4,6 @@
 [submodule "benchmarks/CPU/coremark-pro"]
 	path = benchmarks/CPU/coremark-pro
 	url = https://github.com/eembc/coremark-pro.git
- [submodule "benchmarks/syslevel/rt-tests"]
-	path = benchmarks/syslevel/rt-tests
-	url = https://github.com/vianpl/rt-tests.git
  [submodule "benchmarks/memory/STREAM"]	
  	path = benchmarks/memory/STREAM
  	url = https://github.com/jeffhammond/STREAM.git
@@ -16,9 +13,6 @@
  [submodule "benchmarks/memory/tinymembench"]
 	path = benchmarks/memory/tinymembench
 	url = https://github.com/nuumio/tinymembench.git
- [submodule "benchmarks/memory/ramspeed"]
-	path = benchmarks/memory/ramspeed
-	url = https://github.com/wtarreau/ramspeed.git
 [submodule "benchmarks/GPU/FFmpeg"]
 	path = benchmarks/GPU/FFmpeg
 	url = https://github.com/FFmpeg/FFmpeg.git

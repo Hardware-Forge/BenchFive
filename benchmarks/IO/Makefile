@@ -19,7 +19,7 @@ fio:
 	$(MAKE) create_fio_filecmd
 #creo test simile a crystaldiskmark
 create_fio_filecmd:
-	@printf "[global]\nioengine=libaio\ndirect=1\nbs=4k\nsize=1G\nruntime=30\ngroup_reporting\niodepth=32\n\n[test]\nrw=randrw\nrwmixread=70\nnumjobs=4\nfilename=testfile\n" > fio/configcmd.fio
+	@printf "[global]\nioengine=libaio\ndirect=1\nbs=4k\nsize=1G\nruntime=30\ngroup_reporting\niodepth=32\n\n[test]\nrw=randrw\nrwmixread=70\nnumjobs=1\nfilename=testfile\n" > fio/configcmd.fio
 	@rm -f fio/testfile*
 
 getresults_fio_cmd:
