@@ -4,10 +4,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-getresults: getresultsvkmarkn getresultsFFmpeg_codificah265 && getresultsFFmpeg_decodifica
+getresults: getresultsFFmpeg_codificah265 && getresultsFFmpeg_decodifica
 #ATTENZIONE: PER ESEGUIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
 
-all: setupgpu installvkmark install_FFmpeg 
+all: setupgpu installvkmark install_FFmpeg download_sample_fs
 
 setupgpu:
 	@apt install -y meson ninja-build libx11-dev libwayland-dev libvulkan-dev \libxrandr-dev libxi-dev libegl1-mesa-dev libgles2-mesa-dev
@@ -19,7 +19,6 @@ setupgpu:
 	@apt install libx265-dev
 	@apt install libvpx-dev
 	@apt install -y yt-dlp
-	@apt install ocl-icd-opencl-dev
 	@apt install pkg-config
 	@apt install libxcb1-dev
 	@apt install libxcb-icccm4-dev

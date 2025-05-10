@@ -77,12 +77,13 @@ get_cpu_mhz() {
 
 #--------------------------Functions for graphics:------------------------------
 
-COL_W=27
-BOX_W=44
+COL_W=25
+BOX_W=50
+COL_WF=16
 
 print_table_header() {
     local hdr
-    hdr=$(printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s" \
+    hdr=$(printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s" \
            "Benchmark" \
            "Single-core score" "Single-core score /MHz" \
            "Multi-core score"  "Multi-core score /MHz")
@@ -148,7 +149,7 @@ run(){
 
 
 result() {
-    local name="$1" sc="$2" mc="$3"
+    local name="$1" sc="$2" mc="$3" pl="$4"
 
     
     local unit
@@ -159,9 +160,9 @@ result() {
         *)                                     unit=""            ;;
     esac
 
-    if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf ]]; then
-        printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
-               "$name" "$sc$mc" "----" "----" "----"
+    if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf || "$name" =~ ^stream || "$name" =~ ^tiny || "$name" =~ ^stress ]]; then
+        printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s\n" \
+               "$name" "$sc$mc $pl" "----" "----" "----"
         return
     fi
 
@@ -180,7 +181,7 @@ result() {
         mc="${mc:----}"
     fi
 
-    printf "%-20s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s | %-${COL_W}s\n" \
+    printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s\n" \
            "$name" "$sc" "$per_sc" "$mc" "$per_mc"
 }
 
@@ -194,7 +195,7 @@ parse_coremark() {
         if ($1 == "Iterations/Sec") print $3
     }' "$f" |
     while read -r ips; do
-        result "coremark" "$ips" ""
+        result "coremark" "$ips" "" ""
     done
 }
 
@@ -208,7 +209,7 @@ parse_coremark-pro() {
         print sc, mc
     }' "$f" |
     while read -r sc mc; do
-        result "coremark-pro" "$sc" "$mc"
+        result "coremark-pro" "$sc" "$mc" ""
     done
 }
 
@@ -222,8 +223,8 @@ parse_7zip() {
         print comp, decomp
     }' "$f" |
     while read -r comp decomp; do
-        result "7zip-compressing" ""      "$comp"
-        result "7zip-decompressing" ""      "$decomp"
+        result "7zip-compressing" ""      "$comp" ""
+        result "7zip-decompressing" ""      "$decomp" ""
     done
 }
 
@@ -237,7 +238,7 @@ parse_stockfish() {
         print $2
     }' "$f" | 
     while read -r nodes_per_sec; do
-        result "stockfish" "$nodes_per_sec" ""
+        result "stockfish" "$nodes_per_sec" "" ""
     done
 }
 
@@ -278,7 +279,7 @@ parse_geekbench() {
 
     [[ -n $sc && -n $mc ]] || { echo "warning: Geekbench scores not found"; return; }
 
-    result "geekbench" "$sc" "$mc"
+    result "geekbench" "$sc" "$mc" ""
 }
 parse_ffmpeg() {
     local f="$RESULTS_DIR/ffmpeg_codifica.txt"
@@ -293,8 +294,8 @@ parse_ffmpeg() {
         print a[1], a[2]
     }' $f 
     )
-    result "ffmpeg_encode_time" "$time" "s" ""
-    result "ffmpeg_encode_fps" "$fps" "fps" ""
+    result "ffmpeg_encode_time" "$time" "s" "" ""
+    result "ffmpeg_encode_fps" "$fps" "fps" "" ""
 
 
     # ─── DECODIFICA ───────────────────────────────────────────────
@@ -310,8 +311,8 @@ parse_ffmpeg() {
         print seconds, b[1]
     }' "$f2"
     )
-    result "ffmpeg_decode_time" "$time" "s" ""
-    result "ffmpeg_decode_speed" "$speed" "x" ""
+    result "ffmpeg_decode_time" "$time" "s" "" ""
+    result "ffmpeg_decode_speed" "$speed" "x" "" ""
 }
 
 parse_fio() {
@@ -324,21 +325,18 @@ parse_fio() {
             section=""
             read_lat_done=write_lat_done=0
         }
-        # Catturo BW e IOPS di read
         /^  read:/ {
             section="read"
             if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bwr = a[1]
             if (match($0, /IOPS=([^,]+)/,      c)) iopsr = c[1]
             next
         }
-        # Catturo BW e IOPS di write
         /^  write:/ {
             section="write"
             if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bww = a[1]
             if (match($0, /IOPS=([^,;]+)/,      c)) iopsw = c[1]
             next
         }
-        # Catturo lat (usec): avg=... in base alla sezione corrente
         /^[[:space:]]+lat \(usec\):.*avg=/ {
             if (section=="read" && !read_lat_done) {
                 if (match($0, /avg=([0-9.]+)/, d)) {
@@ -355,19 +353,17 @@ parse_fio() {
             next
         }
         END {
-            # Se qualche valore è rimasto vuoto, lo lasciamo comunque stampato (""), 
-            # così result non va in errore di arità
             print bwr, bww, iopsr, iopsw, latr, latw
         }
         ' "$f"
     )
 
-    result "fio_bandwidth_r" "$bwr" "MB/s" ""
-    result "fio_bandwidth_w" "$bww" "MB/s" ""
-    result "fio_iops_r" "$iopsr" "IOPS" ""
-    result "fio_iops_w" "$iopsw" "IOPS" ""
-    result "fio_lat_r" "$latr" "usec" ""
-    result "fio_lat_w" "$latw" "usec" ""
+    result "fio_bandwidth_r" "$bwr" "MB/s" "" 
+    result "fio_bandwidth_w" "$bww" "MB/s" "" 
+    result "fio_iops_r" "$iopsr" "IOPS" "" 
+    result "fio_iops_w" "$iopsw" "IOPS" "" 
+    result "fio_lat_r" "$latr" "usec" "" 
+    result "fio_lat_w" "$latw" "usec" "" 
 }
 
 parse_iperf3() {
@@ -383,20 +379,127 @@ parse_iperf3() {
         }' "$f"
     )
 
-    result "iperf_net_throughput" "$throughput" "Gb/s" ""
+    result "iperf_net_throughput" "$throughput" "Gb/s" "" 
+}
+parse_stream() {
+    local f="$RESULTS_DIR/stream_results.txt"
+
+    # ─── STREAM benchmark (Scale & Triad) ──────────────────────
+    read scale_rate scale_avg triad_rate triad_avg < <(
+        awk '
+            /^Scale:/ {
+                # $2 = Best Rate MB/s, $3 = Avg time (s)
+                scale_rate = $2
+                scale_avg  = $3
+            }
+            /^Triad:/ {
+                # $2 = Best Rate MB/s, $3 = Avg time (s)
+                triad_rate = $2
+                triad_avg  = $3
+            }
+            END {
+                print scale_rate, scale_avg, triad_rate, triad_avg
+            }
+        ' "$f"
+    )
+    result "stream_scale_rate&lat" "$scale_rate" "MB/s" "${scale_avg}s"
+    result "stream_triad_rate&lat" "$triad_rate" "MB/s" "${triad_avg}s"
+}
+
+parse_tinymembench() {
+    local f="$RESULTS_DIR/tinymembench_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+
+    # ─── Estrai C copy & C fill ───────────────────────────────────────
+    read copy_rate fill_rate < <(
+        awk '
+        # C copy generico (quello con ":   8012.3 MB/s")
+        /^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
+            copy_rate = gensub(/^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        }
+        # C fill generico
+        /^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
+            fill_rate = gensub(/^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        }
+        END {
+            # Se uno dei due non è stato trovato, rimane vuoto
+            print copy_rate, fill_rate
+        }
+        ' "$f"
+    )
+
+    # Verifica che li abbiamo trovati
+    [[ -z "$copy_rate" ]] && echo "warning: valore C copy non trovato."
+    [[ -z "$fill_rate" ]] && echo "warning: valore C fill non trovato."
+
+    result "tinymemb_copy" "$copy_rate" "MB/s" ""
+    result "tinymemb_fill" "$fill_rate" "MB/s" ""
 }
 
 
+parse_tinymembench_latency() {
+    local f="$RESULTS_DIR/tinymembench_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+
+    # Riga vuota e titolo
+    echo
+    echo "memory latency from cache L1 to ram – Single Random Read"
+    # Intestazione tabella
+    echo "Block size | Single random read (ns)"
+    echo "-----------|---------------------------"
+
+    awk '
+    /^block size/ { in_table=1; next }
+    in_table && /^$/  { exit }
+    in_table && /^[[:space:]]*[0-9]+/ {
+        tog = 1 - tog
+        if (tog == 1) {
+            printf "%9s  | %21s\n", $1, $3
+        }
+    }
+    ' "$f"
+}
+parse_stressng_temp() {
+    local f="$RESULTS_DIR/stress-ng_cputemp.txt"
+    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+    local temp
+    read temp < <(
+        awk '
+        /cluster0_thermal/ {
+            if (match($0, /([0-9]+\.[0-9]+)[[:space:]]*C/, a))
+                print a[1]
+        }
+        ' "$f"
+    )
+
+
+    result "stressng_temp" "$temp" "C" ""
+}
+parse_stressng_vm() {
+    local f="$RESULTS_DIR/stress-ng_vm.txt"
+    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+
+    local bogo_ops
+    read bogo_ops < <(
+        awk '
+        /metrc:.*vm/ {
+            print $5
+            exit
+        }
+        ' "$f"
+    )
+
+    result "stressng_vm_bogo_ops" "$bogo_ops" "bogo-ops" ""
+}
 
 
 
 main() {
     clear
     # Title box
-    echo "╔════════════════════════════════════════════╗"
-    echo "║          RISC-V Benchmark Suite            ║"
-    echo "╚════════════════════════════════════════════╝"
-    echo
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║              RISC-V Benchmark Suite              ║"
+    echo "╚══════════════════════════════════════════════════╝"
     
     CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
     CPU_NAME=$(get_cpu_name) || { echo "Unable to detect CPU name" >&2; exit 1; }
@@ -419,18 +522,27 @@ main() {
     # setup
     # build
     # run
- 
-     print_table_header
-    # parse_coremark 
-    # parse_coremark-pro
-    # parse_7zip
-    # parse_stockfish
-    # get_geekbench_results
-    # parse_geekbench
+ #potremmo mettere una riga per separare la tipologia di benchmark
+    print_table_header
+    parse_coremark 
+    parse_coremark-pro
+    parse_7zip
+    parse_stockfish
+    get_geekbench_results
+    parse_geekbench
+#---------------------------------
     parse_ffmpeg
+#---------------------------------
     parse_fio
     parse_iperf3
-    # TODO: parse_* per gli altri benchmark…
+#---------------------------------
+    parse_stream
+    parse_tinymembench    
+    parse_stressng_vm
+#---------------------------------
+    parse_stressng_temp
+#---------------------------------
+    parse_tinymembench_latency
 
     echo
     echo "------------------------------------------------------All benchmarks have been completed----------------------------------------------------"
