@@ -10,10 +10,10 @@ all: stream tinymembench ramspeed
 getresults: getresults_stream getresults_tinymembench getresults_ramspeed
 
 clean:
-	@rm -f STREAM/streameseguibile
+	@rm -f stream/streameseguibile
 	@rm -f $(RESULTS_DIR)/stream_results.txt
 	@(cd tinymembench && $(MAKE) clean)
-	@(cd STREAM && $(MAKE) clean)
+	@(cd stream && $(MAKE) clean)
 	@rm -f $(BIN_DIR)/tinymembench
 	@rm -f $(RESULTS_DIR)/tinymembench_results.txt
 
@@ -23,11 +23,11 @@ clean_results:
 	@rm -f $(RESULTS_DIR)/tinymembench_results.txt
 #------------------------------------------------------------stream------------------------------------------------------------
 stream:
-	@(cd STREAM && gcc -O -DSTREAM_ARRAY_SIZE=$(DIMARR) stream.c -o streameseguibile)
-	@cp STREAM/streameseguibile $(BIN_DIR)/streameseguibile
+	@(cd stream && gcc -O -DSTREAM_ARRAY_SIZE=$(DIMARR) stream.c -o streameseguibile)
+	@cp stream/streameseguibile $(BIN_DIR)/streameseguibile
 
 getresults_stream:
-	@./STREAM/streameseguibile > $(RESULTS_DIR)/stream_results.txt
+	@./stream/streameseguibile > $(RESULTS_DIR)/stream_results.txt
 
 CACHE_L3 := $(shell getconf LEVEL3_CACHE_SIZE)
 CACHE_L2 := $(shell getconf LEVEL2_CACHE_SIZE)

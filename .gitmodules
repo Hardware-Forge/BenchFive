@@ -1,36 +1,33 @@
 [submodule "benchmarks/CPU/coremark"]
-	path = benchmarks/CPU/coremark
+	path = benchmarks/cpu/coremark
 	url = https://github.com/eembc/coremark.git
 [submodule "benchmarks/CPU/coremark-pro"]
 	path = benchmarks/CPU/coremark-pro
 	url = https://github.com/eembc/coremark-pro.git
  [submodule "benchmarks/memory/STREAM"]	
- 	path = benchmarks/memory/STREAM
+	path = benchmarks/memory/stream
  	url = https://github.com/jeffhammond/STREAM.git
  [submodule "benchmarks/GPU/vkmark"]
-	path = benchmarks/GPU/vkmark
+	path = benchmarks/gpu/vkmark
 	url = https://github.com/vkmark/vkmark.git
  [submodule "benchmarks/memory/tinymembench"]
 	path = benchmarks/memory/tinymembench
 	url = https://github.com/nuumio/tinymembench.git
 [submodule "benchmarks/GPU/FFmpeg"]
-	path = benchmarks/GPU/FFmpeg
+	path = benchmarks/gpu/FFmpeg
 	url = https://github.com/FFmpeg/FFmpeg.git
-[submodule "benchmarks/CPU/coremark-pro"]
-	path = benchmarks/CPU/coremark-pro
-	url = https://github.com/eembc/coremark-pro.git
 [submodule "benchmarks/CPU/7zip"]
-	path = benchmarks/CPU/7zip
+	path = benchmarks/cpu/7zip
 	url = https://github.com/ip7z/7zip.git
 [submodule "benchmarks/IO/fio"]
-	path = benchmarks/IO/fio
+	path = benchmarks/io/fio
 	url = https://github.com/axboe/fio.git
 [submodule "benchmarks/IO/iperf3"]
-	path = benchmarks/IO/iperf3
+	path = benchmarks/io/iperf3
 	url = https://github.com/esnet/iperf.git
 [submodule "benchmarks/stress-ng"]
 	path = benchmarks/stress-ng
 	url = https://github.com/ColinIanKing/stress-ng.git
 [submodule "benchmarks/CPU/stockfish"]
-	path = benchmarks/CPU/stockfish
+	path = benchmarks/cpu/stockfish
 	url = https://github.com/official-stockfish/Stockfish.git

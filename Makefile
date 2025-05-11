@@ -5,9 +5,9 @@
 RESULTS_DIR := results
 BIN_DIR := bin
 memory_dir := benchmarks/memory
-cpu_dir := benchmarks/CPU
-io_dir := benchmarks/IO
-gpu_dir := benchmarks/GPU
+cpu_dir := benchmarks/cpu
+io_dir := benchmarks/io
+gpu_dir := benchmarks/gpu
 
 setup:
 	git submodule update --init --recursive
