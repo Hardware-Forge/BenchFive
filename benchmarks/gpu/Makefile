@@ -4,10 +4,10 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-getresults: getresultsFFmpeg_codificah265 && getresultsFFmpeg_decodifica
+getresults: getresults_FFmpeg_codificah265 && getresults_FFmpeg_decodifica
 #ATTENZIONE: PER ESEGUIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
 
-all: setupgpu installvkmark install_FFmpeg download_sample_fs
+all: setupgpu install_vkmark install_FFmpeg download_sample_fs
 
 setupgpu:
 	@apt install -y meson ninja-build libx11-dev libwayland-dev libvulkan-dev \libxrandr-dev libxi-dev libegl1-mesa-dev libgles2-mesa-dev
@@ -30,7 +30,7 @@ setupgpu:
 	  libxcb-image0-dev \
 	  libxcb-xfixes0-dev
 
-installvkmark:
+install_vkmark:
 	@echo "Installazione di vkmark"
 	(cd vkmark && meson setup build --prefix=/usr --buildtype=release -Dxcb=true -Dwayland=false -Dkms=true --wipe )
 	ninja -C vkmark/build
@@ -42,16 +42,16 @@ install_FFmpeg:
 	(cd FFmpeg && ./configure --target-os=linux --enable-gpl --enable-libx264 --enable-libx265 && make)
 	@echo "FFmpeg installato"
 
-getresultsFFmpeg_decodifica:
+getresults_FFmpeg_decodifica:
 	@echo "Esecuzione di FFmpeg"
 	./FFmpeg/ffmpeg -i output_h265.mp4 -f null -threads 1 - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
 	rm -f output_h265.mp4
 
-getresultsFFmpeg_codificah265:
+getresults_FFmpeg_codificah265:
 	@echo "Esecuzione di FFmpeg"
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
-getresultsvkmark:
+getresults_vkmark:
 	./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
 download_sample_fs:
