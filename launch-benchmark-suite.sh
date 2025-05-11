@@ -162,7 +162,7 @@ result() {
 
     if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf || "$name" =~ ^stream || "$name" =~ ^tiny || "$name" =~ ^stress ]]; then
         printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s\n" \
-               "$name" "$sc$mc $pl" "----" "----" "----"
+               "$name" "$sc $mc $pl" "----" "----" "----"
         return
     fi
 
@@ -362,8 +362,8 @@ parse_fio() {
     result "fio_bandwidth_w" "$bww" "MB/s" "" 
     result "fio_iops_r" "$iopsr" "IOPS" "" 
     result "fio_iops_w" "$iopsw" "IOPS" "" 
-    result "fio_lat_r" "$latr" "usec" "" 
-    result "fio_lat_w" "$latw" "usec" "" 
+    result "fio_lat_r" "$latr" "us" "" 
+    result "fio_lat_w" "$latw" "us" "" 
 }
 
 parse_iperf3() {
@@ -402,8 +402,8 @@ parse_stream() {
             }
         ' "$f"
     )
-    result "stream_scale_rate&lat" "$scale_rate" "MB/s" "${scale_avg}s"
-    result "stream_triad_rate&lat" "$triad_rate" "MB/s" "${triad_avg}s"
+    result "stream_scale_rate&lat" "$scale_rate" "MB/s" " ${scale_avg} s"
+    result "stream_triad_rate&lat" "$triad_rate" "MB/s" " ${triad_avg}n s"
 }
 
 parse_tinymembench() {
@@ -413,16 +413,13 @@ parse_tinymembench() {
     # ─── Estrai C copy & C fill ───────────────────────────────────────
     read copy_rate fill_rate < <(
         awk '
-        # C copy generico (quello con ":   8012.3 MB/s")
         /^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
             copy_rate = gensub(/^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
         }
-        # C fill generico
         /^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
             fill_rate = gensub(/^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
         }
         END {
-            # Se uno dei due non è stato trovato, rimane vuoto
             print copy_rate, fill_rate
         }
         ' "$f"
@@ -519,9 +516,9 @@ main() {
     echo
 
 
-    # setup
-    # build
-    # run
+    setup
+    build
+    run
  #potremmo mettere una riga per separare la tipologia di benchmark
     print_table_header
     parse_coremark 
