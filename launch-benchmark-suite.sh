@@ -191,12 +191,9 @@ result() {
      local f="$RESULTS_DIR/coremark_results.txt"
      [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
--    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
--        if ($1 == "Iterations/Sec") print $3
--    }' "$f" |
-+    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
-+        if ($1 == "Iterations/Sec") printf "%.2f\n", $3
-+    }' "$f" |
+    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
+        if ($1 == "Iterations/Sec") printf "%.2f\n", $3
+    }' "$f" |
      while read -r ips; do
          result "coremark" "$ips" "" ""
      done
