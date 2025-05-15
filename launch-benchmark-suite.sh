@@ -77,9 +77,9 @@ get_cpu_mhz() {
 
 #--------------------------Functions for graphics:------------------------------
 
-COL_W=25
+COL_W=25 #singlecore
 BOX_W=50
-COL_WF=16
+COL_WF=25 #multicore
 
 print_table_header() {
     local hdr
@@ -187,17 +187,21 @@ result() {
 
 
 
-parse_coremark() {
-    local f="$RESULTS_DIR/coremark_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+ parse_coremark() {
+     local f="$RESULTS_DIR/coremark_results.txt"
+     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
-    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
-        if ($1 == "Iterations/Sec") print $3
-    }' "$f" |
-    while read -r ips; do
-        result "coremark" "$ips" "" ""
-    done
-}
+-    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
+-        if ($1 == "Iterations/Sec") print $3
+-    }' "$f" |
++    awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
++        if ($1 == "Iterations/Sec") printf "%.2f\n", $3
++    }' "$f" |
+     while read -r ips; do
+         result "coremark" "$ips" "" ""
+     done
+ }
+
 
 parse_coremark-pro() {
     local f="$RESULTS_DIR/coremark-pro_results.txt"
@@ -492,7 +496,11 @@ parse_stressng_vm() {
 
 
 main() {
+    #setup
+    #build
+    #run
     clear
+
     # Title box
     echo "╔══════════════════════════════════════════════════╗"
     echo "║              RISC-V Benchmark Suite              ║"
@@ -502,6 +510,7 @@ main() {
     CPU_NAME=$(get_cpu_name) || { echo "Unable to detect CPU name" >&2; exit 1; }
     CPU_CORES=$(get_cpu_cores) || { echo "Unable to detect CPU cores" >&2; exit 1; }
     RAM_GB=$(get_ram_gb) || { echo "Unable to detect RAM GB" >&2; exit 1; }
+    
     
     
     # System information box
@@ -516,9 +525,6 @@ main() {
     echo
 
 
-    setup
-    build
-    run
  #potremmo mettere una riga per separare la tipologia di benchmark
     print_table_header
     parse_coremark 
