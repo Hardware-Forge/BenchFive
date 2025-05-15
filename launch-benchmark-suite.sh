@@ -490,7 +490,55 @@ parse_stressng_vm() {
     result "stressng_vm_bogo_ops" "$bogo_ops" "bogo-ops" ""
 }
 
+print_organized_results() {
+    # CPU Benchmarks
+    echo "CPU"
+    echo "───────────────────────────────────────────────────"
+    print_table_header
+    parse_coremark 
+    parse_coremark-pro
+    parse_7zip
+    parse_stockfish
+    get_geekbench_results
+    parse_geekbench
+    echo
 
+    # RAM Benchmarks
+    echo "RAM"
+    echo "───────────────────────────────────────────────────"
+    printf "%-30s | %-25s\n" "Benchmark" "Score"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
+    
+    # Get the values first
+    local f="$RESULTS_DIR/stream_results.txt"
+    scale_rate=$(awk '/^Scale:/ {print $2}' "$f")
+    scale_avg=$(awk '/^Scale:/ {print $3}' "$f")
+    triad_rate=$(awk '/^Triad:/ {print $2}' "$f")
+    triad_avg=$(awk '/^Triad:/ {print $3}' "$f")
+    
+    f="$RESULTS_DIR/tinymembench_results.txt"
+    copy_rate=$(awk '/^[[:space:]]*C copy[[:space:]]*:/ {match($0, /C copy[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f")
+    fill_rate=$(awk '/^[[:space:]]*C fill[[:space:]]*:/ {match($0, /C fill[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f")
+    
+    # Print RAM benchmark results
+    printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate} MB/s ${scale_avg}s"
+    printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate} MB/s ${triad_avg}s"
+    printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate} MB/s"
+    printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate} MB/s"
+    echo
+    
+    # Memory Latency Table
+    parse_tinymembench_latency
+
+    # Run but don't display these benchmarks
+    parse_ffmpeg >/dev/null 2>&1
+    parse_fio >/dev/null 2>&1
+    parse_iperf3 >/dev/null 2>&1
+    parse_stream >/dev/null 2>&1
+    parse_tinymembench >/dev/null 2>&1
+    parse_stressng_vm >/dev/null 2>&1
+    parse_stressng_temp >/dev/null 2>&1
+}
 
 main() {
     #setup
@@ -508,8 +556,6 @@ main() {
     CPU_CORES=$(get_cpu_cores) || { echo "Unable to detect CPU cores" >&2; exit 1; }
     RAM_GB=$(get_ram_gb) || { echo "Unable to detect RAM GB" >&2; exit 1; }
     
-    
-    
     # System information box
     echo "┌$(printf '─%.0s' $(seq 1 $BOX_W))┐"
     row_center "System Information"
@@ -521,29 +567,9 @@ main() {
     echo "└$(printf '─%.0s' $(seq 1 $BOX_W))┘"
     echo
 
-
- #potremmo mettere una riga per separare la tipologia di benchmark
-    print_table_header
-    parse_coremark 
-    parse_coremark-pro
-    parse_7zip
-    parse_stockfish
-    get_geekbench_results
-    parse_geekbench
-#---------------------------------
-    parse_ffmpeg
-#---------------------------------
-    parse_fio
-    parse_iperf3
-#---------------------------------
-    parse_stream
-    parse_tinymembench    
-    parse_stressng_vm
-#---------------------------------
-    parse_stressng_temp
-#---------------------------------
-    parse_tinymembench_latency
-
+    # Print organized benchmark results
+    print_organized_results
+    
     echo
     echo "------------------------------------------------------All benchmarks have been completed----------------------------------------------------"
 }
