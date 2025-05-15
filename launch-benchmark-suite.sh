@@ -404,7 +404,7 @@ parse_stream() {
         ' "$f"
     )
     result "stream_scale_rate&lat" "$scale_rate" "MB/s" " ${scale_avg} s"
-    result "stream_triad_rate&lat" "$triad_rate" "MB/s" " ${triad_avg}n s"
+    result "stream_triad_rate&lat" "$triad_rate" "MB/s" " ${triad_avg} s"
 }
 
 parse_tinymembench() {
