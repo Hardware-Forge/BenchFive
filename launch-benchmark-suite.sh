@@ -573,47 +573,65 @@ print_organized_results() {
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
         fiof="$RESULTS_DIR/fio_resultscmd.txt"
 
-        # estrai valori in una sola passata awk, senza array
-        read bwr bww iopsr iopsw latr latw < <(
-            awk '
-                /^  read:/  { mode="r"; next }
-                /^  write:/ { mode="w"; next }
+        # ── helper: KiB→MB, GiB→MB, ecc. ──────────────────────────
+        convert_bw_to_mb() {
+            local tok="$1" num unit mb
+            num=$(echo "$tok" | sed -nE 's/([0-9.]+).*/\1/p')
+            unit=$(echo "$tok" | sed -nE 's/[0-9.]+([A-Za-z]+)\/s.*/\1/p')
+            case "$unit" in
+                KiB|kB) mb=$(awk -v n="$num" 'BEGIN{printf "%.2f", n/1024}') ;;
+                KB)     mb=$(awk -v n="$num" 'BEGIN{printf "%.2f", n/1000}') ;;
+                MiB|MB) mb="$num" ;;
+                GiB|GB) mb=$(awk -v n="$num" 'BEGIN{printf "%.2f", n*1024}') ;;
+                *)      mb="$num" ;;
+            esac
+            echo "$mb"
+        }
 
-                mode=="r" && /IOPS=/ {
-                    # BW dentro parentesi, IOPS prima della virgola
-                    if ($0 ~ /BW=/)  {
-                        sub(/.*BW=[^(]+\(/,""); sub(/[A-Za-z].*/,""); bwr=$1
-                    }
-                    if ($0 ~ /IOPS=/) {
-                        sub(/.*IOPS=/,""); sub(/[^0-9.].*/,"");   iopsr=$1
-                    }
-                }
-                mode=="w" && /IOPS=/ {
-                    if ($0 ~ /BW=/)  {
-                        sub(/.*BW=[^(]+\(/,""); sub(/[A-Za-z].*/,""); bww=$1
-                    }
-                    if ($0 ~ /IOPS=/) {
-                        sub(/.*IOPS=/,""); sub(/[^0-9.].*/,"");   iopsw=$1
-                    }
-                }
+        # ── helper: nsec/usec/msec → µs ───────────────────────────
+        to_us() {
+            local val="$1" unit="$2"
+            case "$unit" in
+                nsec) awk -v v="$val" 'BEGIN{printf "%.2f", v/1000}' ;;
+                msec) awk -v v="$val" 'BEGIN{printf "%.2f", v*1000}' ;;
+                *)    printf "%.2f" "$val" ;;
+            esac
+        }
 
-                mode=="r" && /lat \(/ {
-                    if (match($0,/avg=([0-9.]+)/)) latr=substr($0,RSTART+4,RLENGTH-4)
-                    mode=""     # trovato; esco dal blocco read
-                }
-                mode=="w" && /lat \(/ {
-                    if (match($0,/avg=([0-9.]+)/)) latw=substr($0,RSTART+4,RLENGTH-4)
-                    mode=""
-                }
+        # prima riga “read:” e “write:”
+        read_line=$(grep -m1 '^[[:space:]]*read:'  "$fiof")
+        write_line=$(grep -m1 '^[[:space:]]*write:' "$fiof")
 
-                END { print bwr,bww,iopsr,iopsw,latr,latw }
-            ' "$fiof"
-        )
+        # IOPS
+        read_iops=$(echo "$read_line"  | sed -nE 's/.*IOPS=([0-9.]+).*/\1/p')
+        write_iops=$(echo "$write_line" | sed -nE 's/.*IOPS=([0-9.]+).*/\1/p')
+
+        # Bandwidth
+        bw_read_tok=$(echo "$read_line"  | sed -nE 's/.*BW=([^,]+).*/\1/p')
+        bw_write_tok=$(echo "$write_line" | sed -nE 's/.*BW=([^,]+).*/\1/p')
+        bwr=$(convert_bw_to_mb "$bw_read_tok")
+        bww=$(convert_bw_to_mb "$bw_write_tok")
+
+        # Latency: primi due match della forma “lat (xsec): … avg=…”
+        mapfile -t lat_lines < <(grep -n '^[[:space:]]*lat (' "$fiof" | head -n2)
+        latr="N/A"; latw="N/A"
+        if [[ ${lat_lines[0]} ]]; then
+            line=$(sed -n "${lat_lines[0]%%:*}p" "$fiof")
+            avg=$(echo "$line" | sed -nE 's/.*avg=([0-9.]+).*/\1/p')
+            unit=$(echo "$line" | sed -nE 's/.*lat \(([a-z]+)\).*/\1/p')
+            latr=$(to_us "$avg" "$unit")
+        fi
+        if [[ ${lat_lines[1]} ]]; then
+            line=$(sed -n "${lat_lines[1]%%:*}p" "$fiof")
+            avg=$(echo "$line" | sed -nE 's/.*avg=([0-9.]+).*/\1/p')
+            unit=$(echo "$line" | sed -nE 's/.*lat \(([a-z]+)\).*/\1/p')
+            latw=$(to_us "$avg" "$unit")
+        fi
 
         printf "%-30s | %-25s\n" "fio_bandwidth_r" "${bwr:-N/A} MB/s"
         printf "%-30s | %-25s\n" "fio_bandwidth_w" "${bww:-N/A} MB/s"
-        printf "%-30s | %-25s\n" "fio_iops_r"      "${iopsr:-N/A} IOPS"
-        printf "%-30s | %-25s\n" "fio_iops_w"      "${iopsw:-N/A} IOPS"
+        printf "%-30s | %-25s\n" "fio_iops_r"      "${read_iops:-N/A} IOPS"
+        printf "%-30s | %-25s\n" "fio_iops_w"      "${write_iops:-N/A} IOPS"
         printf "%-30s | %-25s\n" "fio_lat_r"       "${latr:-N/A} µs"
         printf "%-30s | %-25s\n" "fio_lat_w"       "${latw:-N/A} µs"
     else
@@ -635,6 +653,7 @@ print_organized_results() {
         printf "%-30s | %-25s\n" "iperf3" "File not found"
     fi
     echo
+
 
 
 
