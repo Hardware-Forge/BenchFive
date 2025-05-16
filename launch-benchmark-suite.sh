@@ -414,7 +414,7 @@ parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
 
-    # Estrai il valore numerico subito prima di “MB/s”
+    # Estrai il valore numerico subito prima di "MB/s"
     local copy_rate fill_rate
     copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' "$f")
     fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' "$f")
@@ -450,10 +450,7 @@ parse_tinymembench_latency() {
     /^block size/ { in_table=1; next }
     in_table && /^$/  { exit }
     in_table && /^[[:space:]]*[0-9]+/ {
-        tog = 1 - tog
-        if (tog == 1) {
-            printf "%9s  | %21s\n", $1, $3
-        }
+        printf "%9s  | %21s\n", $1, $3
     }
     ' "$f"
 }
@@ -533,7 +530,7 @@ print_organized_results() {
             /^[[:space:]]*C[[:space:]]+copy/ {
                 if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
                     val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l’unità
+                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
                     print val
                     exit
                 }
