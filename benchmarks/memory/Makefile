@@ -1,13 +1,13 @@
 #---------------------------------------------------memory Makefile------------------------------------------------
 
-.PHONY: tinymembench ramspeed 
+.PHONY: all tinymembench stream getresults getresults_stream getresults_tinymembench clean clean_results
 
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-all: stream tinymembench ramspeed 
+all: stream tinymembench 
 
-getresults: getresults_stream getresults_tinymembench getresults_ramspeed
+getresults: getresults_stream getresults_tinymembench 
 
 clean:
 	@rm -f stream/streameseguibile
