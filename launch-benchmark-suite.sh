@@ -417,24 +417,27 @@ parse_tinymembench() {
     # ─── Estrai C copy & C fill ───────────────────────────────────────
     read copy_rate fill_rate < <(
         awk '
-        # C copy generico (quello con ":   8012.3 MB/s")
-        /^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
-            copy_rate = gensub(/^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        BEGIN {
+            copy_rate = "N/A"
+            fill_rate = "N/A"
         }
-        # C fill generico
-        /^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
-            fill_rate = gensub(/^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        # Cerca "C copy" seguito da numeri e MB/s
+        /C copy[^:]*:[^0-9]*[0-9.]+/ {
+            if (match($0, /C copy[^:]*:[^0-9]*([0-9.]+)/, arr)) {
+                copy_rate = arr[1]
+            }
+        }
+        # Cerca "C fill" seguito da numeri e MB/s
+        /C fill[^:]*:[^0-9]*[0-9.]+/ {
+            if (match($0, /C fill[^:]*:[^0-9]*([0-9.]+)/, arr)) {
+                fill_rate = arr[1]
+            }
         }
         END {
-            # Se uno dei due non è stato trovato, rimane vuoto
             print copy_rate, fill_rate
         }
         ' "$f"
     )
-
-    # Verifica che li abbiamo trovati
-    [[ -z "$copy_rate" ]] && echo "warning: valore C copy non trovato."
-    [[ -z "$fill_rate" ]] && echo "warning: valore C fill non trovato."
 
     result "tinymemb_copy" "$copy_rate" "MB/s" ""
     result "tinymemb_fill" "$fill_rate" "MB/s" ""
@@ -523,8 +526,9 @@ print_organized_results() {
     triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
     
     f="$RESULTS_DIR/tinymembench_results.txt"
-    copy_rate=$(awk '/^C copy[[:space:]]*:/ {print $4; exit}' "$f" 2>/dev/null || echo "N/A")
-    fill_rate=$(awk '/^C fill[[:space:]]*:/ {print $4; exit}' "$f" 2>/dev/null || echo "N/A")
+    # Usa la stessa logica robusta per estrarre i valori
+    copy_rate=$(awk 'BEGIN { res="N/A" } /C copy[^:]*:[^0-9]*[0-9.]+/ { if (match($0, /C copy[^:]*:[^0-9]*([0-9.]+)/, arr)) { res=arr[1]; exit } } END { print res }' "$f")
+    fill_rate=$(awk 'BEGIN { res="N/A" } /C fill[^:]*:[^0-9]*[0-9.]+/ { if (match($0, /C fill[^:]*:[^0-9]*([0-9.]+)/, arr)) { res=arr[1]; exit } } END { print res }' "$f")
     
     # Print RAM benchmark results
     printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
