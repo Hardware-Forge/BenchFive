@@ -526,12 +526,18 @@ print_organized_results() {
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
 
-    # -------- TINYMEMBENCH ----
+        # -------- TINYMEMBENCH ----
     if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
-        copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' \
-                          "$RESULTS_DIR/tinymembench_results.txt")
-        fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' \
-                          "$RESULTS_DIR/tinymembench_results.txt")
+
+        copy_rate=$(awk '
+            /^[[:space:]]*C[[:space:]]+copy/ {
+                if (match($0,/([0-9]+(\.[0-9]+)?)\s*MB\/s/,m)) {print m[1]; exit}
+            }' "$RESULTS_DIR/tinymembench_results.txt")
+
+        fill_rate=$(awk '
+            /^[[:space:]]*C[[:space:]]+fill/ {
+                if (match($0,/([0-9]+(\.[0-9]+)?)\s*MB\/s/,m)) {print m[1]; exit}
+            }' "$RESULTS_DIR/tinymembench_results.txt")
 
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
@@ -541,6 +547,7 @@ print_organized_results() {
     else
         printf "%-30s | %-25s\n" "tinymembench" "File not found"
     fi
+
     echo
 
     # ----- LATENCY TABLE -------
