@@ -384,16 +384,19 @@ parse_iperf3() {
 }
 parse_stream() {
     local f="$RESULTS_DIR/stream_results.txt"
+    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
     # ─── STREAM benchmark (Scale & Triad) ──────────────────────
     read scale_rate scale_avg triad_rate triad_avg < <(
         awk '
             /^Scale:/ {
+                # Format in file: Scale:           17720.9     0.001245     0.000903     0.001738
                 # $2 = Best Rate MB/s, $3 = Avg time (s)
                 scale_rate = $2
                 scale_avg  = $3
             }
             /^Triad:/ {
+                # Format in file: Triad:          19497.1     0.001834     0.001231     0.002897
                 # $2 = Best Rate MB/s, $3 = Avg time (s)
                 triad_rate = $2
                 triad_avg  = $3
@@ -403,8 +406,8 @@ parse_stream() {
             }
         ' "$f"
     )
-    result "stream_scale_rate&lat" "$scale_rate" "MB/s" " ${scale_avg} s"
-    result "stream_triad_rate&lat" "$triad_rate" "MB/s" " ${triad_avg} s"
+    result "stream_scale_rate&lat" "${scale_rate:-N/A}" "MB/s" " ${scale_avg:-N/A} s"
+    result "stream_triad_rate&lat" "${triad_rate:-N/A}" "MB/s" " ${triad_avg:-N/A} s"
 }
 
 parse_tinymembench() {
@@ -441,7 +444,7 @@ parse_tinymembench_latency() {
 
     # Riga vuota e titolo
     echo
-    echo "memory latency from cache L1 to ram – Single Random Read"
+    echo "memory latency from cache L1 to ram - Single Random Read"
     # Intestazione tabella
     echo "Block size | Single random read (ns)"
     echo "-----------|---------------------------"
@@ -511,20 +514,20 @@ print_organized_results() {
     
     # Get the values first
     local f="$RESULTS_DIR/stream_results.txt"
-    scale_rate=$(awk '/^Scale:/ {print $2}' "$f")
-    scale_avg=$(awk '/^Scale:/ {print $3}' "$f")
-    triad_rate=$(awk '/^Triad:/ {print $2}' "$f")
-    triad_avg=$(awk '/^Triad:/ {print $3}' "$f")
+    scale_rate=$(awk '/^Scale:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
+    scale_avg=$(awk '/^Scale:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
+    triad_rate=$(awk '/^Triad:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
+    triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
     
     f="$RESULTS_DIR/tinymembench_results.txt"
-    copy_rate=$(awk '/^[[:space:]]*C copy[[:space:]]*:/ {match($0, /C copy[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f")
-    fill_rate=$(awk '/^[[:space:]]*C fill[[:space:]]*:/ {match($0, /C fill[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f")
+    copy_rate=$(awk '/^[[:space:]]*C copy[[:space:]]*:/ {match($0, /C copy[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f" 2>/dev/null || echo "N/A")
+    fill_rate=$(awk '/^[[:space:]]*C fill[[:space:]]*:/ {match($0, /C fill[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f" 2>/dev/null || echo "N/A")
     
     # Print RAM benchmark results
-    printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate} MB/s ${scale_avg}s"
-    printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate} MB/s ${triad_avg}s"
-    printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate} MB/s"
-    printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate} MB/s"
+    printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
+    printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate:-N/A} MB/s ${triad_avg:-N/A}s"
+    printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate:-N/A} MB/s"
+    printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate:-N/A} MB/s"
     echo
     
     # Memory Latency Table
