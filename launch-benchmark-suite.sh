@@ -523,29 +523,11 @@ print_organized_results() {
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
 
-        # -------- TINYMEMBENCH ----
+    # -------- TINYMEMBENCH ----
     if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
-        # --- copy ---
-        copy_rate=$(awk '
-            /^[[:space:]]*C[[:space:]]+copy/ {
-                if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                    val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
-                    print val
-                    exit
-                }
-            } "$RESULTS_DIR/tinymembench_results.txt")
-
-        # --- fill ---
-        fill_rate=$(awk '
-            /^[[:space:]]*C[[:space:]]+fill/ {
-                if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                    val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)
-                    print val
-                    exit
-                }
-            }' "$RESULTS_DIR/tinymembench_results.txt")
+        local copy_rate fill_rate
+        copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' "$RESULTS_DIR/tinymembench_results.txt")
+        fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' "$RESULTS_DIR/tinymembench_results.txt")
 
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
@@ -556,72 +538,10 @@ print_organized_results() {
         printf "%-30s | %-25s\n" "tinymembench" "File not found"
     fi
 
-
     echo
 
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
-
-    # ─────────────────────────── I/O ────────────────────────────
-    echo
-    echo "I/O"
-    echo "───────────────────────────────────────────────────"
-    printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
-
-    # -------- FIO ----------
-    if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
-        local bwr bww iopsr iopsw latr latw
-        read bwr bww iopsr iopsw latr latw < <(
-            awk 
-            BEGIN {
-                section=""
-                read_lat_done=write_lat_done=0
-            }
-            /^  read:/ {
-                section="read"
-                if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bwr = a[1]
-                if (match($0, /IOPS=([^,]+)/,      c)) iopsr = c[1]
-                next
-            }
-            /^  write:/ {
-                section="write"
-                if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bww = a[1]
-                if (match($0, /IOPS=([^,;]+)/,      c)) iopsw = c[1]
-                next
-            }
-            /^[[:space:]]+lat \(usec\):.*avg=/ {
-                if (section=="read" && !read_lat_done) {
-                    if (match($0, /avg=([0-9.]+)/, d)) {
-                        latr = d[1]
-                        read_lat_done = 1
-                    }
-                }
-                else if (section=="write" && !write_lat_done) {
-                    if (match($0, /avg=([0-9.]+)/, d)) {
-                        latw = d[1]
-                        write_lat_done = 1
-                    }
-                }
-                next
-            }
-            END {
-                print bwr, bww, iopsr, iopsw, latr, latw
-            }
-             "$RESULTS_DIR/fio_resultscmd.txt"
-        )
-
-        printf "%-30s | %-25s\n" "fio_bandwidth_r" "${bwr:-N/A} MB/s"
-        printf "%-30s | %-25s\n" "fio_bandwidth_w" "${bww:-N/A} MB/s"
-        printf "%-30s | %-25s\n" "fio_iops_r" "${iopsr:-N/A} IOPS"
-        printf "%-30s | %-25s\n" "fio_iops_w" "${iopsw:-N/A} IOPS"
-        printf "%-30s | %-25s\n" "fio_lat_r" "${latr:-N/A} us"
-        printf "%-30s | %-25s\n" "fio_lat_w" "${latw:-N/A} us"
-    else
-        printf "%-30s | %-25s\n" "fio_benchmark" "File not found"
-    fi
-
-    echo
 
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
