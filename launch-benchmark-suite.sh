@@ -415,10 +415,22 @@ parse_tinymembench() {
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
 
     # ─── Estrai C copy & C fill ───────────────────────────────────────
-    # Usa grep per estrarre i valori, molto più semplice di awk con regex complesse
+    # Usa metodi più semplici per estrarre i valori
     if [[ -r "$f" ]]; then
-        copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
-        fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        # Metodo 1: usa awk per estrarre i valori
+        copy_rate=$(awk '/^C copy/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
+        fill_rate=$(awk '/^C fill/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
+        
+        # Se awk fallisce, prova con cut
+        if [[ -z "$copy_rate" ]]; then
+            copy_line=$(grep -m1 "^C copy" "$f")
+            copy_rate=$(echo "$copy_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
+        fi
+        
+        if [[ -z "$fill_rate" ]]; then
+            fill_line=$(grep -m1 "^C fill" "$f")  
+            fill_rate=$(echo "$fill_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
+        fi
     else
         copy_rate=""
         fill_rate=""
@@ -508,8 +520,8 @@ print_organized_results() {
     parse_geekbench
     echo
 
-    # RAM Benchmarks - Stream section
-    echo "RAM - Stream Benchmark"
+    # RAM Benchmarks - Unified section
+    echo "RAM"
     echo "───────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
@@ -528,27 +540,32 @@ print_organized_results() {
     else
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
-    echo
-
-    # RAM Benchmarks - Tinymembench section
-    echo "RAM - Tinymembench"
-    echo "───────────────────────────────────────────────────"
-    printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
     
     # Get tinymembench values
     f="$RESULTS_DIR/tinymembench_results.txt"
     if [[ -r "$f" ]]; then
-        copy_rate=$(grep -E "^C copy" "$f" 2>/dev/null | grep -o "[0-9]\+\.[0-9]\+" | head -1)
-        fill_rate=$(grep -E "^C fill" "$f" 2>/dev/null | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        # Metodo più affidabile per estrarre i valori
+        copy_rate=$(awk '/^C copy/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
+        fill_rate=$(awk '/^C fill/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
+        
+        # Se awk fallisce, prova con cut
+        if [[ -z "$copy_rate" ]]; then
+            copy_line=$(grep -m1 "^C copy" "$f")
+            copy_rate=$(echo "$copy_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
+        fi
+        
+        if [[ -z "$fill_rate" ]]; then
+            fill_line=$(grep -m1 "^C fill" "$f")  
+            fill_rate=$(echo "$fill_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
+        fi
         
         # Default values if not found
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
         
         # Print tinymembench results
-        printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate:-N/A} MB/s"
-        printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate:-N/A} MB/s"
+        printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate} MB/s"
+        printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate} MB/s"
     else
         printf "%-30s | %-25s\n" "tinymembench" "File not found"
     fi
