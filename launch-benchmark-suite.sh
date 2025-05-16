@@ -523,40 +523,6 @@ print_organized_results() {
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
 
-        # -------- TINYMEMBENCH ----
-    if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
-        # --- copy ---
-        copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {
-            if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                val = substr($0, RSTART, RLENGTH)
-                sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
-                print val
-                exit
-            }
-        ' "$RESULTS_DIR/tinymembench_results.txt")
-
-        # --- fill ---
-        fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {
-            if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                val = substr($0, RSTART, RLENGTH)
-                sub(/[[:space:]]*MB\/s/, "", val)
-                print val
-                exit
-            }
-         "$RESULTS_DIR/tinymembench_results.txt"
-
-        copy_rate=${copy_rate:-N/A}
-        fill_rate=${fill_rate:-N/A}
-
-        printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate} MB/s"
-        printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate} MB/s"
-    else
-        printf "%-30s | %-25s\n" "tinymembench" "File not found"
-    fi
-
-
-    echo
-
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
