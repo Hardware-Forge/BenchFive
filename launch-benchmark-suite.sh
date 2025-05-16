@@ -486,7 +486,6 @@ parse_stressng_vm() {
 
     result "stressng_vm_bogo_ops" "$bogo_ops" "bogo-ops" ""
 }
-
 print_organized_results() {
     # ─────────────────────────── CPU ────────────────────────────
     echo "CPU"
@@ -530,11 +529,11 @@ print_organized_results() {
             /^[[:space:]]*C[[:space:]]+copy/ {
                 if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
                     val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
+                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l’unità
                     print val
                     exit
                 }
-            } "$RESULTS_DIR/tinymembench_results.txt")
+            }' "$RESULTS_DIR/tinymembench_results.txt")
 
         # --- fill ---
         fill_rate=$(awk '
@@ -561,7 +560,6 @@ print_organized_results() {
 
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
-
     # ─────────────────────────── I/O ────────────────────────────
     echo
     echo "I/O"
