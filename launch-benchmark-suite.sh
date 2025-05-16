@@ -416,8 +416,13 @@ parse_tinymembench() {
 
     # ─── Estrai C copy & C fill ───────────────────────────────────────
     # Usa grep per estrarre i valori, molto più semplice di awk con regex complesse
-    copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
-    fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    if [[ -r "$f" ]]; then
+        copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    else
+        copy_rate=""
+        fill_rate=""
+    fi
     
     # Default values if not found
     copy_rate=${copy_rate:-N/A}
@@ -431,6 +436,13 @@ parse_tinymembench() {
 parse_tinymembench_latency() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+
+    # Controlla se le informazioni di latenza sono presenti nel file
+    if ! grep -q "^block size" "$f"; then
+        echo
+        echo "Memory latency table not available in tinymembench results"
+        return
+    fi
 
     # Riga vuota e titolo
     echo
@@ -496,46 +508,63 @@ print_organized_results() {
     parse_geekbench
     echo
 
-    # RAM Benchmarks
-    echo "RAM"
+    # RAM Benchmarks - Stream section
+    echo "RAM - Stream Benchmark"
     echo "───────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
     
-    # Get the values first
+    # Get stream values
     local f="$RESULTS_DIR/stream_results.txt"
-    scale_rate=$(awk '/^Scale:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
-    scale_avg=$(awk '/^Scale:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
-    triad_rate=$(awk '/^Triad:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
-    triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
+    if [[ -r "$f" ]]; then
+        scale_rate=$(awk '/^Scale:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
+        scale_avg=$(awk '/^Scale:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
+        triad_rate=$(awk '/^Triad:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
+        triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
+        
+        # Print stream results
+        printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
+        printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate:-N/A} MB/s ${triad_avg:-N/A}s"
+    else
+        printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
+    fi
+    echo
+
+    # RAM Benchmarks - Tinymembench section
+    echo "RAM - Tinymembench"
+    echo "───────────────────────────────────────────────────"
+    printf "%-30s | %-25s\n" "Benchmark" "Score"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
     
+    # Get tinymembench values
     f="$RESULTS_DIR/tinymembench_results.txt"
-    # Usa grep invece di awk per evitare problemi di sintassi
-    copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
-    fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
-    
-    # Default values if not found
-    copy_rate=${copy_rate:-N/A}
-    fill_rate=${fill_rate:-N/A}
-    
-    # Print RAM benchmark results
-    printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
-    printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate:-N/A} MB/s ${triad_avg:-N/A}s"
-    printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate:-N/A} MB/s"
-    printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate:-N/A} MB/s"
+    if [[ -r "$f" ]]; then
+        copy_rate=$(grep -E "^C copy" "$f" 2>/dev/null | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        fill_rate=$(grep -E "^C fill" "$f" 2>/dev/null | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+        
+        # Default values if not found
+        copy_rate=${copy_rate:-N/A}
+        fill_rate=${fill_rate:-N/A}
+        
+        # Print tinymembench results
+        printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate:-N/A} MB/s"
+        printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate:-N/A} MB/s"
+    else
+        printf "%-30s | %-25s\n" "tinymembench" "File not found"
+    fi
     echo
     
-    # Memory Latency Table
-    parse_tinymembench_latency
+    # Memory Latency Table (solo se il file esiste)
+    [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
-    # Run but don't display these benchmarks
-    parse_ffmpeg >/dev/null 2>&1
-    parse_fio >/dev/null 2>&1
-    parse_iperf3 >/dev/null 2>&1
-    parse_stream >/dev/null 2>&1
-    parse_tinymembench >/dev/null 2>&1
-    parse_stressng_vm >/dev/null 2>&1
-    parse_stressng_temp >/dev/null 2>&1
+    # Run but don't display these benchmarks - run only if files exist
+    [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt" ]] && [[ -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]] && parse_fio >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/iperf3_results.txt" ]] && parse_iperf3 >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stream_results.txt" ]] && parse_stream >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stress-ng_vm.txt" ]] && parse_stressng_vm >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stress-ng_cputemp.txt" ]] && parse_stressng_temp >/dev/null 2>&1
 }
 
 main() {
