@@ -415,29 +415,13 @@ parse_tinymembench() {
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
 
     # ─── Estrai C copy & C fill ───────────────────────────────────────
-    read copy_rate fill_rate < <(
-        awk '
-        BEGIN {
-            copy_rate = "N/A"
-            fill_rate = "N/A"
-        }
-        # Cerca "C copy" seguito da numeri e MB/s
-        /C copy[^:]*:[^0-9]*[0-9.]+/ {
-            if (match($0, /C copy[^:]*:[^0-9]*([0-9.]+)/, arr)) {
-                copy_rate = arr[1]
-            }
-        }
-        # Cerca "C fill" seguito da numeri e MB/s
-        /C fill[^:]*:[^0-9]*[0-9.]+/ {
-            if (match($0, /C fill[^:]*:[^0-9]*([0-9.]+)/, arr)) {
-                fill_rate = arr[1]
-            }
-        }
-        END {
-            print copy_rate, fill_rate
-        }
-        ' "$f"
-    )
+    # Usa grep per estrarre i valori, molto più semplice di awk con regex complesse
+    copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    
+    # Default values if not found
+    copy_rate=${copy_rate:-N/A}
+    fill_rate=${fill_rate:-N/A}
 
     result "tinymemb_copy" "$copy_rate" "MB/s" ""
     result "tinymemb_fill" "$fill_rate" "MB/s" ""
@@ -526,9 +510,13 @@ print_organized_results() {
     triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
     
     f="$RESULTS_DIR/tinymembench_results.txt"
-    # Usa la stessa logica robusta per estrarre i valori
-    copy_rate=$(awk 'BEGIN { res="N/A" } /C copy[^:]*:[^0-9]*[0-9.]+/ { if (match($0, /C copy[^:]*:[^0-9]*([0-9.]+)/, arr)) { res=arr[1]; exit } } END { print res }' "$f")
-    fill_rate=$(awk 'BEGIN { res="N/A" } /C fill[^:]*:[^0-9]*[0-9.]+/ { if (match($0, /C fill[^:]*:[^0-9]*([0-9.]+)/, arr)) { res=arr[1]; exit } } END { print res }' "$f")
+    # Usa grep invece di awk per evitare problemi di sintassi
+    copy_rate=$(grep -E "^C copy" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    fill_rate=$(grep -E "^C fill" "$f" | grep -o "[0-9]\+\.[0-9]\+" | head -1)
+    
+    # Default values if not found
+    copy_rate=${copy_rate:-N/A}
+    fill_rate=${fill_rate:-N/A}
     
     # Print RAM benchmark results
     printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
