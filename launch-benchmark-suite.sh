@@ -526,27 +526,24 @@ print_organized_results() {
         # -------- TINYMEMBENCH ----
     if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
         # --- copy ---
-        copy_rate=$(awk '
-            /^[[:space:]]*C[[:space:]]+copy/ {
-                if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                    val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
-                    print val
-                    exit
-                }
+        copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {
+            if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
+                val = substr($0, RSTART, RLENGTH)
+                sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
+                print val
+                exit
+            }
         ' "$RESULTS_DIR/tinymembench_results.txt")
 
         # --- fill ---
-        fill_rate=$(awk '
-            /^[[:space:]]*C[[:space:]]+fill/ {
-                if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
-                    val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)
-                    print val
-                    exit
-                }
+        fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {
+            if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
+                val = substr($0, RSTART, RLENGTH)
+                sub(/[[:space:]]*MB\/s/, "", val)
+                print val
+                exit
             }
-        ' "$RESULTS_DIR/tinymembench_results.txt")
+         "$RESULTS_DIR/tinymembench_results.txt"
 
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
