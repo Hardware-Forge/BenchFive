@@ -562,7 +562,7 @@ print_organized_results() {
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
-    ## ──────────────────────────  I/O  ───────────────────────────
+        ## ──────────────────────────  I/O  ───────────────────────────
     echo
     echo "I/O"
     echo "───────────────────────────────────────────────────"
@@ -574,23 +574,37 @@ print_organized_results() {
         read bwr bww iopsr iopsw latr latw < <(
             awk '
                 BEGIN { section="" }
-                /^  read:/ {
-                    section="read"
-                    if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bwr = a[1]
-                    if (match($0, /IOPS=([^,]+)/,              b)) iopsr = b[1]
-                    next
+                /^  read:/  { section="read"  }
+                /^  write:/ { section="write" }
+
+                # --- Bandwidth: numero dentro le parentesi tonde prima di "MB/s"
+                /\(.*MB\/s\)/ {
+                    if (match($0, /\([0-9.]+MB\/s\)/)) {
+                        val = substr($0, RSTART+1, RLENGTH-6)  # togli "(" e "MB/s"
+                        if (section=="read")  bwr = val
+                        if (section=="write") bww = val
+                    }
                 }
-                /^  write:/ {
-                    section="write"
-                    if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bww = a[1]
-                    if (match($0, /IOPS=([^,;]+)/,             b)) iopsw = b[1]
-                    next
+
+                # --- IOPS
+                /IOPS=/ {
+                    if (match($0, /IOPS=[0-9.]+/)) {
+                        val = substr($0, RSTART+5, RLENGTH-5)  # togli "IOPS="
+                        if (section=="read")  iopsr = val
+                        if (section=="write") iopsw = val
+                    }
                 }
-                /^[[:space:]]+lat \(usec\):.*avg=/ {
-                    if (section=="read"  && match($0, /avg=([0-9.]+)/, d)) latr = d[1]
-                    if (section=="write" && match($0, /avg=([0-9.]+)/, d)) latw = d[1]
+
+                # --- Latency media (avg=...)
+                /lat .*avg=/ {
+                    if (match($0, /avg=[0-9.]+/)) {
+                        val = substr($0, RSTART+4, RLENGTH-4)  # togli "avg="
+                        if (section=="read")  latr = val
+                        if (section=="write") latw = val
+                    }
                 }
-                END { print bwr,bww,iopsr,iopsw,latr,latw }
+
+                END { print bwr, bww, iopsr, iopsw, latr, latw }
             ' "$RESULTS_DIR/fio_resultscmd.txt"
         )
 
@@ -609,14 +623,18 @@ print_organized_results() {
         throughput=$(awk '
             /Gbits\/sec/ { last=$0 }
             END {
-                if (match(last, /([0-9.]+)[[:space:]]*Gbits\/sec/, a))
-                    printf("%.1f", a[1])
+                if (match(last, /[0-9.]+[[:space:]]*Gbits\/sec/)) {
+                    val = substr($0, RSTART, RLENGTH)
+                    sub(/[[:space:]]*Gbits\/sec/, "", val)
+                    print val
+                }
             }' "$RESULTS_DIR/iperf3_results.txt")
         printf "%-30s | %-25s\n" "iperf_net_throughput" "${throughput:-N/A} Gb/s"
     else
         printf "%-30s | %-25s\n" "iperf3" "File not found"
     fi
     echo
+
 
 
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
