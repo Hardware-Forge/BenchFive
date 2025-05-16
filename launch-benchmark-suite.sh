@@ -417,11 +417,15 @@ parse_tinymembench() {
     # ─── Estrai C copy & C fill ───────────────────────────────────────
     read copy_rate fill_rate < <(
         awk '
-        /^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
-            copy_rate = gensub(/^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        /^C copy[[:space:]]*:/ {
+            # Format: C copy               : 3210.7 MB/s (3)
+            # $4 = Value (3210.7)
+            copy_rate = $4
         }
-        /^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
-            fill_rate = gensub(/^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
+        /^C fill[[:space:]]*:/ {
+            # Format: C fill               : 7665.4 MB/s (10, 0.2%)
+            # $4 = Value (7665.4)
+            fill_rate = $4
         }
         END {
             print copy_rate, fill_rate
@@ -520,8 +524,8 @@ print_organized_results() {
     triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
     
     f="$RESULTS_DIR/tinymembench_results.txt"
-    copy_rate=$(awk '/^[[:space:]]*C copy[[:space:]]*:/ {match($0, /C copy[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f" 2>/dev/null || echo "N/A")
-    fill_rate=$(awk '/^[[:space:]]*C fill[[:space:]]*:/ {match($0, /C fill[[:space:]]*:[[:space:]]*([0-9.]+)/, arr); print arr[1]; exit}' "$f" 2>/dev/null || echo "N/A")
+    copy_rate=$(awk '/^C copy[[:space:]]*:/ {print $4; exit}' "$f" 2>/dev/null || echo "N/A")
+    fill_rate=$(awk '/^C fill[[:space:]]*:/ {print $4; exit}' "$f" 2>/dev/null || echo "N/A")
     
     # Print RAM benchmark results
     printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
