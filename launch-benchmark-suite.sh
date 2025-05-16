@@ -562,11 +562,68 @@ print_organized_results() {
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
+    ## ──────────────────────────  I/O  ───────────────────────────
+    echo
+    echo "I/O"
+    echo "───────────────────────────────────────────────────"
+    printf "%-30s | %-25s\n" "Benchmark" "Score"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
+
+    # ---------- FIO ------------------------------------------------
+    if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
+        read bwr bww iopsr iopsw latr latw < <(
+            awk '
+                BEGIN { section="" }
+                /^  read:/ {
+                    section="read"
+                    if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bwr = a[1]
+                    if (match($0, /IOPS=([^,]+)/,              b)) iopsr = b[1]
+                    next
+                }
+                /^  write:/ {
+                    section="write"
+                    if (match($0, /BW=[^(]+\(([0-9.]+)MB\/s\)/, a)) bww = a[1]
+                    if (match($0, /IOPS=([^,;]+)/,             b)) iopsw = b[1]
+                    next
+                }
+                /^[[:space:]]+lat \(usec\):.*avg=/ {
+                    if (section=="read"  && match($0, /avg=([0-9.]+)/, d)) latr = d[1]
+                    if (section=="write" && match($0, /avg=([0-9.]+)/, d)) latw = d[1]
+                }
+                END { print bwr,bww,iopsr,iopsw,latr,latw }
+            ' "$RESULTS_DIR/fio_resultscmd.txt"
+        )
+
+        printf "%-30s | %-25s\n" "fio_bandwidth_r" "${bwr:-N/A} MB/s"
+        printf "%-30s | %-25s\n" "fio_bandwidth_w" "${bww:-N/A} MB/s"
+        printf "%-30s | %-25s\n" "fio_iops_r"      "${iopsr:-N/A} IOPS"
+        printf "%-30s | %-25s\n" "fio_iops_w"      "${iopsw:-N/A} IOPS"
+        printf "%-30s | %-25s\n" "fio_lat_r"       "${latr:-N/A} µs"
+        printf "%-30s | %-25s\n" "fio_lat_w"       "${latw:-N/A} µs"
+    else
+        printf "%-30s | %-25s\n" "fio" "File not found"
+    fi
+
+    # ---------- IPERF3 --------------------------------------------
+    if [[ -r "$RESULTS_DIR/iperf3_results.txt" ]]; then
+        throughput=$(awk '
+            /Gbits\/sec/ { last=$0 }
+            END {
+                if (match(last, /([0-9.]+)[[:space:]]*Gbits\/sec/, a))
+                    printf("%.1f", a[1])
+            }' "$RESULTS_DIR/iperf3_results.txt")
+        printf "%-30s | %-25s\n" "iperf_net_throughput" "${throughput:-N/A} Gb/s"
+    else
+        printf "%-30s | %-25s\n" "iperf3" "File not found"
+    fi
+    echo
+
+
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
+    #[[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
+    #[[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
+    #[[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
+    #[[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/stress-ng_vm.txt"    ]] && parse_stressng_vm >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/stress-ng_cputemp.txt" ]] && parse_stressng_temp >/dev/null 2>&1
 }
