@@ -534,7 +534,7 @@ print_organized_results() {
                     print val
                     exit
                 }
-            }' "$RESULTS_DIR/tinymembench_results.txt")
+            } "$RESULTS_DIR/tinymembench_results.txt")
 
         # --- fill ---
         fill_rate=$(awk '
@@ -573,7 +573,7 @@ print_organized_results() {
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
         local bwr bww iopsr iopsw latr latw
         read bwr bww iopsr iopsw latr latw < <(
-            awk '
+            awk 
             BEGIN {
                 section=""
                 read_lat_done=write_lat_done=0
@@ -608,7 +608,7 @@ print_organized_results() {
             END {
                 print bwr, bww, iopsr, iopsw, latr, latw
             }
-            ' "$RESULTS_DIR/fio_resultscmd.txt"
+             "$RESULTS_DIR/fio_resultscmd.txt"
         )
 
         printf "%-30s | %-25s\n" "fio_bandwidth_r" "${bwr:-N/A} MB/s"
