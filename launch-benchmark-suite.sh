@@ -562,7 +562,7 @@ print_organized_results() {
     # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
-       ## ──────────────────────────  I/O  ───────────────────────────
+        ## ──────────────────────────  I/O  ───────────────────────────
     echo
     echo "I/O"
     echo "───────────────────────────────────────────────────"
@@ -573,60 +573,69 @@ print_organized_results() {
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
         fiof="$RESULTS_DIR/fio_resultscmd.txt"
 
-        # Bandwidth MB/s
-        bwr=$(grep -m1 '^  read:'  "$fiof" | sed -nE 's/.*BW=[^(]+\(([0-9.]+)MB\/s.*/\1/p')
-        bww=$(grep -m1 '^  write:' "$fiof" | sed -nE 's/.*BW=[^(]+\(([0-9.]+)MB\/s.*/\1/p')
+        # estrai valori in una sola passata awk, senza array
+        read bwr bww iopsr iopsw latr latw < <(
+            awk '
+                /^  read:/  { mode="r"; next }
+                /^  write:/ { mode="w"; next }
 
-        # IOPS
-        iopsr=$(grep -m1 '^  read:'  "$fiof" | sed -nE 's/.*IOPS=([0-9.]+).*/\1/p')
-        iopsw=$(grep -m1 '^  write:' "$fiof" | sed -nE 's/.*IOPS=([0-9.]+).*/\1/p')
+                mode=="r" && /IOPS=/ {
+                    # BW dentro parentesi, IOPS prima della virgola
+                    if ($0 ~ /BW=/)  {
+                        sub(/.*BW=[^(]+\(/,""); sub(/[A-Za-z].*/,""); bwr=$1
+                    }
+                    if ($0 ~ /IOPS=/) {
+                        sub(/.*IOPS=/,""); sub(/[^0-9.].*/,"");   iopsr=$1
+                    }
+                }
+                mode=="w" && /IOPS=/ {
+                    if ($0 ~ /BW=/)  {
+                        sub(/.*BW=[^(]+\(/,""); sub(/[A-Za-z].*/,""); bww=$1
+                    }
+                    if ($0 ~ /IOPS=/) {
+                        sub(/.*IOPS=/,""); sub(/[^0-9.].*/,"");   iopsw=$1
+                    }
+                }
 
-        # Latenza media
-        latr_line=$(grep -A2 '^  read:'  "$fiof"  | grep -m1 ' lat (' || true)
-        latw_line=$(grep -A2 '^  write:' "$fiof"  | grep -m1 ' lat (' || true)
+                mode=="r" && /lat \(/ {
+                    if (match($0,/avg=([0-9.]+)/)) latr=substr($0,RSTART+4,RLENGTH-4)
+                    mode=""     # trovato; esco dal blocco read
+                }
+                mode=="w" && /lat \(/ {
+                    if (match($0,/avg=([0-9.]+)/)) latw=substr($0,RSTART+4,RLENGTH-4)
+                    mode=""
+                }
 
-        convert_to_us() {
-            local raw="$1" unit="$2"
-            case "$unit" in
-                nsec) awk -v v="$raw" 'BEGIN{printf "%.3f", v/1000}' ;;
-                usec) printf "%s" "$raw" ;;
-                msec) awk -v v="$raw" 'BEGIN{printf "%.3f", v*1000}' ;;
-                *)    printf "N/A" ;;
-            esac
-        }
-
-        latr="N/A"; latw="N/A"
-        if [[ $latr_line =~ lat[[:space:]]\(([a-z]+)\).*\ avg=([0-9.]+) ]]; then
-            latr=$(convert_to_us "${BASH_REMATCH[2]}" "${BASH_REMATCH[1]}")
-        fi
-        if [[ $latw_line =~ lat[[:space:]]\(([a-z]+)\).*\ avg=([0-9.]+) ]]; then
-            latw=$(convert_to_us "${BASH_REMATCH[2]}" "${BASH_REMATCH[1]}")
-        fi
+                END { print bwr,bww,iopsr,iopsw,latr,latw }
+            ' "$fiof"
+        )
 
         printf "%-30s | %-25s\n" "fio_bandwidth_r" "${bwr:-N/A} MB/s"
         printf "%-30s | %-25s\n" "fio_bandwidth_w" "${bww:-N/A} MB/s"
         printf "%-30s | %-25s\n" "fio_iops_r"      "${iopsr:-N/A} IOPS"
         printf "%-30s | %-25s\n" "fio_iops_w"      "${iopsw:-N/A} IOPS"
-        printf "%-30s | %-25s\n" "fio_lat_r"       "${latr} µs"
-        printf "%-30s | %-25s\n" "fio_lat_w"       "${latw} µs"
+        printf "%-30s | %-25s\n" "fio_lat_r"       "${latr:-N/A} µs"
+        printf "%-30s | %-25s\n" "fio_lat_w"       "${latw:-N/A} µs"
     else
         printf "%-30s | %-25s\n" "fio" "File not found"
     fi
 
     # ---------- IPERF3 --------------------------------------------
     if [[ -r "$RESULTS_DIR/iperf3_results.txt" ]]; then
-        last_line=$(grep -E 'bits/sec' "$RESULTS_DIR/iperf3_results.txt" | tail -n1)
-        throughput="N/A"
-        if [[ $last_line =~ ([0-9.]+)[[:space:]]*Gbits/sec ]]; then
-            throughput=${BASH_REMATCH[1]}
-        elif [[ $last_line =~ ([0-9.]+)[[:space:]]*Mbits/sec ]]; then
-            throughput=$(awk -v v="${BASH_REMATCH[1]}" 'BEGIN{printf "%.2f", v/1000}')
+        last=$(grep -E 'bits/sec' "$RESULTS_DIR/iperf3_results.txt" | tail -n1)
+        if [[ $last =~ ([0-9.]+)[[:space:]]*Gbits/sec ]]; then
+            thr=${BASH_REMATCH[1]}
+        elif [[ $last =~ ([0-9.]+)[[:space:]]*Mbits/sec ]]; then
+            thr=$(awk -v v="${BASH_REMATCH[1]}" 'BEGIN{printf "%.2f", v/1000}')
+        else
+            thr="N/A"
         fi
-        printf "%-30s | %-25s\n" "iperf_net_throughput" "${throughput} Gb/s"
+        printf "%-30s | %-25s\n" "iperf_net_throughput" "${thr} Gb/s"
     else
         printf "%-30s | %-25s\n" "iperf3" "File not found"
     fi
     echo
+
 
 
 
