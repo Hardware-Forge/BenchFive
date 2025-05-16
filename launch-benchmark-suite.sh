@@ -417,17 +417,16 @@ parse_tinymembench() {
     # ─── Estrai C copy & C fill ───────────────────────────────────────
     read copy_rate fill_rate < <(
         awk '
-        /^C copy[[:space:]]*:/ {
-            # Format: C copy               : 3210.7 MB/s (3)
-            # $4 = Value (3210.7)
-            copy_rate = $4
+        # C copy generico (quello con ":   8012.3 MB/s")
+        /^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
+            copy_rate = gensub(/^[[:space:]]*C copy[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
         }
-        /^C fill[[:space:]]*:/ {
-            # Format: C fill               : 7665.4 MB/s (10, 0.2%)
-            # $4 = Value (7665.4)
-            fill_rate = $4
+        # C fill generico
+        /^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+)[[:space:]]*MB\/s/ {
+            fill_rate = gensub(/^[[:space:]]*C fill[[:space:]]*:[[:space:]]*([0-9.]+).*$/, "\\1", "g")
         }
         END {
+            # Se uno dei due non è stato trovato, rimane vuoto
             print copy_rate, fill_rate
         }
         ' "$f"
