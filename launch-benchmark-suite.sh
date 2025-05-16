@@ -571,7 +571,7 @@ print_organized_results() {
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
         local bwr bww iopsr iopsw latr latw
         read bwr bww iopsr iopsw latr latw < <(
-            awk 
+            awk
             BEGIN {
                 section=""
                 read_lat_done=write_lat_done=0
