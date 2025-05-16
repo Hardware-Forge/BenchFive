@@ -414,35 +414,18 @@ parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
 
-    # ─── Estrai C copy & C fill ───────────────────────────────────────
-    # Usa metodi più semplici per estrarre i valori
-    if [[ -r "$f" ]]; then
-        # Metodo 1: usa awk per estrarre i valori
-        copy_rate=$(awk '/^C copy/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
-        fill_rate=$(awk '/^C fill/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
-        
-        # Se awk fallisce, prova con cut
-        if [[ -z "$copy_rate" ]]; then
-            copy_line=$(grep -m1 "^C copy" "$f")
-            copy_rate=$(echo "$copy_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
-        fi
-        
-        if [[ -z "$fill_rate" ]]; then
-            fill_line=$(grep -m1 "^C fill" "$f")  
-            fill_rate=$(echo "$fill_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
-        fi
-    else
-        copy_rate=""
-        fill_rate=""
-    fi
-    
-    # Default values if not found
+    # Estrai il valore numerico subito prima di “MB/s”
+    local copy_rate fill_rate
+    copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' "$f")
+    fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' "$f")
+
     copy_rate=${copy_rate:-N/A}
     fill_rate=${fill_rate:-N/A}
 
     result "tinymemb_copy" "$copy_rate" "MB/s" ""
     result "tinymemb_fill" "$fill_rate" "MB/s" ""
 }
+
 
 
 parse_tinymembench_latency() {
@@ -508,11 +491,11 @@ parse_stressng_vm() {
 }
 
 print_organized_results() {
-    # CPU Benchmarks
+    # ─────────────────────────── CPU ────────────────────────────
     echo "CPU"
     echo "───────────────────────────────────────────────────"
     print_table_header
-    parse_coremark 
+    parse_coremark
     parse_coremark-pro
     parse_7zip
     parse_stockfish
@@ -520,69 +503,58 @@ print_organized_results() {
     parse_geekbench
     echo
 
-    # RAM Benchmarks - Unified section
+    # ─────────────────────────── RAM ────────────────────────────
     echo "RAM"
     echo "───────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
-    
-    # Get stream values
-    local f="$RESULTS_DIR/stream_results.txt"
-    if [[ -r "$f" ]]; then
-        scale_rate=$(awk '/^Scale:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
-        scale_avg=$(awk '/^Scale:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
-        triad_rate=$(awk '/^Triad:/ {print $2}' "$f" 2>/dev/null || echo "N/A")
-        triad_avg=$(awk '/^Triad:/ {print $3}' "$f" 2>/dev/null || echo "N/A")
-        
-        # Print stream results
-        printf "%-30s | %-25s\n" "stream_scale_rate&lat" "${scale_rate:-N/A} MB/s ${scale_avg:-N/A}s"
-        printf "%-30s | %-25s\n" "stream_triad_rate&lat" "${triad_rate:-N/A} MB/s ${triad_avg:-N/A}s"
+
+    # -------- STREAM ----------
+    if [[ -r "$RESULTS_DIR/stream_results.txt" ]]; then
+        awk '
+            BEGIN { OFS=" | " }
+            /^Scale:/ {
+                printf "%-30s | %-25s\n",
+                       "stream_scale_rate&lat",  $2 " MB/s " $3 "s"
+            }
+            /^Triad:/ {
+                printf "%-30s | %-25s\n",
+                       "stream_triad_rate&lat", $2 " MB/s " $3 "s"
+            }
+        ' "$RESULTS_DIR/stream_results.txt"
     else
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
-    
-    # Get tinymembench values
-    f="$RESULTS_DIR/tinymembench_results.txt"
-    if [[ -r "$f" ]]; then
-        # Metodo più affidabile per estrarre i valori
-        copy_rate=$(awk '/^C copy/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
-        fill_rate=$(awk '/^C fill/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]/) {print $i; exit}}' "$f")
-        
-        # Se awk fallisce, prova con cut
-        if [[ -z "$copy_rate" ]]; then
-            copy_line=$(grep -m1 "^C copy" "$f")
-            copy_rate=$(echo "$copy_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
-        fi
-        
-        if [[ -z "$fill_rate" ]]; then
-            fill_line=$(grep -m1 "^C fill" "$f")  
-            fill_rate=$(echo "$fill_line" | cut -d ":" -f2 | tr -s ' ' | cut -d ' ' -f2)
-        fi
-        
-        # Default values if not found
+
+    # -------- TINYMEMBENCH ----
+    if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
+        copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' \
+                          "$RESULTS_DIR/tinymembench_results.txt")
+        fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' \
+                          "$RESULTS_DIR/tinymembench_results.txt")
+
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
-        
-        # Print tinymembench results
+
         printf "%-30s | %-25s\n" "tinymemb_copy" "${copy_rate} MB/s"
         printf "%-30s | %-25s\n" "tinymemb_fill" "${fill_rate} MB/s"
     else
         printf "%-30s | %-25s\n" "tinymembench" "File not found"
     fi
     echo
-    
-    # Memory Latency Table (solo se il file esiste)
+
+    # ----- LATENCY TABLE -------
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench_latency
 
-    # Run but don't display these benchmarks - run only if files exist
-    [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt" ]] && [[ -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]] && parse_fio >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/iperf3_results.txt" ]] && parse_iperf3 >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/stream_results.txt" ]] && parse_stream >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
-    [[ -r "$RESULTS_DIR/stress-ng_vm.txt" ]] && parse_stressng_vm >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stress-ng_vm.txt"    ]] && parse_stressng_vm >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/stress-ng_cputemp.txt" ]] && parse_stressng_temp >/dev/null 2>&1
 }
+
 
 main() {
     #setup
