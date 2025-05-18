@@ -567,7 +567,7 @@ print_organized_results() {
     echo "I/O"
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
+    printf "%s-+-%s\n" "$(printf '%.0s─' $(seq 1 30))" "$(printf '%.0s─' $(seq 1 25))"
 
     # ---------- FIO ------------------------------------------------
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
@@ -655,25 +655,22 @@ print_organized_results() {
     echo
 
     ## ──────────────────────────  GPU  ───────────────────────────
-    echo
     echo "GPU"
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
+    printf "%s-+-%s\n" "$(printf '%.0s─' $(seq 1 30))" "$(printf '%.0s─' $(seq 1 25))"
 
     # ---------- FFMPEG --------------------------------------------
     if [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt" && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]]; then
         # -- Codifica --
         enc_time=$(awk '/encoded/ { 
-            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) {
+            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) 
                 print a[1]
-            }
         }' "$RESULTS_DIR/ffmpeg_codifica.txt")
         
         enc_fps=$(awk '/encoded/ { 
-            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) {
+            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) 
                 print a[2]
-            }
         }' "$RESULTS_DIR/ffmpeg_codifica.txt")
 
         # -- Decodifica --
