@@ -414,7 +414,7 @@ parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
 
-    # Estrai il valore numerico subito prima di “MB/s”
+    # Estrai il valore numerico subito prima di "MB/s"
     local copy_rate fill_rate
     copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' "$f")
     fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' "$f")
@@ -530,7 +530,7 @@ print_organized_results() {
             /^[[:space:]]*C[[:space:]]+copy/ {
                 if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
                     val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l’unità
+                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
                     print val
                     exit
                 }
@@ -545,7 +545,7 @@ print_organized_results() {
                     print val
                     exit
                 }
-            }' "$RESULTS_DIR/tinymembench_results.txt")
+            } "$RESULTS_DIR/tinymembench_results.txt")
 
         copy_rate=${copy_rate:-N/A}
         fill_rate=${fill_rate:-N/A}
@@ -598,7 +598,7 @@ print_organized_results() {
             esac
         }
 
-        # prima riga “read:” e “write:”
+        # prima riga "read:" e "write:"
         read_line=$(grep -m1 '^[[:space:]]*read:'  "$fiof")
         write_line=$(grep -m1 '^[[:space:]]*write:' "$fiof")
 
@@ -612,7 +612,7 @@ print_organized_results() {
         bwr=$(convert_bw_to_mb "$bw_read_tok")
         bww=$(convert_bw_to_mb "$bw_write_tok")
 
-        # Latency: primi due match della forma “lat (xsec): … avg=…”
+        # Latency: primi due match della forma "lat (xsec): ... avg=..."
         mapfile -t lat_lines < <(grep -n '^[[:space:]]*lat (' "$fiof" | head -n2)
         latr="N/A"; latw="N/A"
         if [[ ${lat_lines[0]} ]]; then
@@ -654,9 +654,53 @@ print_organized_results() {
     fi
     echo
 
+    ## ──────────────────────────  GPU  ───────────────────────────
+    echo
+    echo "GPU"
+    echo "──────────────────────────────────────────────────────────"
+    printf "%-30s | %-25s\n" "Benchmark" "Score"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
 
+    # ---------- FFMPEG --------------------------------------------
+    if [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt" && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]]; then
+        # -- Codifica --
+        enc_time=$(awk '/encoded/ { 
+            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) {
+                print a[1]
+            }
+        }' "$RESULTS_DIR/ffmpeg_codifica.txt")
+        
+        enc_fps=$(awk '/encoded/ { 
+            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) {
+                print a[2]
+            }
+        }' "$RESULTS_DIR/ffmpeg_codifica.txt")
 
-
+        # -- Decodifica --
+        dec_time="N/A"
+        dec_speed="N/A"
+        
+        last_line=$(grep -A1 "frame=" "$RESULTS_DIR/ffmpeg_decodifica.txt" | tail -n1)
+        
+        if [[ $last_line =~ time=([0-9:.]+) ]]; then
+            time_str=${BASH_REMATCH[1]}
+            # Converti "00:00:28.23" in secondi
+            IFS=':.' read -r h m s ms <<< "$time_str"
+            dec_time=$(awk -v h="$h" -v m="$m" -v s="$s" 'BEGIN{printf "%.2f", h*3600 + m*60 + s}')
+        fi
+        
+        if [[ $last_line =~ speed=([0-9.]+)x ]]; then
+            dec_speed=${BASH_REMATCH[1]}
+        fi
+        
+        printf "%-30s | %-25s\n" "ffmpeg_encode_time" "${enc_time:-N/A} s"
+        printf "%-30s | %-25s\n" "ffmpeg_encode_fps" "${enc_fps:-N/A} fps"
+        printf "%-30s | %-25s\n" "ffmpeg_decode_time" "${dec_time} s"
+        printf "%-30s | %-25s\n" "ffmpeg_decode_speed" "${dec_speed} x"
+    else
+        printf "%-30s | %-25s\n" "ffmpeg" "File not found"
+    fi
+    echo
 
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
     #[[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
