@@ -534,7 +534,7 @@ print_organized_results() {
                     print val
                     exit
                 }
-            }' "$RESULTS_DIR/tinymembench_results.txt")
+            } "$RESULTS_DIR/tinymembench_results.txt")
 
         # --- fill ---
         fill_rate=$(awk '
