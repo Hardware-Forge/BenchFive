@@ -567,7 +567,7 @@ print_organized_results() {
     echo "I/O"
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%s-+-%s\n" "$(printf '%.0s─' $(seq 1 30))" "$(printf '%.0s─' $(seq 1 25))"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
 
     # ---------- FIO ------------------------------------------------
     if [[ -r "$RESULTS_DIR/fio_resultscmd.txt" ]]; then
@@ -658,45 +658,40 @@ print_organized_results() {
     echo "GPU"
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
-    printf "%s-+-%s\n" "$(printf '%.0s─' $(seq 1 30))" "$(printf '%.0s─' $(seq 1 25))"
+    printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
 
-    # ---------- FFMPEG --------------------------------------------
+        # ---------- FFMPEG --------------------------------------------
     if [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt" && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]]; then
-        # -- Codifica --
-        enc_time=$(awk '/encoded/ { 
-            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) 
-                print a[1]
-        }' "$RESULTS_DIR/ffmpeg_codifica.txt")
-        
-        enc_fps=$(awk '/encoded/ { 
-            if (match($0, /in ([0-9.]+)s \(([0-9.]+) fps\)/, a)) 
-                print a[2]
-        }' "$RESULTS_DIR/ffmpeg_codifica.txt")
+        # ── Codifica ────────────────────────────────────────────
+        enc_line=$(grep -m1 'encoded' "$RESULTS_DIR/ffmpeg_codifica.txt")
 
-        # -- Decodifica --
-        dec_time="N/A"
-        dec_speed="N/A"
-        
-        last_line=$(grep -A1 "frame=" "$RESULTS_DIR/ffmpeg_decodifica.txt" | tail -n1)
-        
-        if [[ $last_line =~ time=([0-9:.]+) ]]; then
-            time_str=${BASH_REMATCH[1]}
-            # Converti "00:00:28.23" in secondi
-            IFS=':.' read -r h m s ms <<< "$time_str"
-            dec_time=$(awk -v h="$h" -v m="$m" -v s="$s" 'BEGIN{printf "%.2f", h*3600 + m*60 + s}')
+        # tempo in secondi
+        enc_time=$(echo "$enc_line" | sed -nE 's/.*in ([0-9.]+)s .*/\1/p')
+        # fps
+        enc_fps=$(echo  "$enc_line" | sed -nE 's/.*\(([0-9.]+) fps\).*/\1/p')
+
+        # ── Decodifica ──────────────────────────────────────────
+        dec_line=$(grep 'frame=' "$RESULTS_DIR/ffmpeg_decodifica.txt" | tail -n1)
+
+        # tempo in secondi
+        if [[ $dec_line =~ time=([0-9:.]+) ]]; then
+            IFS=':.' read -r h m s ms <<< "${BASH_REMATCH[1]}"
+            dec_time=$(awk -v h="$h" -v m="$m" -v s="$s" 'BEGIN{printf "%.2f", h*3600+m*60+s}')
+        else
+            dec_time="N/A"
         fi
-        
-        if [[ $last_line =~ speed=([0-9.]+)x ]]; then
-            dec_speed=${BASH_REMATCH[1]}
-        fi
-        
-        printf "%-30s | %-25s\n" "ffmpeg_encode_time" "${enc_time:-N/A} s"
-        printf "%-30s | %-25s\n" "ffmpeg_encode_fps" "${enc_fps:-N/A} fps"
-        printf "%-30s | %-25s\n" "ffmpeg_decode_time" "${dec_time} s"
-        printf "%-30s | %-25s\n" "ffmpeg_decode_speed" "${dec_speed} x"
+
+        # speed in x
+        dec_speed=$(echo "$dec_line" | sed -nE 's/.*speed=([0-9.]+)x.*/\1/p')
+
+        printf "%-30s | %-25s\n" "ffmpeg_encode_time"  "${enc_time:-N/A} s"
+        printf "%-30s | %-25s\n" "ffmpeg_encode_fps"   "${enc_fps:-N/A} fps"
+        printf "%-30s | %-25s\n" "ffmpeg_decode_time"  "${dec_time:-N/A} s"
+        printf "%-30s | %-25s\n" "ffmpeg_decode_speed" "${dec_speed:-N/A} x"
     else
         printf "%-30s | %-25s\n" "ffmpeg" "File not found"
     fi
+
     echo
 
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
