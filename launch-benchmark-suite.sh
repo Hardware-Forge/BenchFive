@@ -530,7 +530,7 @@ print_organized_results() {
             /^[[:space:]]*C[[:space:]]+copy/ {
                 if (match($0, /[0-9]+(\.[0-9]+)?[[:space:]]*MB\/s/)) {
                     val = substr($0, RSTART, RLENGTH)
-                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l'unità
+                    sub(/[[:space:]]*MB\/s/, "", val)   # rimuovi l’unità
                     print val
                     exit
                 }
