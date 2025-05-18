@@ -682,7 +682,8 @@ print_organized_results() {
         fi
 
         # speed in x
-        dec_speed=$(echo "$dec_line" | sed -nE 's/.*speed=([0-9.]+)x.*/\1/p')
+        dec_speed=$(echo "$dec_line" | sed -nE 's/.*speed=[[:space:]]*([0-9.]+)x.*/\1/p')
+
 
         printf "%-30s | %-25s\n" "ffmpeg_encode_time"  "${enc_time:-N/A} s"
         printf "%-30s | %-25s\n" "ffmpeg_encode_fps"   "${enc_fps:-N/A} fps"
