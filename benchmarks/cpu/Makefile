@@ -55,6 +55,7 @@ coremark:
 
 #saving the score in results
 getresults_coremark: | $(RESULTS_DIR)
+	(cd coremark && make run)
 	@echo "=== run1.log results ===" > $(RESULTS_DIR)/coremark_results.txt
 	@cat coremark/run1.log >> $(RESULTS_DIR)/coremark_results.txt
 	@echo "" >> $(RESULTS_DIR)/coremark_results.txt
