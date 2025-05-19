@@ -1,4 +1,4 @@
-.PHONY: all clean setup install_sysbench install_stress_ng getresults getresultssysbench_cpu getresultssysbench_memory getresultssysbench_fileio getresultssysbench_mutex getresultssysbench_thread getresultsstress-ng_mv getresultsstress-ng_ram getresultsstress-ng_cputemp clean_results
+.PHONY: all clean setup install_stress_ng getresults getresultsstress-ng_mv getresultsstress-ng_ram getresultsstress-ng_cputemp clean_results
 #directory di output
 RESULTS_DIR := ../results
 BIN_DIR := ../bin
@@ -9,14 +9,13 @@ all: install_stress_ng
 getresults: getresults_stress-ng_ram getresults_stress-ng_cputemp
 # Pulizia per tutti i benchmark
 clean:
-	$(MAKE) -C benchmarks/sysbench clean
-	$(MAKE) -C benchmarks/stress-ng clean
-	rm -f $(RESULTS_DIR)/stress-ng_mv.txt
-	rm -f $(RESULTS_DIR)/stress-ng_ram.txt
+	$(MAKE) -C benchmarks/stress-ng clean || true
+	rm -f $(RESULTS_DIR)/stress-ng_mv.txt || true
+	rm -f $(RESULTS_DIR)/stress-ng_ram.txt || true
 
 clean_results:
-	rm -f $(RESULTS_DIR)/stress-ng_mv.txt
-	rm -f $(RESULTS_DIR)/stress-ng_cputemp.txt
+	rm -f $(RESULTS_DIR)/stress-ng_mv.txt || true
+	rm -f $(RESULTS_DIR)/stress-ng_cputemp.txt || true
 
 #-------------------------------------------------------stress-ng-------------------------------------------------------
 install_stress_ng:
