@@ -68,7 +68,7 @@ FORCE:
 	@echo "Compiling Coremark-PRO..."
 
 
-getresults_coremark-pro:
+getresults_coremark-pro: | $(RESULTS_DIR)
 	@echo "Running all Coremark-PRO workloads..."
 	$(MAKE) -C coremark-pro TARGET=linux64 XCMD='-c4' certify-all > $(RESULTS_DIR)/coremark-pro_results.txt
 
@@ -81,7 +81,7 @@ getresults_coremark-pro:
 	-f makefile.gcc 
 	@echo "7zip build completato"
 
-getresults_7zip:
+getresults_7zip: | $(RESULTS_DIR)
 	@mkdir -p $(RESULTS_DIR)
 	7zip/CPP/7zip/Bundles/LzmaCon/_o/lzma b > $(RESULTS_DIR)/7zip_results.txt
 	@echo "7zip results saved in $(RESULTS_DIR)/7zip_results.txt"
@@ -95,7 +95,7 @@ stockfish:
 	$(MAKE) -C stockfish/src -j1 build ARCH=$(STOCKFISH_ARCH)
 	@echo "Stockfish compiled with ARCH=$(STOCKFISH_ARCH)"
 
-getresults_stockfish:
+getresults_stockfish: | $(RESULTS_DIR)
 	./stockfish/src/stockfish bench > $(RESULTS_DIR)/stockfish_results.txt 2>&1
 	@echo "Stockfish results saved in $(RESULTS_DIR)/stockfish_results.txt"
 
@@ -111,7 +111,7 @@ install_geekbench:
 	rm Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
 	@echo "Geekbench 6 successfully installed in current directory."
 
-getresults_geekbench:
+getresults_geekbench: | $(RESULTS_DIR)
 	@echo "Esecuzione di Geekbench 6..."
 	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(GEEK_DIR)/geekbench_results.txt 2>&1
 	@echo "Geekbench 6 results saved in $(GEEK_DIR)/geekbench_results.txt"

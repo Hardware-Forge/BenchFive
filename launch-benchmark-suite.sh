@@ -695,13 +695,6 @@ print_organized_results() {
 
     echo
 
-    #[[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/stress-ng_vm.txt"    ]] && parse_stressng_vm >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/stress-ng_cputemp.txt" ]] && parse_stressng_temp >/dev/null 2>&1
 }
 
 
