@@ -36,11 +36,10 @@ run:
 
 # Pulizia per tutti i benchmark
 clean:
-	$(MAKE) -C benchmarks/CPU clean
-	$(MAKE) -C benchmarks/syslevel clean
-	$(MAKE) -C benchmarks/IO clean
+	$(MAKE) -C benchmarks/cpu clean
 	$(MAKE) -C benchmarks/memory clean
-	$(MAKE) -C benchmarks/GPU clean
+	$(MAKE) -C benchmarks/io clean
+	$(MAKE) -C benchmarks/gpu clean
 	$(MAKE) -C benchmarks clean
 	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
 		rm -f "$(RESULTS_DIR)"/*;
