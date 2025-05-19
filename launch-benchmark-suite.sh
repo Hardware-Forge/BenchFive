@@ -699,9 +699,11 @@ print_organized_results() {
 
 
 main() {
-    #setup
-    #build
-    #run
+    clear
+    clean
+    setup
+    build
+    run
     clear
 
     # Title box
