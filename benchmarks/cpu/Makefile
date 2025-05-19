@@ -105,7 +105,7 @@ getresults_stockfish: | $(RESULTS_DIR)
 
 #-----------------------------------------------------General---------------------------------------------
 
-GEEK_DIR := $(RESULTS_DIR)
+GEEK_DIR := ../$(RESULTS_DIR)
 
 install_geekbench:
 	@echo "Scaricamento e installazione di Geekbench 6..."
