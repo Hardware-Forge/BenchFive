@@ -19,7 +19,6 @@ getresults: getresults_coremark getresults_coremark-pro getresults_7zip getresul
 
 clean:
 	$(MAKE) -C coremark clean || true
-	$(MAKE) -C whetstone clean  || true
 	$(MAKE) -C coremark-pro clean || true
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon clean || true
 	find 7zip/CPP/7zip -type f \( -name '*.o' -o -name '*.obj' \) -delete || true

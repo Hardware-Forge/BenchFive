@@ -42,7 +42,7 @@ clean:
 	$(MAKE) -C benchmarks/gpu clean
 	$(MAKE) -C benchmarks clean
 	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
-		rm -f "$(RESULTS_DIR)"/*;
+		rm -f "$(RESULTS_DIR)"/*; \
 	fi
 
 clean_results:
