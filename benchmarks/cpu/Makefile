@@ -7,6 +7,9 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
+$(RESULTS_DIR):
+	@mkdir -p $@
+
 
 all: coremark coremark-pro 7zip stockfish install_geekbench
 	@echo "All benchmarks compiled successfully."
