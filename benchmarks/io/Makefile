@@ -36,10 +36,10 @@ getresults_iperf3:
 
 
 clean:
-	$(MAKE) -C benchmarks/IO/fio clean
-	$(MAKE) -C benchmarks/IO/iperf3 clean
-	rm -f $(RESULTS_DIR)/fio_resultscmd.txt
-	rm -f $(RESULTS_DIR)/iperf3_results.txt
+	$(MAKE) -C benchmarks/io/fio clean || true
+	$(MAKE) -C benchmarks/io/iperf3 clean || true		
+	rm -f $(RESULTS_DIR)/fio_resultscmd.txt || true
+	rm -f $(RESULTS_DIR)/iperf3_results.txt || true
 clean_results:
-	rm -r $(RESULTS_DIR)/fio_resultscmd.txt
-	rm -r $(RESULTS_DIR)/iperf3_results.txt
+	rm -r $(RESULTS_DIR)/fio_resultscmd.txt || true
+	rm -r $(RESULTS_DIR)/iperf3_results.txt || true

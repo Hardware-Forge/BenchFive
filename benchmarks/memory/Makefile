@@ -10,12 +10,12 @@ all: stream tinymembench
 getresults: getresults_stream getresults_tinymembench 
 
 clean:
-	@rm -f stream/streameseguibile
-	@rm -f $(RESULTS_DIR)/stream_results.txt
+	@rm -f stream/streameseguibile || true
+	@rm -f $(RESULTS_DIR)/stream_results.txt || true
 	@(cd tinymembench && $(MAKE) clean)
 	@(cd stream && $(MAKE) clean)
-	@rm -f $(BIN_DIR)/tinymembench
-	@rm -f $(RESULTS_DIR)/tinymembench_results.txt
+	@rm -f $(BIN_DIR)/tinymembench || true
+	@rm -f $(RESULTS_DIR)/tinymembench_results.txt || true
 
 
 clean_results:
