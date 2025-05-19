@@ -386,29 +386,33 @@ parse_stream() {
     local f="$RESULTS_DIR/stream_results.txt"
     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
 
-    # ─── STREAM benchmark (Scale & Triad) ──────────────────────
-    read scale_rate scale_avg triad_rate triad_avg < <(
+    # ─── STREAM benchmark (Scale & Triad + avg error) ────────
+    read scale_rate scale_avg triad_rate triad_avg avg_error < <(
         awk '
             /^Scale:/ {
-                # Format in file: Scale:           17720.9     0.001245     0.000903     0.001738
-                # $2 = Best Rate MB/s, $3 = Avg time (s)
                 scale_rate = $2
                 scale_avg  = $3
             }
             /^Triad:/ {
-                # Format in file: Triad:          19497.1     0.001834     0.001231     0.002897
-                # $2 = Best Rate MB/s, $3 = Avg time (s)
                 triad_rate = $2
                 triad_avg  = $3
             }
+            /^Solution Validates:/ {
+                # Line e.g.: Solution Validates: avg error less than 1.000000e-13 on all three arrays
+                # $6 contiene il valore scientifico
+                avg_error = $6
+            }
             END {
-                print scale_rate, scale_avg, triad_rate, triad_avg
+                print scale_rate, scale_avg, triad_rate, triad_avg, avg_error
             }
         ' "$f"
     )
-    result "stream_scale_rate&lat" "${scale_rate:-N/A}" "MB/s" " ${scale_avg:-N/A} s"
-    result "stream_triad_rate&lat" "${triad_rate:-N/A}" "MB/s" " ${triad_avg:-N/A} s"
+
+    result "stream_scale_rate&lat" "${scale_rate:-N/A}"    "MB/s"  " ${scale_avg:-N/A} s"
+    result "stream_triad_rate&lat" "${triad_rate:-N/A}"    "MB/s"  " ${triad_avg:-N/A} s"
+    result "stream_avg_error"       "${avg_error:-N/A}"    "avgerror"      ""
 }
+
 
 parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
@@ -517,6 +521,12 @@ print_organized_results() {
             /^Triad:/ {
                 printf "%-30s | %-25s\n",
                        "stream_triad_rate&lat", $2 " MB/s " $3 "s"
+            }
+            /^Solution Validates:/ {
+                # Estrai avg error dalla riga
+                if (match($0, /less than ([0-9.eE+-]+)/, a)) {
+                    printf "%-30s | %-25s\n", "stream_avg_error", a[1]
+                }
             }
         ' "$RESULTS_DIR/stream_results.txt"
     else
@@ -696,19 +706,19 @@ print_organized_results() {
     echo
 
     [[ -r "$RESULTS_DIR/ffmpeg_codifica.txt"      && -r "$RESULTS_DIR/ffmpeg_decodifica.txt" ]] && parse_ffmpeg  >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
-    #[[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/fio_resultscmd.txt"   ]] && parse_fio         >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/iperf3_results.txt"  ]] && parse_iperf3      >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/stream_results.txt"  ]] && parse_stream      >/dev/null 2>&1
+    [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]] && parse_tinymembench >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/stress-ng_vm.txt"    ]] && parse_stressng_vm >/dev/null 2>&1
     [[ -r "$RESULTS_DIR/stress-ng_cputemp.txt" ]] && parse_stressng_temp >/dev/null 2>&1
 }
 
 
 main() {
-    #setup
-    #build
-    #run
+    setup
+    build
+    run
     clear
 
     # Title box

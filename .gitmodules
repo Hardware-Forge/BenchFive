@@ -31,3 +31,6 @@
 [submodule "benchmarks/CPU/stockfish"]
 	path = benchmarks/cpu/stockfish
 	url = https://github.com/official-stockfish/Stockfish.git
+[submodule "benchmarks/ai/obpmark"]
+	path = benchmarks/ai/obpmark
+	url = https://github.com/OBPMark/OBPMark.git
