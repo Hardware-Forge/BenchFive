@@ -7,9 +7,6 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-$(RESULTS_DIR):
-	@mkdir -p $@
-
 
 all: coremark coremark-pro 7zip stockfish install_geekbench
 	@echo "All benchmarks compiled successfully."
@@ -105,8 +102,6 @@ getresults_stockfish: | $(RESULTS_DIR)
 
 #-----------------------------------------------------General---------------------------------------------
 
-GEEK_DIR := ../$(RESULTS_DIR)
-
 install_geekbench:
 	@echo "Scaricamento e installazione di Geekbench 6..."
 	curl -O https://cdn.geekbench.com/Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
@@ -115,7 +110,6 @@ install_geekbench:
 	@echo "Geekbench 6 successfully installed in current directory."
 
 getresults_geekbench: | $(RESULTS_DIR)
-	@mkdir -p $(RESULTS_DIR)
 	@echo "Esecuzione di Geekbench 6..."
-	cd Geekbench-6.4.0-LinuxRISCVPreview && ./geekbench6 > $(GEEK_DIR)/geekbench_results.txt 2>&1
-	@echo "Geekbench 6 results saved in $(GEEK_DIR)/geekbench_results.txt"
+	./Geekbench-6.4.0-LinuxRISCVPreview/geekbench6 > $(RESULTS_DIR)/geekbench_results.txt 2>&1
+	@echo "Geekbench 6 results saved in $(RESULTS_DIR)/geekbench_results.txt"

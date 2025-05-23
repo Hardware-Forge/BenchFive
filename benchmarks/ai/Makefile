@@ -1,5 +1,6 @@
 .PHONY: 
 OPENCL_INC ?= /usr/include
+RESULTS_DIR := ../../results
 
 all:
 	@set -e; \
@@ -21,5 +22,21 @@ all:
 	
 	fi
 
+
+1.1_image:
+	(cd obpmark/scripts && ./run_1.1-image.sh)
+1.2_radar:
+	(cd obpmark/scripts && ./run_1.2-radar.sh)
+2.1_data_compression:
+	(cd obpmark/scripts && ./run_2.1-data_compression.sh)
+2.2_image_compression:
+	(cd obpmark/scripts && ./run_2.2-image_compression.sh)
+3.1_aes_encryption:
+	- (cd obpmark/scripts && ./run_3.1-aes_encryption.sh) > $(RESULTS_DIR)/obpmarktest_results.txt
+run_all:
+	- (cd obpmark/scripts && ./run_all.sh) > $(RESULTS_DIR)/obpmark_results.txt
+
 clean:
 	(cd obpmark && make clean)
+
+getresults: run_all

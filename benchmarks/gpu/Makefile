@@ -7,7 +7,7 @@ BIN_DIR := ../../bin
 getresults: getresults_FFmpeg_codificah265 && getresults_FFmpeg_decodifica
 #ATTENZIONE: PER ESEGUIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
 
-all: setupgpu install_vkmark install_FFmpeg download_sample_fs
+all: setupgpu install_FFmpeg download_sample_fs
 
 clean:
 	$(MAKE) -C benchmarks/gpu/FFmpeg clean || true
@@ -25,7 +25,6 @@ setupgpu:
 	@apt install libx264-dev
 	@apt install libx265-dev
 	@apt install libvpx-dev
-	@apt install -y yt-dlp
 	@apt install pkg-config
 	@apt install libxcb1-dev
 	@apt install libxcb-icccm4-dev
@@ -62,5 +61,7 @@ getresults_vkmark: | $(RESULTS_DIR)
 	./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
 download_sample_fs:
-	@echo "download sample FileSamples 720p 28s, 16 MB come input.mp4..."
-	curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"
+	@if [ ! -f input.mp4 ]; then \
+		echo "download sample FileSamples 720p 28s, 16 MB as input.mp4..."; \
+		curl -L -o input.mp4 "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"; \
+	fi

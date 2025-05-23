@@ -710,7 +710,6 @@ print_organized_results() {
 
 main() {
     clear
-    clean
     setup
     build
     run
@@ -721,7 +720,10 @@ main() {
     echo "║              RISC-V Benchmark Suite              ║"
     echo "╚══════════════════════════════════════════════════╝"
     
-    CPU_MHZ=$(get_cpu_mhz) || { echo "Unable to detect CPU MHz" >&2; exit 1; }
+    if ! CPU_MHZ=$(get_cpu_mhz 2>/dev/null); then
+    echo "Unable to detect CPU MHz, default set to 1" >&2
+    CPU_MHZ=1
+    fi
     CPU_NAME=$(get_cpu_name) || { echo "Unable to detect CPU name" >&2; exit 1; }
     CPU_CORES=$(get_cpu_cores) || { echo "Unable to detect CPU cores" >&2; exit 1; }
     RAM_GB=$(get_ram_gb) || { echo "Unable to detect RAM GB" >&2; exit 1; }
