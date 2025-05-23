@@ -19,7 +19,6 @@ all:
 	else \
 		echo "Attempting cpu build..."; \
 		(cd obpmark && ./compile_all.sh cpu); \
-	
 	fi
 
 
