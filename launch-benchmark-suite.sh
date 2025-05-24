@@ -161,8 +161,7 @@ result() {
     esac
 
     if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf || "$name" =~ ^stream || "$name" =~ ^tiny || "$name" =~ ^stress ]]; then
-        printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s\n" \
-               "$name" "$sc $mc $pl" "----" "----" "----"
+        printf "%-30s | %-25s\n" "$name" "$sc $mc $pl"
         return
     fi
 
