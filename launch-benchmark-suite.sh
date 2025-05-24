@@ -165,11 +165,10 @@ result() {
                "$name" "$sc $mc $pl" "----" "----" "----"
         return
     fi
-    if ["$name" =~ ^stressng_vm ]; then
+    if [[ "$name" =~ ^stressng_vm ]]; then
         printf "%-30s | %-25s\n" "$name" "$sc $mc $pl"
         return
     fi
-
 
     local per_sc="---" per_mc="---"
     if [[ $sc =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
