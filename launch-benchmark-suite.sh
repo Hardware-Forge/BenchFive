@@ -488,7 +488,16 @@ parse_stressng_vm() {
         ' "$f"
     )
 
-    result "stressng_vm_bogo_ops" "$bogo_ops" "bogo-ops" ""
+    result "stressng_vm" "$bogo_ops" "bogo-ops" ""
+}
+print_obpmark_results() {
+    local f="$RESULTS_DIR/obpmark_results.txt"
+    if [[ -r "$f" ]]; then
+        cat "$f"
+        echo "──────────────────────────────────────────────────────────"
+    else
+        echo "File obpmark_results.txt not found in $RESULTS_DIR"
+    fi
 }
 
 print_organized_results() {
@@ -510,7 +519,7 @@ print_organized_results() {
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
-    parse_stressng_vms
+    parse_stressng_vm
     if [[ -r "$RESULTS_DIR/stream_results.txt" ]]; then
         awk '
             BEGIN { OFS=" | " }
@@ -704,15 +713,8 @@ print_organized_results() {
 
     echo "ai-obpmark"
     echo "──────────────────────────────────────────────────────────"
-print_obpmark_results() {
-    local f="$RESULTS_DIR/obpmark_results.txt"
-    if [[ -r "$f" ]]; then
-        cat "$f"
-        echo "──────────────────────────────────────────────────────────"
-    else
-        echo "File obpmark_results.txt not found in $RESULTS_DIR"
-    fi
-}
+    print_obpmark_results
+    echo
 
 }
 
