@@ -50,6 +50,7 @@ getresults_FFmpeg_decodifica: | $(RESULTS_DIR)
 
 getresults_FFmpeg_codificah265: | $(RESULTS_DIR)
 	@echo "Esecuzione di FFmpeg"
+	rm -f output_h265.mp4
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresults_vkmark: | $(RESULTS_DIR)
