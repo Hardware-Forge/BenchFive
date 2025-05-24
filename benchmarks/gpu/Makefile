@@ -4,7 +4,7 @@
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
-getresults: getresults_FFmpeg_codificah265 && getresults_FFmpeg_decodifica
+getresults: getresults_FFmpeg_codificah265 getresults_FFmpeg_decodifica
 #ATTENZIONE: PER ESEGUIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
 
 all: setupgpu install_FFmpeg download_sample_fs
@@ -58,7 +58,7 @@ getresults_FFmpeg_codificah265: | $(RESULTS_DIR)
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresults_vkmark: | $(RESULTS_DIR)
-	./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
+	- ./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
 download_sample_fs:
 	@if [ ! -f input.mp4 ]; then \

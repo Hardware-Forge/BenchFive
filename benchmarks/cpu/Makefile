@@ -111,5 +111,5 @@ install_geekbench:
 
 getresults_geekbench: | $(RESULTS_DIR)
 	@echo "Esecuzione di Geekbench 6..."
-	./Geekbench-6.4.0-LinuxRISCVPreview/geekbench6 > $(RESULTS_DIR)/geekbench_results.txt 2>&1
+	./Geekbench-6.4.0-LinuxRISCVPreview/geekbench6 > $(RESULTS_DIR)/geekbench_results.txt
 	@echo "Geekbench 6 results saved in $(RESULTS_DIR)/geekbench_results.txt"

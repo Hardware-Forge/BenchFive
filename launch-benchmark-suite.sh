@@ -514,16 +514,13 @@ print_organized_results() {
     if [[ -r "$RESULTS_DIR/stream_results.txt" ]]; then
         awk '
             BEGIN { OFS=" | " }
-            /^Scale:/ {
-                printf "%-30s | %-25s\n",
-                       "stream_scale_rate&lat",  $2 " MB/s " $3 "s"
+            /^[[:space:]]*Scale:/ {
+                printf "%-30s | %-25s\n", "stream_scale_rate&lat",  $2 " MB/s " $3 "s"
             }
-            /^Triad:/ {
-                printf "%-30s | %-25s\n",
-                       "stream_triad_rate&lat", $2 " MB/s " $3 "s"
+            /^[[:space:]]*Triad:/ {
+                printf "%-30s | %-25s\n", "stream_triad_rate&lat", $2 " MB/s " $3 "s"
             }
-            /^Solution Validates:/ {
-                # Estrai avg error dalla riga
+            /Solution Validates:/ {
                 if (match($0, /less than ([0-9.eE+-]+)/, a)) {
                     printf "%-30s | %-25s\n", "stream_avg_error", a[1]
                 }
@@ -710,9 +707,9 @@ print_organized_results() {
 
 main() {
     clear
-    setup
-    build
-    run
+    #setup
+    #build
+    #run
     clear
 
     # Title box
