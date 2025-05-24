@@ -510,22 +510,21 @@ print_organized_results() {
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
 
-    # -------- STREAM ----------
     if [[ -r "$RESULTS_DIR/stream_results.txt" ]]; then
-    awk '
-        BEGIN { OFS=" | " }
-        /^[[:space:]]*Scale:/ {
-            printf "%-30s | %-25s\n", "stream_scale_rate&lat",  sprintf("%s MB/s %s s", $2, $3)
-        }
-        /^[[:space:]]*Triad:/ {
-            printf "%-30s | %-25s\n", "stream_triad_rate&lat", sprintf("%s MB/s %s s", $2, $3)
-        }
-        /Solution Validates:/ {
-            if (match($0, /less than ([0-9.eE+-]+)/, a)) {
-                printf "%-30s | %-25s\n", "stream_avg_error", a[1]
+        awk '
+            BEGIN { OFS=" | " }
+            /^[[:space:]]*Scale:/ {
+                printf "%-30s | %-25s\n", "stream_scale_rate&lat", sprintf("%s MB/s %s s", $2, $3)
             }
-        }
-    ' "$RESULTS_DIR/stream_results.txt"
+            /^[[:space:]]*Triad:/ {
+                printf "%-30s | %-25s\n", "stream_triad_rate&lat", sprintf("%s MB/s %s s", $2, $3)
+            }
+            /Solution Validates:/ {
+                if (match($0, /less than ([0-9.eE+-]+)/, a)) {
+                    printf "%-30s | %-25s\n", "stream_avg_error", a[1]
+                }
+            }
+        ' "$RESULTS_DIR/stream_results.txt"
     else
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
