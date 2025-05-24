@@ -529,7 +529,7 @@ print_organized_results() {
     else
         printf "%-30s | %-25s\n" "stream_benchmark" "File not found"
     fi
-
+    
         # -------- TINYMEMBENCH ----
     if [[ -r "$RESULTS_DIR/tinymembench_results.txt" ]]; then
         # --- copy ---
