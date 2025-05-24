@@ -160,7 +160,12 @@ result() {
         *)                                     unit=""            ;;
     esac
 
-    if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf || "$name" =~ ^stream || "$name" =~ ^tiny || "$name" =~ ^stress ]]; then
+    if [[ "$name" =~ ^ffmpeg || "$name" =~ ^fio || "$name" =~ ^iperf || "$name" =~ ^stream || "$name" =~ ^tiny || "$name" =~ ^stressng_temp ]]; then
+        printf "%-25s | %-${COL_W}s | %-${COL_W}s | %-${COL_WF}s | %-${COL_WF}s\n" \
+               "$name" "$sc $mc $pl" "----" "----" "----"
+        return
+    fi
+    if ["$name" =~ ^stressng_vm ]; then
         printf "%-30s | %-25s\n" "$name" "$sc $mc $pl"
         return
     fi
