@@ -9,11 +9,13 @@ cpu_dir := benchmarks/cpu
 io_dir := benchmarks/io
 gpu_dir := benchmarks/gpu
 ai_dir := benchmarks/ai
+temp_dir := benchmarks
 
 setup:
 	git submodule update --init --recursive
 	@mkdir -p $(RESULTS_DIR)
 	@mkdir -p $(BIN_DIR) 
+	apt-get install gawk
 
 
 # Compilazione di tutti i benchmark
@@ -23,6 +25,7 @@ all:
 	$(MAKE) -C $(io_dir) all
 	$(MAKE) -C $(gpu_dir) all
 	$(MAKE) -C $(ai_dir) all
+	$(MAKE) -C $(temp_dir) all
 	@echo "Build completata"
 
 # Esecuzione di tutti i benchmark e salvataggio dei risulati in results
@@ -32,6 +35,7 @@ run:
 	$(MAKE) -C $(io_dir) getresults
 	$(MAKE) -C $(gpu_dir) getresults
 	$(MAKE) -C $(ai_dir) getresults
+	$(MAKE) -C $(temp_dir) getresults
 
 	@echo "Esecuzione benchmarks completata"
 
@@ -43,6 +47,7 @@ clean:
 	$(MAKE) -C benchmarks/gpu clean
 	$(MAKE) -C benchmarks clean
 	$(MAKE) -C benchmarks/ai clean
+	$(MAKE) -C benchmarks clean
 	@if [ -n "$(RESULTS_DIR)" ] && [ -d "$(RESULTS_DIR)" ] && [ "$(RESULTS_DIR)" != "/" ]; then \
 		rm -f "$(RESULTS_DIR)"/*; \
 	fi

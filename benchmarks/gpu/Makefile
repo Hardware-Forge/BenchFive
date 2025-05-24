@@ -37,12 +37,7 @@ setupgpu:
 	  libxcb-xfixes0-dev
 
 install_vkmark:
-	@echo "Installazione di vkmark"
-	(cd vkmark && meson setup build --prefix=/usr --buildtype=release -Dxcb=true -Dwayland=false -Dkms=true --wipe )
-	ninja -C vkmark/build
-#	sudo ninja -C vkmark/build install
-	@echo "vkmark installato"
-
+	(cd vkmark && meson setup build && ninja -C build)
 #--enable-libvpx 
 install_FFmpeg:
 	(cd FFmpeg && ./configure --target-os=linux --enable-gpl --enable-libx264 --enable-libx265 && make)
@@ -58,7 +53,7 @@ getresults_FFmpeg_codificah265: | $(RESULTS_DIR)
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
 getresults_vkmark: | $(RESULTS_DIR)
-	- ./vkmark/build/src/vkmark --winsys kms > $(RESULTS_DIR)/vkmark.txt
+	- ./vkmark/build/src/vkmark --headless --winsys kms > $(RESULTS_DIR)/vkmark.txt
 
 download_sample_fs:
 	@if [ ! -f input.mp4 ]; then \

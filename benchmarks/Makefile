@@ -6,7 +6,7 @@ BIN_DIR := ../bin
 
 all: install_stress_ng
 
-getresults: getresults_stress-ng_ram getresults_stress-ng_cputemp
+getresults: getresults_stress-ng_vm getresults_stress-ng_cputemp
 # Pulizia per tutti i benchmark
 clean:
 	$(MAKE) -C benchmarks/stress-ng clean || true

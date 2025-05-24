@@ -502,6 +502,7 @@ print_organized_results() {
     parse_stockfish
     get_geekbench_results
     parse_geekbench
+    parse_stressng_temp
     echo
 
     # ─────────────────────────── RAM ──────────────────────────────
@@ -509,7 +510,7 @@ print_organized_results() {
     echo "──────────────────────────────────────────────────────────"
     printf "%-30s | %-25s\n" "Benchmark" "Score"
     printf "%-30s-+-%-25s\n" "$(printf '%.0s─' {1..30})" "$(printf '%.0s─' {1..25})"
-
+    parse_stressng_vms
     if [[ -r "$RESULTS_DIR/stream_results.txt" ]]; then
         awk '
             BEGIN { OFS=" | " }
@@ -700,6 +701,18 @@ print_organized_results() {
     fi
 
     echo
+
+    echo "ai-obpmark"
+    echo "──────────────────────────────────────────────────────────"
+print_obpmark_results() {
+    local f="$RESULTS_DIR/obpmark_results.txt"
+    if [[ -r "$f" ]]; then
+        cat "$f"
+        echo "──────────────────────────────────────────────────────────"
+    else
+        echo "File obpmark_results.txt not found in $RESULTS_DIR"
+    fi
+}
 
 }
 
