@@ -514,10 +514,12 @@ print_organized_results() {
         awk '
             BEGIN { OFS=" | " }
             /^[[:space:]]*Scale:/ {
-                printf "%-30s | %-25s\n", "stream_scale_rate&lat", sprintf("%s MB/s %s s", $2, $3)
+                val = $2 " MB/s " $3 " s"
+                printf "%-30s | %-25s\n", "stream_scale_rate&lat", val
             }
             /^[[:space:]]*Triad:/ {
-                printf "%-30s | %-25s\n", "stream_triad_rate&lat", sprintf("%s MB/s %s s", $2, $3)
+                val = $2 " MB/s " $3 " s"
+                printf "%-30s | %-25s\n", "stream_triad_rate&lat", val
             }
             /Solution Validates:/ {
                 if (match($0, /less than ([0-9.eE+-]+)/, a)) {
