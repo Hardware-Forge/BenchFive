@@ -17,24 +17,18 @@ clean:
 	rm -f $(RESULTS_DIR)/vkmark.txt || true	
 
 setupgpu:
-	@apt install -y meson ninja-build libx11-dev libwayland-dev libvulkan-dev \libxrandr-dev libxi-dev libegl1-mesa-dev libgles2-mesa-dev
-	@apt install libglm-dev
-	@apt install libassimp-dev
-	@apt install libxcb-icccm4-dev wayland-protocols libdrm-dev libgbm-dev
+	@apt install -y meson ninja-build libx11-dev libwayland-dev libvulkan-dev libxrandr-dev libxi-dev libegl1-mesa-dev libgles2-mesa-dev
+	@apt install -y libglm-dev
+	@apt install -y libassimp-dev
+	@apt install -y libxcb-icccm4-dev wayland-protocols libdrm-dev libgbm-dev
 	@apt install -y nasm
-	@apt install libx264-dev
-	@apt install libx265-dev
-	@apt install libvpx-dev
-	@apt install pkg-config
-	@apt install libxcb1-dev
-	@apt install libxcb-icccm4-dev
-	@apt install libvulkan1 mesa-vulkan-drivers vulkan-tools
-	@apt install \
-	  libxcb-randr0-dev \
-	  libxcb-cursor-dev \
-	  libxcb-keysyms1-dev \
-	  libxcb-image0-dev \
-	  libxcb-xfixes0-dev
+	@apt install -y libx264-dev
+	@apt install -y libx265-dev
+	@apt install -y libvpx-dev
+	@apt install -y pkg-config
+	@apt install -y libxcb1-dev
+	@apt install -y libvulkan1 mesa-vulkan-drivers vulkan-tools
+	@apt install -y libxcb-randr0-dev libxcb-cursor-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-xfixes0-dev
 
 install_vkmark:
 	(cd vkmark && meson setup build && ninja -C build)
