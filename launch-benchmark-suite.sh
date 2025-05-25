@@ -249,17 +249,12 @@ parse_stockfish() {
 get_geekbench_results() {
     local txt="$RESULTS_DIR/geekbench_results.txt"
     local out="$RESULTS_DIR/geekbench_results.html"
-
     [[ -r $txt ]] || return
-
     local url
-    url=$(grep -m1 -oE 'https://browser\.geekbench\.com/[A-Za-z0-9/_-]+' "$txt")
+    url=$(grep -oE 'https://browser\.geekbench\.com/v6/cpu/[0-9]+' "$txt" | head -n1)
     [[ -n $url ]] || return
-
     mkdir -p "$RESULTS_DIR"
-
     curl -sL "$url" -o "$out" || return
-
 }
 
 
