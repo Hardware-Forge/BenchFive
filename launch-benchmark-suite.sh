@@ -491,12 +491,53 @@ parse_stressng_vm() {
 print_obpmark_results() {
     local f="$RESULTS_DIR/obpmark_results.txt"
     if [[ -r "$f" ]]; then
-        cat "$f"
+        awk '
+        # Rilevo il nome del test
+        /^============ OBPMark/ {
+          raw = substr($0, match($0, /OBPMark/))
+          header = "Test: " raw
+          fill_len = 65 - length(header)
+          for (i = 0; i < fill_len; i++) header = header "="
+          test_name = header
+        }
+
+        # Inizio raccolta metriche
+        /^Benchmark metrics:/ {
+          in_metrics = 1
+          next
+        }
+
+        # Fine sezione metriche: stampo blocco
+        in_metrics && NF == 0 {
+          print test_name
+          printf "  %s\n", elapsed
+          printf "  %s\n", total
+          printf "  %s\n\n", throughput
+          in_metrics = 0
+          elapsed = total = throughput = ""
+          next
+        }
+
+        # Cattura valori metriche
+        in_metrics {
+          if ($0 ~ /Elapsed time execution/) {
+            sub(/.*= */, "", $0)
+            elapsed = sprintf("%-26s = %s", "Elapsed time execution", $0)
+          } else if ($0 ~ /Total execution time/) {
+            sub(/.*= */, "", $0)
+            total = sprintf("%-26s = %s", "Total execution time", $0)
+          } else if ($0 ~ /Throughput/) {
+            sub(/.*= */, "", $0)
+            throughput = sprintf("%-26s = %s", "Throughput", $0)
+          }
+        }
+        ' "$f"
         echo "──────────────────────────────────────────────────────────"
     else
         echo "File obpmark_results.txt not found in $RESULTS_DIR"
     fi
 }
+
 
 print_organized_results() {
     # ─────────────────────────── CPU ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
