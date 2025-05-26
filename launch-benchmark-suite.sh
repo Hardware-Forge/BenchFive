@@ -191,8 +191,8 @@ result() {
 
 
  parse_coremark() {
-     local f="$RESULTS_DIR/coremark_results.txt"
-     [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    local f="$RESULTS_DIR/coremark_results.txt"
+    [[ -s "$f" ]] || { echo "coremark results not available"; return 0; }
 
     awk '/^2K performance run parameters/,/^CoreMark 1.0/ {
         if ($1 == "Iterations/Sec") printf "%.2f\n", $3
@@ -205,7 +205,7 @@ result() {
 
 parse_coremark-pro() {
     local f="$RESULTS_DIR/coremark-pro_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    [[ -s "$f" ]] || { echo "coremark-pro results not available"; return 0; }
 
     awk '$1 == "CoreMark-PRO" {
         mc = $2
@@ -219,7 +219,7 @@ parse_coremark-pro() {
 
 parse_7zip() {
     local f="$RESULTS_DIR/7zip_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    [[ -s "$f" ]] || { echo "7zip results not available"; return 0; }
 
     awk '/^Avr:/ {
         comp = $2        
@@ -235,8 +235,7 @@ parse_7zip() {
 
 parse_stockfish() {
     local f="$RESULTS_DIR/stockfish_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
-
+    [[ -s "$f" ]] || { echo "stockfish results not available"; return 0; }
     awk -F: '/Nodes\/second/ {
         gsub(/^[ \t]+|[ \t]+$/, "", $2)
         print $2
@@ -249,7 +248,7 @@ parse_stockfish() {
 get_geekbench_results() {
     local txt="$RESULTS_DIR/geekbench_results.txt"
     local out="$RESULTS_DIR/geekbench_results.html"
-    [[ -r $txt ]] || return
+    [[ -s $txt ]] || { echo "geekbench results not available"; return 0; }
     local url
     url=$(grep -oE 'https://browser\.geekbench\.com/v6/cpu/[0-9]+' "$txt" | head -n1)
     [[ -n $url ]] || return
@@ -260,7 +259,7 @@ get_geekbench_results() {
 
 parse_geekbench() {
     local html="$RESULTS_DIR/geekbench_results.html"
-    [[ -r $html ]] || { echo "warning: $html not found"; return; }
+    [[ -s "$html" ]] || return 0
 
     # ─── SINGLE-CORE ──────────────────────────────────────────────
     sc=$(grep -A1 "<div class='score-container score-container-1" "$html" \
@@ -276,15 +275,15 @@ parse_geekbench() {
     sc=${sc//,/}
     mc=${mc//,/}
 
-    [[ -n $sc && -n $mc ]] || { echo "warning: Geekbench scores not found"; return; }
+    [[ -n $sc && -n $mc ]] || { echo "warning: Geekbench scores not found"; return 0; }
 
     result "geekbench" "$sc" "$mc" ""
 }
 parse_ffmpeg() {
     local f="$RESULTS_DIR/ffmpeg_codifica.txt"
     local f2="$RESULTS_DIR/ffmpeg_decodifica.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
-    [[ -r "$f2" ]] || { echo "warning: $f2 not found"; return; }
+    [[ -s "$f" ]] || return 0
+    [[ -s "$f2" ]] || return 0
 
     # ─── CODIFICA ───────────────────────────────────────────────
     read time fps < <(
@@ -316,7 +315,7 @@ parse_ffmpeg() {
 
 parse_fio() {
     local f="$RESULTS_DIR/fio_resultscmd.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    [[ -s "$f" ]] || return 0
 
     read bwr bww iopsr iopsw latr latw < <(
         awk '
@@ -367,7 +366,7 @@ parse_fio() {
 
 parse_iperf3() {
     local f="$RESULTS_DIR/iperf3_results.txt"
-
+        [[ -s "$f" ]] || return 0
     # ─── NET THROUGHPUT (ultimo valore Gbits/sec) ────────────────
     local throughput
     throughput=$(awk '
@@ -382,7 +381,7 @@ parse_iperf3() {
 }
 parse_stream() {
     local f="$RESULTS_DIR/stream_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f not found"; return; }
+    [[ -s "$f" ]] || return 0
 
     # ─── STREAM benchmark (Scale & Triad + avg error) ────────
     read scale_rate scale_avg triad_rate triad_avg avg_error < <(
@@ -414,7 +413,7 @@ parse_stream() {
 
 parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+    [[ -s "$f" ]] || return 0
 
     # Estrai il valore numerico subito prima di "MB/s"
     local copy_rate fill_rate
@@ -432,7 +431,7 @@ parse_tinymembench() {
 
 parse_tinymembench_latency() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
-    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+    [[ -s "$f" ]] || return 0
 
     # Controlla se le informazioni di latenza sono presenti nel file
     if ! grep -q "^block size" "$f"; then
@@ -458,7 +457,7 @@ parse_tinymembench_latency() {
 }
 parse_stressng_temp() {
     local f="$RESULTS_DIR/stress-ng_cputemp.txt"
-    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+    [[ -s "$f" ]] || return 0
     local temp
     read temp < <(
         awk '
@@ -474,7 +473,7 @@ parse_stressng_temp() {
 }
 parse_stressng_vm() {
     local f="$RESULTS_DIR/stress-ng_vm.txt"
-    [[ -r "$f" ]] || { echo "warning: $f non trovato o non leggibile"; return; }
+    [[ -s "$f" ]] || return 0
 
     local bogo_ops
     read bogo_ops < <(
@@ -488,6 +487,13 @@ parse_stressng_vm() {
 
     result "stressng_vm" "$bogo_ops" "bogo-ops" ""
 }
+
+parse_vkmark() {
+    local f="$RESULTS_DIR/vkmark.txt"
+    # esci subito se il file è inesistente o vuoto
+    [[ -s "$f" ]] || return 0
+}
+
 print_obpmark_results() {
     local f="$RESULTS_DIR/obpmark_results.txt"
     if [[ -r "$f" ]]; then
