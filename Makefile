@@ -1,7 +1,7 @@
 #---------------------------------------------------Main Makefile------------------------------------------------
 
 .PHONY: all run clean
-#directory di output
+# Output directories
 RESULTS_DIR := results
 BIN_DIR := bin
 memory_dir := benchmarks/memory
@@ -18,7 +18,7 @@ setup:
 	apt-get install gawk
 
 
-# Compilazione di tutti i benchmark
+# Compile all benchmarks
 all:
 	$(MAKE) -C $(cpu_dir) all
 	$(MAKE) -C $(memory_dir) all
@@ -26,9 +26,9 @@ all:
 	$(MAKE) -C $(gpu_dir) all
 	$(MAKE) -C $(ai_dir) all
 	$(MAKE) -C $(temp_dir) all
-	@echo "Build completata"
+	@echo "Build completed"
 
-# Esecuzione di tutti i benchmark e salvataggio dei risulati in results
+# Run all benchmarks and save results in results directory
 run:
 	$(MAKE) -C $(cpu_dir) getresults
 	$(MAKE) -C $(memory_dir) getresults
@@ -37,9 +37,9 @@ run:
 	$(MAKE) -C $(ai_dir) getresults
 	$(MAKE) -C $(temp_dir) getresults
 
-	@echo "Esecuzione benchmarks completata"
+	@echo "Benchmark execution completed"
 
-# Pulizia per tutti i benchmark
+# Clean all benchmarks
 clean:
 	$(MAKE) -C benchmarks/cpu clean
 	$(MAKE) -C benchmarks/memory clean

@@ -101,7 +101,6 @@ print_table_header() {
 
 # ─── row() ───
 row() {
-    # $1 = stringa completa da mettere
     printf "│ %-*s │\n" $((BOX_W-2)) "$1"
 }
 
@@ -123,7 +122,7 @@ center() {
     local width=$1
     local text="$2"
     local len=${#text}
-    # se il testo è più lungo, lo restituiamo inalterato
+    
     (( len >= width )) && { printf "%s" "$text"; return; }
 
     local padL=$(( (width - len) / 2 ))
@@ -367,7 +366,7 @@ parse_fio() {
 parse_iperf3() {
     local f="$RESULTS_DIR/iperf3_results.txt"
         [[ -s "$f" ]] || return 0
-    # ─── NET THROUGHPUT (ultimo valore Gbits/sec) ────────────────
+    # ─── NET THROUGHPUT (last value Gbits/sec) ────────────────
     local throughput
     throughput=$(awk '
         /Gbits\/sec/ { last=$0 }
@@ -415,7 +414,7 @@ parse_tinymembench() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -s "$f" ]] || return 0
 
-    # Estrai il valore numerico subito prima di "MB/s"
+    # Extract the numeric value immediately before "MB/s"
     local copy_rate fill_rate
     copy_rate=$(awk '/^[[:space:]]*C[[:space:]]+copy/ {print $(NF-1); exit}' "$f")
     fill_rate=$(awk '/^[[:space:]]*C[[:space:]]+fill/ {print $(NF-1); exit}' "$f")
@@ -433,17 +432,17 @@ parse_tinymembench_latency() {
     local f="$RESULTS_DIR/tinymembench_results.txt"
     [[ -s "$f" ]] || return 0
 
-    # Controlla se le informazioni di latenza sono presenti nel file
+    # Check if latency information is present in the file
     if ! grep -q "^block size" "$f"; then
         echo
         echo "Memory latency table not available in tinymembench results"
         return
     fi
 
-    # Riga vuota e titolo
+    # Empty line and title
     echo
     echo "memory latency from cache L1 to ram - Single Random Read"
-    # Intestazione tabella
+    # Table header
     echo "Block size | Single random read (ns)"
     echo "-----------|---------------------------"
 
@@ -490,7 +489,7 @@ parse_stressng_vm() {
 
 parse_vkmark() {
     local f="$RESULTS_DIR/vkmark.txt"
-    # esci subito se il file è inesistente o vuoto
+    # exit immediately if the file is non-existent or empty
     [[ -s "$f" ]] || return 0
 }
 
@@ -659,7 +658,7 @@ print_organized_results() {
             esac
         }
 
-        # prima riga "read:" e "write:"
+        # first line "read:" and "write:"
         read_line=$(grep -m1 '^[[:space:]]*read:'  "$fiof")
         write_line=$(grep -m1 '^[[:space:]]*write:' "$fiof")
 
@@ -673,7 +672,7 @@ print_organized_results() {
         bwr=$(convert_bw_to_mb "$bw_read_tok")
         bww=$(convert_bw_to_mb "$bw_write_tok")
 
-        # Latency: primi due match della forma "lat (xsec): ... avg=..."
+        # Latency: first two matches of the form "lat (xsec): ... avg=..."
         mapfile -t lat_lines < <(grep -n '^[[:space:]]*lat (' "$fiof" | head -n2)
         latr="N/A"; latw="N/A"
         if [[ ${lat_lines[0]} ]]; then
@@ -726,7 +725,7 @@ print_organized_results() {
         # ── Codifica ────────────────────────────────────────────
         enc_line=$(grep -m1 'encoded' "$RESULTS_DIR/ffmpeg_codifica.txt")
 
-        # tempo in secondi
+        # time in seconds
         enc_time=$(echo "$enc_line" | sed -nE 's/.*in ([0-9.]+)s .*/\1/p')
         # fps
         enc_fps=$(echo  "$enc_line" | sed -nE 's/.*\(([0-9.]+) fps\).*/\1/p')
@@ -734,7 +733,7 @@ print_organized_results() {
         # ── Decodifica ──────────────────────────────────────────
         dec_line=$(grep 'frame=' "$RESULTS_DIR/ffmpeg_decodifica.txt" | tail -n1)
 
-        # tempo in secondi
+        # time in seconds
         if [[ $dec_line =~ time=([0-9:.]+) ]]; then
             IFS=':.' read -r h m s ms <<< "${BASH_REMATCH[1]}"
             dec_time=$(awk -v h="$h" -v m="$m" -v s="$s" 'BEGIN{printf "%.2f", h*3600+m*60+s}')
@@ -766,9 +765,9 @@ print_organized_results() {
 
 main() {
     clear
-    #setup
-    #build
-    #run
+    setup
+    build
+    run
     clear
 
     # Title box

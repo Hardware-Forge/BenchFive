@@ -3,7 +3,7 @@
 .PHONY: all clean clean_results run getresults coremark getresults_coremark coremark_pro getresults_coremark-pro 7zip getresults_7zip stockfish getresults_stockfish install_geekbench getresults_geekbench 
 
 
-#output directory
+# Output directory
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
@@ -44,12 +44,12 @@ clean_results:
 
 #---------------------------------------------------Integer ALU performance----------------------------------------------
 
-#coremark compiling and execution
+# Coremark compiling and execution
 coremark:
 	$(MAKE) -C coremark 
 
 
-#saving the score in results
+# Saving the score in results
 getresults_coremark: | $(RESULTS_DIR)
 	(cd coremark && make run)
 	@echo "=== run1.log results ===" > $(RESULTS_DIR)/coremark_results.txt
@@ -59,7 +59,7 @@ getresults_coremark: | $(RESULTS_DIR)
 	@cat coremark/run2.log >> $(RESULTS_DIR)/coremark_results.txt
 	@echo "CoreMark results saved in $(RESULTS_DIR)/coremark_results.txt"
 
-#compiling
+# Compiling
 coremark-pro: FORCE
 	$(MAKE) -C coremark-pro TARGET=linux64 build
 
@@ -79,7 +79,7 @@ getresults_coremark-pro: | $(RESULTS_DIR)
 7zip:
 	$(MAKE) -C 7zip/CPP/7zip/Bundles/LzmaCon \
 	-f makefile.gcc 
-	@echo "7zip build completato"
+	@echo "7zip build completed"
 
 getresults_7zip: | $(RESULTS_DIR)
 	@mkdir -p $(RESULTS_DIR)
@@ -103,13 +103,13 @@ getresults_stockfish: | $(RESULTS_DIR)
 #-----------------------------------------------------General---------------------------------------------
 
 install_geekbench:
-	@echo "Scaricamento e installazione di Geekbench 6..."
+	@echo "Downloading and installing Geekbench 6..."
 	curl -O https://cdn.geekbench.com/Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
 	tar -xvzf Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
 	rm Geekbench-6.4.0-LinuxRISCVPreview.tar.gz
 	@echo "Geekbench 6 successfully installed in current directory."
 
 getresults_geekbench: | $(RESULTS_DIR)
-	@echo "Esecuzione di Geekbench 6..."
+	@echo "Running Geekbench 6..."
 	./Geekbench-6.4.0-LinuxRISCVPreview/geekbench6 > $(RESULTS_DIR)/geekbench_results.txt
 	@echo "Geekbench 6 results saved in $(RESULTS_DIR)/geekbench_results.txt"

@@ -1,5 +1,5 @@
 .PHONY: all clean setup install_stress_ng getresults getresultsstress-ng_mv getresultsstress-ng_ram getresultsstress-ng_cputemp clean_results
-#directory di output
+# Output directories
 RESULTS_DIR := ../results
 BIN_DIR := ../bin
 
@@ -7,7 +7,7 @@ BIN_DIR := ../bin
 all: install_stress_ng
 
 getresults: getresults_stress-ng_vm getresults_stress-ng_cputemp
-# Pulizia per tutti i benchmark
+# Clean all benchmarks
 clean:
 	$(MAKE) -C benchmarks/stress-ng clean || true
 	rm -f $(RESULTS_DIR)/stress-ng_mv.txt || true

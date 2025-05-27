@@ -1,11 +1,11 @@
 #---------------------------------------------------GPU Makefile------------------------------------------------
 
-#output directory
+# Output directory
 RESULTS_DIR := ../../results
 BIN_DIR := ../../bin
 
 getresults: getresults_FFmpeg_codificah265 getresults_FFmpeg_decodifica
-#ATTENZIONE: PER ESEGUIORE FFMPEG E' NECESSARIO AVERE UN FILE input.mp4 NELLA STESSA DIRECTORY DEL MAKEFILE
+# WARNING: TO RUN FFMPEG YOU NEED AN input.mp4 FILE IN THE SAME DIRECTORY AS THE MAKEFILE
 
 all: setupgpu install_FFmpeg download_sample_fs
 
@@ -35,15 +35,15 @@ install_vkmark:
 #--enable-libvpx 
 install_FFmpeg:
 	(cd FFmpeg && ./configure --target-os=linux --enable-gpl --enable-libx264 --enable-libx265 && make)
-	@echo "FFmpeg installato"
+	@echo "FFmpeg installed"
 
 getresults_FFmpeg_decodifica: | $(RESULTS_DIR)
-	@echo "Esecuzione di FFmpeg"
+	@echo "Running FFmpeg"
 	./FFmpeg/ffmpeg -i output_h265.mp4 -f null -threads 1 - 2>&1 | grep "time=" > $(RESULTS_DIR)/ffmpeg_decodifica.txt
 	rm -f output_h265.mp4
 
 getresults_FFmpeg_codificah265: | $(RESULTS_DIR)
-	@echo "Esecuzione di FFmpeg"
+	@echo "Running FFmpeg"
 	rm -f output_h265.mp4
 	./FFmpeg/ffmpeg -i input.mp4 -c:v libx265 -preset fast -crf 28 -threads 1 output_h265.mp4 2> $(RESULTS_DIR)/ffmpeg_codifica.txt
 
