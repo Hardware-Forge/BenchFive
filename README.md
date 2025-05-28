@@ -3,14 +3,6 @@
 This benchmark suite is a comprehensive collection of third-party benchmarks designed to evaluate the performance of various hardware components: including CPU, GPU, RAM, I/O, temperature and AI perfomances.
 It provides a standardized and simpler way to measure and compare the capabilities of your RISC-V system.
 
-## Getting Started
-
-Initial setup:
-
-```bash
-git submodule update --init --recursive
-```
-
 ## Launch the suite
 
 There are two primary ways to compile and run the benchmark suite:
