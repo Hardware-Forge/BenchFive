@@ -1,9 +1,17 @@
-# Benchmark Suite
+# RISC-V Benchmark Suite
 
 This benchmark suite is a comprehensive collection of benchmarks designed to evaluate the performance of various hardware components: including CPU, GPU, RAM, I/O, temperature and AI perfomances.
-It provides a standardized way to measure and compare the capabilities of your system.
+It provides a standardized way to measure and compare the capabilities of your RISC-V system.
 
 ## Getting Started
+
+Initial setup:
+
+```bash
+git submodule update --init --recursive
+```
+
+## Launch the suite
 
 There are two primary ways to compile and run the benchmark suite:
 
@@ -43,4 +51,12 @@ The main targets are:
     ```bash
     make run
     ```
-    
+
+## Credits
+- **Michelangelo Stefanini**  
+    GitHub: [michelangelostefanini](https://github.com/michelangelostefanini)  
+    Email: michelangelo.stefanini@mail.polimi.it
+
+- **Edoardo Tedesco**  
+    GitHub: [Tededo02](https://github.com/Tededo02)  
+    Email: edoardo.tedesco@mail.polimi.it
