@@ -1,7 +1,7 @@
 # RISC-V Benchmark Suite
 
-This benchmark suite is a comprehensive collection of benchmarks designed to evaluate the performance of various hardware components: including CPU, GPU, RAM, I/O, temperature and AI perfomances.
-It provides a standardized way to measure and compare the capabilities of your RISC-V system.
+This benchmark suite is a comprehensive collection of third-party benchmarks designed to evaluate the performance of various hardware components: including CPU, GPU, RAM, I/O, temperature and AI perfomances.
+It provides a standardized and simpler way to measure and compare the capabilities of your RISC-V system.
 
 ## Getting Started
 
